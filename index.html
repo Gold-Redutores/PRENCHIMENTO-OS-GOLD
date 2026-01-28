@@ -140,13 +140,13 @@
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
 
-            // Busca exata na coluna 20 (índice 19)
+            // Busca exata na coluna 20 (índice 18)
             const linha = dadosOS.find(l => l[19] === osVal);
             
             if (linha) {
                 document.getElementById('campo-serie').value = linha[21] || "";   // Coluna 22
                 document.getElementById('campo-redutor').value = linha[22] || ""; // Coluna 23
-                document.getElementById('campo-cliente').value = linha[24] || ""; // Coluna 25
+                document.getElementById('campo-cliente').value = linha[23] || ""; // Coluna 25
             }
         }
 
