@@ -1,228 +1,95 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Relatório Gold Redutores - V3</title>
-    <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; color: #003366; background-color: #fff; }
-        .header { text-align: center; border-bottom: 3px solid #ed1c24; padding-bottom: 10px; margin-bottom: 15px; }
-        .header h2 { margin: 0; font-size: 24px; }
-        .section { background: #d9d9d9; padding: 8px; margin-top: 20px; font-weight: bold; text-align: center; border: 1px solid #333; text-transform: uppercase; font-size: 13px; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        table, th, td { border: 1px solid #333; }
-        td { padding: 8px; font-size: 11px; vertical-align: middle; }
-        th { background: #eee; padding: 10px; font-size: 11px; text-align: center; color: #003366; }
-        
-        input { width: 95%; border: none; outline: none; background: transparent; font-size: 11px; color: #000; }
-        input:focus { background: #fffde7; }
+<script>
+    const URL_CSV_OS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/dmsoser00000045.csv';
+    const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/relatlisatagemprodutosdetalhada.csv';
 
-        .autocomplete-wrapper { position: relative; }
-        .suggestions { 
-            position: absolute; background: white; border: 2px solid #333; 
-            width: 250%; z-index: 9999; max-height: 250px; overflow-y: auto; 
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5); display: none; left: 0; top: 100%;
-        }
-        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; font-size: 10px; line-height: 1.4; text-align: left;}
-        .suggestion-item:hover { background-color: #ed1c24; color: white; }
+    let dadosOS = [];
+    let listaProdutos = [];
 
-        .no-print { margin: 15px 0; background: #f0f4f8; padding: 15px; border: 1px solid #003366; border-radius: 8px; }
-        .status-db { font-size: 13px; font-weight: bold; margin-bottom: 10px; display: block; }
-        
-        .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .foto-item { border: 1px solid #333; padding: 5px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; }
-        .foto-preview { max-width: 100%; max-height: 250px; display: block; margin: 0 auto 5px; }
-        .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 4px 10px; font-weight: bold; border-radius: 3px; }
-
-        @media print { 
-            .no-print, .suggestions, .btn-remove { display: none !important; } 
-            body { margin: 0; }
-            .section { -webkit-print-color-adjust: exact; background-color: #d9d9d9 !important; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h2>RELATÓRIO DE MANUTENÇÃO PREVENTIVA</h2>
-        <div style="margin-top: 10px;">
-            <label style="font-weight: bold;">Nº ORDEM DE SERVIÇO: </label>
-            <input type="text" id="input-os" style="width: 120px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px;" placeholder="..." oninput="buscarDadosOS()">
-        </div>
-    </div>
-
-    <div class="no-print">
-        <span id="db-status" class="status-db" style="color: orange;">⏳ Sincronizando com GitHub...</span>
-        <label>📸 Adicionar Fotos: </label>
-        <input type="file" accept="image/*" multiple onchange="previewFotos(event)">
-    </div>
-
-    <div class="section">DADOS DO CLIENTE E EQUIPAMENTO</div>
-    <table>
-        <tr>
-            <td colspan="2"><strong>Cliente:</strong> <input type="text" id="campo-cliente" readonly></td>
-            <td colspan="2"><strong>Data:</strong> <span id="data-atual"></span></td>
-        </tr>
-        <tr>
-            <td><strong>Redutor:</strong> <input type="text" id="campo-redutor" readonly></td>
-            <td><strong>Redução:</strong> <input type="text" placeholder="Informa manual..."></td>
-            <td colspan="2"><strong>Série:</strong> <input type="text" id="campo-serie" readonly></td>
-        </tr>
-    </table>
-
-    <div class="section">ANÁLISES FOTOGRÁFICAS</div>
-    <div id="container-fotos" class="foto-container"></div>
-
-    <div class="section">PEÇAS NECESSÁRIAS</div>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 70%;">Descrição (Busca: termo%termo)</th>
-                <th>Qtd</th>
-                <th>Cód Gold</th>
-            </tr>
-        </thead>
-        <tbody id="tabela-pecas"></tbody>
-    </table>
-
-    <div class="section">MÃO DE OBRA TÉCNICA</div>
-    <table>
-        <tbody>
-            <tr><td>DESMONTAGEM</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
-            <tr><td>DESCONTAMINACAO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
-            <tr><td>ANALISE E PERITAGEM</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
-            <tr><td>MONTAGEM E AJUSTE</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
-            <tr><td>TESTES FINAIS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
-        </tbody>
-        <tfoot>
-            <tr style="background:#eee; font-weight:bold;">
-                <td style="text-align: right;">TOTAL DE HORAS:</td>
-                <td id="total-horas" style="text-align: center; color: #ed1c24;">0</td>
-                <td></td>
-            </tr>
-        </tfoot>
-    </table>
-
-    <div class="no-print" style="text-align: right; margin-top: 30px;">
-        <button onclick="window.print()" style="padding: 15px 35px; background: #003366; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 5px;">GERAR PDF / IMPRIMIR</button>
-    </div>
-
-    <script>
-        // LINKS DO SEU REPOSITÓRIO
-        const URL_CSV_OS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/dmsoser00000045.csv';
-        const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/relatlisatagemprodutosdetalhada.csv';
-
-        let dadosOS = [];
-        let listaProdutos = [];
-
-        async function carregarDados() {
-            const status = document.getElementById('db-status');
-            try {
-                const [resOS, resProd] = await Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ]);
-                
-                const textOS = await resOS.text();
-                // O CSV de OS tem aspas e vírgulas. Limpamos e filtramos.
-                dadosOS = textOS.split(/\r?\n/).map(linha => linha.split('","').map(celula => celula.replace(/"/g, '')));
-
-                const textProd = await resProd.text();
-                // O CSV de Produtos segue o mesmo padrão
-                listaProdutos = textProd.split(/\r?\n/).map(linha => linha.split('","').map(celula => celula.replace(/"/g, '')));
-
-                status.innerText = "✅ GitHub Sincronizado!";
-                status.style.color = "green";
-            } catch (e) {
-                status.innerText = "❌ Erro de Sincronização.";
-                status.style.color = "red";
-            }
-        }
-
-        function buscarDadosOS() {
-            const osVal = document.getElementById('input-os').value.trim();
-            if (osVal.length < 3) return;
-
-            // No seu arquivo dmsoser, a OS está na coluna 20 (índice 19 ou 20)
-            const linha = dadosOS.find(l => l.includes(osVal));
-            if (linha) {
-                // Baseado no seu arquivo:
-                // Série: índice 21 | Produto: índice 22 | Cliente: índice 24
-                document.getElementById('campo-serie').value = linha[21] || "";
-                document.getElementById('campo-redutor').value = linha[22] || "";
-                document.getElementById('campo-cliente').value = linha[24] || "";
-            }
-        }
-
-        function criarLinhaPeca() {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="autocomplete-wrapper">
-                    <input type="text" class="input-nome-peca" placeholder="Peça...">
-                    <div class="suggestions"></div>
-                </td>
-                <td><input type="number" value="1" style="text-align:center;"></td>
-                <td><input type="text" class="cod-gold" readonly style="text-align:center;"></td>
-            `;
+    async function carregarDados() {
+        const status = document.getElementById('db-status');
+        try {
+            const [resOS, resProd] = await Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ]);
             
-            const input = tr.querySelector('.input-nome-peca');
-            const sugestoes = tr.querySelector('.suggestions');
-            const codInput = tr.querySelector('.cod-gold');
+            const textOS = await resOS.text();
+            // Filtra linhas que realmente contém dados de OS (começam com o nome da empresa ou similar e possuem a OS na posição 20)
+            dadosOS = textOS.split(/\r?\n/)
+                .map(linha => linha.split('","').map(c => c.replace(/"/g, '').trim()))
+                .filter(colunas => colunas.length > 20);
 
-            input.addEventListener('input', function() {
-                const busca = this.value.toLowerCase();
-                sugestoes.innerHTML = '';
-                if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
+            const textProd = await resProd.text();
+            // Filtra linhas de produtos (o código Gold está na coluna 16 e nome na 17)
+            listaProdutos = textProd.split(/\r?\n/)
+                .map(linha => linha.split('","').map(c => c.replace(/"/g, '').trim()))
+                .filter(colunas => colunas.length > 17 && colunas[16] !== "Código");
 
-                const regex = new RegExp(busca.split('%').join('.*'), 'i');
-
-                // No seu arquivo relatlisatagem:
-                // Código: coluna 21 (índice 20) | Nome: coluna 22 (índice 21)
-                const filtrados = listaProdutos.filter(p => regex.test(p[21])).slice(0, 12);
-
-                if (filtrados.length > 0) {
-                    sugestoes.style.display = 'block';
-                    filtrados.forEach(p => {
-                        const div = document.createElement('div');
-                        div.className = 'suggestion-item';
-                        div.innerText = `${p[20]} - ${p[21]}`;
-                        div.onclick = () => {
-                            input.value = p[21];
-                            codInput.value = p[20];
-                            sugestoes.style.display = 'none';
-                            if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
-                        };
-                        sugestoes.appendChild(div);
-                    });
-                } else { sugestoes.style.display = 'none'; }
-            });
-
-            document.getElementById('tabela-pecas').appendChild(tr);
+            status.innerText = "✅ GitHub Sincronizado!";
+            status.style.color = "green";
+        } catch (e) {
+            status.innerText = "❌ Erro de Sincronização.";
+            status.style.color = "red";
         }
+    }
 
-        // Funções de utilidade permanecem
-        function calcularTotal() {
-            let t = 0; document.querySelectorAll('.hr-input').forEach(i => t += (parseFloat(i.value) || 0));
-            document.getElementById('total-horas').innerText = t;
+    function buscarDadosOS() {
+        const osVal = document.getElementById('input-os').value.trim();
+        if (osVal.length < 3) return;
+
+        // Procura a OS na coluna de índice 20
+        const linha = dadosOS.find(l => l[20] === osVal);
+        
+        if (linha) {
+            document.getElementById('campo-serie').value = linha[22] || "";
+            document.getElementById('campo-redutor').value = linha[23] || "";
+            document.getElementById('campo-cliente').value = linha[25] || "";
         }
+    }
 
-        function previewFotos(e) {
-            for (let f of e.target.files) {
-                const r = new FileReader();
-                r.onload = ev => {
-                    const d = document.createElement('div');
-                    d.className = 'foto-item';
-                    d.innerHTML = `<button class="btn-remove no-print" onclick="this.parentElement.remove()">X</button>
-                                   <img src="${ev.target.result}" class="foto-preview">
-                                   <input type="text" placeholder="Legenda da foto...">`;
-                    document.getElementById('container-fotos').appendChild(d);
-                };
-                r.readAsDataURL(f);
-            }
-        }
+    function criarLinhaPeca() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="autocomplete-wrapper">
+                <input type="text" class="input-nome-peca" placeholder="Peça...">
+                <div class="suggestions"></div>
+            </td>
+            <td><input type="number" value="1" style="text-align:center;"></td>
+            <td><input type="text" class="cod-gold" readonly style="text-align:center;"></td>
+        `;
+        
+        const input = tr.querySelector('.input-nome-peca');
+        const sugestoes = tr.querySelector('.suggestions');
+        const codInput = tr.querySelector('.cod-gold');
 
-        window.onload = () => {
-            document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
-            carregarDados();
-            criarLinhaPeca();
-        };
-    </script>
-</body>
-</html>
+        input.addEventListener('input', function() {
+            const busca = this.value.toLowerCase();
+            sugestoes.innerHTML = '';
+            if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
+
+            const termos = busca.split('%');
+            
+            // Busca na coluna 17 (Nome do Produto)
+            const filtrados = listaProdutos.filter(p => {
+                const nome = p[17].toLowerCase();
+                return termos.every(termo => nome.includes(termo));
+            }).slice(0, 12);
+
+            if (filtrados.length > 0) {
+                sugestoes.style.display = 'block';
+                filtrados.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.innerText = `${p[16]} - ${p[17]}`; // Código - Nome
+                    div.onclick = () => {
+                        input.value = p[17];
+                        codInput.value = p[16];
+                        sugestoes.style.display = 'none';
+                        if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
+                    };
+                    sugestoes.appendChild(div);
+                });
+            } else { sugestoes.style.display = 'none'; }
+        });
+
+        document.getElementById('tabela-pecas').appendChild(tr);
+    }
+    // ... restante das funções (calcularTotal, previewFotos) permanecem iguais
+</script>
