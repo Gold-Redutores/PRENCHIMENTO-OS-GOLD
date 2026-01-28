@@ -2,48 +2,52 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Relatório de Manutenção Preventiva - OS Automática</title>
+    <title>Relatório de Manutenção Preventiva - Gold Redutores</title>
     <style>
-        /* CONFIGURAÇÕES GERAIS */
-        body { font-family: Arial, sans-serif; margin: 20px; color: #003366; }
-        .header { text-align: center; border-bottom: 2px solid #ed1c24; padding-bottom: 10px; margin-bottom: 10px; position: relative; }
-        .header h2 { margin: 0; font-size: 22px; }
+        /* CONFIGURAÇÕES GERAIS E CORES PADRÃO */
+        body { font-family: Arial, sans-serif; margin: 20px; color: #003366; background-color: #fff; }
+        .header { text-align: center; border-bottom: 3px solid #ed1c24; padding-bottom: 10px; margin-bottom: 10px; }
+        .header h2 { margin: 0; font-size: 24px; text-transform: uppercase; }
         
-        .section { background: #d9d9d9; padding: 5px; margin-top: 15px; font-weight: bold; text-align: center; border: 1px solid #333; text-transform: uppercase; }
+        .section { background: #d9d9d9; padding: 6px; margin-top: 15px; font-weight: bold; text-align: center; border: 1px solid #333; text-transform: uppercase; font-size: 13px; }
         
         /* TABELAS */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 0; }
         table, th, td { border: 1px solid #333; }
         td { padding: 6px; font-size: 11px; vertical-align: middle; }
-        th { background: #eee; padding: 8px; font-size: 11px; text-align: center; }
+        th { background: #eee; padding: 8px; font-size: 11px; text-align: center; color: #003366; }
         
-        /* INPUTS */
-        label { font-weight: bold; color: #003366; }
+        /* INPUTS E TEXTAREAS */
         input[type="text"], input[type="number"], textarea { width: 98%; border: none; outline: none; background: transparent; font-size: 11px; color: #000; font-family: Arial, sans-serif; }
         textarea { resize: none; overflow: hidden; }
 
+        /* AUTOCOMPLETE (BUSCA INTELIGENTE) */
+        .autocomplete-wrapper { position: relative; }
+        .suggestions { 
+            position: absolute; background: white; border: 2px solid #333; 
+            width: 200%; z-index: 9999; max-height: 250px; overflow-y: auto; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5); display: none; left: 0; top: 100%;
+        }
+        .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; font-size: 10px; line-height: 1.3; }
+        .suggestion-item:hover { background-color: #ed1c24; color: white; }
+
         /* GALERIA DE FOTOS */
         .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .foto-item { border: 1px solid #333; padding: 5px; text-align: center; background: #fff; }
-        .foto-preview { max-width: 100%; max-height: 250px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
-        .obs-foto { width: 100%; border-top: 1px solid #ccc !important; padding-top: 5px; font-style: italic; color: #333; }
+        .foto-item { border: 1px solid #333; padding: 5px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; }
+        .foto-preview { max-width: 100%; max-height: 280px; display: block; margin: 0 auto 5px; border-bottom: 1px solid #eee; }
+        .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; z-index: 10; }
 
-        /* SEÇÃO CONCLUSÕES */
-        .conclusoes-title { color: #003366; border-bottom: 1px solid #003366; margin-top: 20px; font-size: 18px; font-weight: normal; padding-bottom: 5px; }
-        .conclusoes-texto { font-size: 13px; color: #003366; line-height: 1.5; margin-top: 10px; text-align: justify; }
-
-        /* TOTAIS E BOTÕES */
-        .total-row { font-weight: bold; background-color: #f2f2f2; font-size: 13px; }
-        #total-horas { color: #ed1c24; font-size: 14px; font-weight: bold; }
-        .no-print { margin-top: 20px; text-align: right; }
-        button { padding: 10px 25px; background: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        /* PAINEL DE CONTROLE (NÃO SAI NA IMPRESSÃO) */
+        .no-print { margin: 15px 0; background: #f0f4f8; padding: 15px; border: 2px dashed #003366; border-radius: 8px; }
+        .no-print label { font-size: 12px; display: block; margin-bottom: 5px; }
+        button { padding: 12px 30px; background: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        button:hover { background: #ed1c24; }
         
         @media print { 
-            .no-print, input[type="file"] { display: none; } 
-            .foto-item { page-break-inside: avoid; }
-            body { margin: 10px; }
-            /* Garante que o placeholder não apareça na impressão se estiver vazio */
-            textarea::placeholder { color: transparent; }
+            .no-print, .suggestions, .btn-remove { display: none !important; } 
+            body { margin: 5px; }
+            input::placeholder { color: transparent; }
+            .section { -webkit-print-color-adjust: exact; background-color: #d9d9d9 !important; }
         }
     </style>
 </head>
@@ -52,26 +56,39 @@
     <div class="header">
         <h2>RELATÓRIO DE MANUTENÇÃO PREVENTIVA</h2>
         <div style="margin-top: 10px;">
-            <label>Nº ORDEM DE SERVIÇO: </label>
-            <input type="text" style="width: 150px; border-bottom: 1px solid #333; text-align: center;" placeholder="Ex: 5422">
+            <label style="font-weight: bold;">Nº ORDEM DE SERVIÇO: </label>
+            <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px;" placeholder="Ex: 5449" oninput="buscarDadosOS()">
+        </div>
+    </div>
+
+    <div class="no-print">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <label>📂 1. Base de Ordens de Serviço (CSV):</label>
+                <input type="file" id="csv-os" accept=".csv">
+            </div>
+            <div>
+                <label>📦 2. Lista de Produtos/Peças (CSV):</label>
+                <input type="file" id="csv-produtos" accept=".csv">
+            </div>
         </div>
     </div>
 
     <div class="section">DADOS DO CLIENTE E EQUIPAMENTO</div>
     <table>
         <tr>
-            <td colspan="2"><label>Cliente: </label> <input type="text" placeholder="Ex: GOLD REDUTORES"></td>
-            <td colspan="2"><label>Data: </label> <span id="data-atual" style="color: #000; font-weight: bold;"></span></td>
+            <td colspan="2"><label>Cliente: </label> <input type="text" id="campo-cliente" placeholder="Aguardando OS..."></td>
+            <td colspan="2"><label>Data: </label> <span id="data-atual" style="font-weight: bold; color: #000;"></span></td>
         </tr>
         <tr>
-            <td><label>Redutor:</label> <input type="text"  placeholder="Ex: X3KS160/HU/B"></td>
-            <td><label>Redução:</label> <input type="text" placeholder="Ex: 15,53"></td>
-            <td colspan="2"><label>Série:</label> <input type="text" placeholder="Ex: 707805785805000119"></td>
+            <td><label>Redutor:</label> <input type="text" id="campo-redutor" placeholder="..."></td>
+            <td><label>Redução:</label> <input type="text" placeholder="..."></td>
+            <td colspan="2"><label>Série:</label> <input type="text" id="campo-serie" placeholder="..."></td>
         </tr>
     </table>
 
     <div class="section">ANÁLISES FOTOGRÁFICAS</div>
-    <div class="no-print" style="padding: 10px; background: #f9f9f9; border: 1px dashed #ccc; margin-top: 5px;">
+    <div class="no-print" style="background: #eee; padding: 10px; border: 1px solid #ccc; margin-top: 5px;">
         <label>📸 Selecionar Fotos do Redutor: </label>
         <input type="file" accept="image/*" multiple onchange="previewFotos(event)">
     </div>
@@ -81,13 +98,12 @@
     <table>
         <thead>
             <tr>
-                <th>Descrição</th>
-                <th style="width: 80px;">Qtd</th>
-                <th style="width: 150px;">Cód Gold</th>
+                <th style="width: 60%;">Descrição (Busca flexível: % termo % termo)</th>
+                <th style="width: 10%;">Qtd</th>
+                <th style="width: 30%;">Cód Gold</th>
             </tr>
         </thead>
-        <tbody id="tabela-pecas">
-            </tbody>
+        <tbody id="tabela-pecas"></tbody>
     </table>
 
     <div class="section">RESUMO DE MÃO DE OBRA</div>
@@ -100,97 +116,155 @@
             </tr>
         </thead>
         <tbody>
-            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" placeholder="Ex:8" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
-            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" placeholder="Ex:3" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
-            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" placeholder="Ex:2" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
-            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" placeholder="Ex:20" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
-            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" placeholder="Ex:1" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
-            <tr><td>PINTURA FINAL</td><td><input type="number" class="hr-input" placeholder="Ex:4" oninput="calcularTotal()"></td><td>SVG1174</td></tr>
-            <tr><td>SACAR ACOPLAMENTOS</td><td><input type="number" class="hr-input" placeholder="Ex:2" oninput="calcularTotal()"></td><td>SVG1262</td></tr>
+            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
+            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
+            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
+            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
+            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
+            <tr><td>PINTURA FINAL</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1174</td></tr>
+            <tr><td>SACAR ACOPLAMENTOS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1262</td></tr>
         </tbody>
         <tfoot>
-            <tr class="total-row">
+            <tr style="background:#f2f2f2; font-weight:bold;">
                 <td style="text-align: right; padding-right: 15px;">TOTAL DE HORAS TÉCNICAS:</td>
-                <td id="total-horas" style="text-align: center;">40</td>
+                <td id="total-horas" style="text-align: center; color: #ed1c24; font-size: 14px;">0</td>
                 <td></td>
             </tr>
         </tfoot>
     </table>
-<!-- conclusoes -->
-    <div class="conclusoes-title">CONCLUSÕES</div>
-    <div class="conclusoes-texto">
-    <textarea rows="6" style="width: 100%;" placeholder="Descrever as conclusões referente as manutenções necessárias para execução do serviço, sempre observando as peças que não são de desgaste e necessitam ser trocadas"></textarea>
-</div>
 
-    <div class="no-print">
-        <button onclick="window.print()">GERAR RELATÓRIO / PDF</button>
+    <div class="section">CONCLUSÕES</div>
+    <div style="margin-top: 5px;">
+        <textarea rows="5" style="width: 100%; border: 1px solid #333; padding: 8px; box-sizing: border-box;" placeholder="Descreva as conclusões técnicas aqui..." oninput="autoResize(this)"></textarea>
+    </div>
+
+    <div class="no-print" style="text-align: right; margin-top: 30px;">
+        <button onclick="window.print()">GERAR RELATÓRIO PDF</button>
     </div>
 
     <script>
-        // 1. DATA ATUAL AUTOMÁTICA
-        function configurarDataAtual() {
-            const data = new Date();
-            const dia = String(data.getDate()).padStart(2, '0');
-            const mes = String(data.getMonth() + 1).padStart(2, '0');
-            const ano = data.getFullYear();
-            document.getElementById('data-atual').innerText = `${dia}/${mes}/${ano}`;
+        let dadosOS = [];
+        let listaProdutos = [];
+
+        // 1. PROCESSAMENTO DOS ARQUIVOS CSV
+        document.getElementById('csv-os').addEventListener('change', e => lerCSV(e, d => dadosOS = d));
+        document.getElementById('csv-produtos').addEventListener('change', e => lerCSV(e, d => listaProdutos = d));
+
+        function lerCSV(e, callback) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = event => {
+                const linhas = event.target.result.split('\n');
+                callback(linhas.map(l => l.replace(/"/g, '').split(',')));
+            };
+            reader.readAsText(file, 'ISO-8859-1');
         }
 
-        // 2. TABELA DE PEÇAS DINÂMICA
-        const corpoTabelaPecas = document.getElementById('tabela-pecas');
+        // 2. BUSCA DE DADOS DA OS
+        function buscarDadosOS() {
+            const osVal = document.getElementById('input-os').value.trim();
+            if (osVal.length < 3) return;
+            
+            const linha = dadosOS.find(col => col.some(c => c.trim() === osVal));
+            if (linha) {
+                const i = linha.indexOf(osVal);
+                // Mapeamento: OS[i], Série[i+2], Produto[i+3], Cliente[i+5]
+                document.getElementById('campo-serie').value = linha[i + 1] || linha[i + 2] || "";
+                document.getElementById('campo-redutor').value = linha[i + 2] || linha[i + 3] || "";
+                document.getElementById('campo-cliente').value = linha[i + 5] || linha[i + 4] || "";
+            }
+        }
+
+        // 3. TABELA DE PEÇAS COM BUSCA FLEXÍVEL (%)
         function criarLinhaPeca() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="text" class="input-peca" placeholder="Digite para adicionar peça..."></td>
-                <td><input type="number" placeholder="0"></td>
-                <td><input type="text" placeholder="Cód Gold"></td>
+                <td class="autocomplete-wrapper">
+                    <input type="text" class="input-nome-peca" placeholder="Ex: ret%55%90">
+                    <div class="suggestions"></div>
+                </td>
+                <td><input type="number" value="1" style="text-align:center;"></td>
+                <td><input type="text" class="cod-gold-peca" readonly style="text-align:center; color:#555;"></td>
             `;
-            // Listener para criar nova linha quando a última for preenchida
-            tr.querySelector('.input-peca').addEventListener('input', function() {
-                const inputs = document.querySelectorAll('.input-peca');
-                if (inputs[inputs.length - 1].value.trim() !== "") {
-                    criarLinhaPeca();
-                }
+            
+            const inputNome = tr.querySelector('.input-nome-peca');
+            const sugestoesDiv = tr.querySelector('.suggestions');
+            const inputCod = tr.querySelector('.cod-gold-peca');
+
+            inputNome.addEventListener('input', function() {
+                const buscaOriginal = this.value.toLowerCase().trim();
+                sugestoesDiv.innerHTML = '';
+
+                if (buscaOriginal.length < 2) { sugestoesDiv.style.display = 'none'; return; }
+
+                // Lógica de Busca Flexível (Regex)
+                const termos = buscaOriginal.split('%').filter(t => t !== "");
+                const regex = new RegExp(termos.join('.*'), 'i');
+
+                // Filtra no CSV de Produtos (Cód: col 21, Nome: col 22)
+                const filtrados = listaProdutos.filter(p => {
+                    const texto = (p[21] + " " + p[22]).toLowerCase();
+                    return regex.test(texto);
+                }).slice(0, 15);
+
+                if (filtrados.length > 0) {
+                    sugestoesDiv.style.display = 'block';
+                    filtrados.forEach(p => {
+                        const item = document.createElement('div');
+                        item.className = 'suggestion-item';
+                        item.innerText = `${p[21]} | ${p[22]}`;
+                        item.onclick = () => {
+                            inputNome.value = p[22];
+                            inputCod.value = p[21];
+                            sugestoesDiv.style.display = 'none';
+                            // Cria nova linha se for a última
+                            if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
+                        };
+                        sugestoesDiv.appendChild(item);
+                    });
+                } else { sugestoesDiv.style.display = 'none'; }
             });
-            corpoTabelaPecas.appendChild(tr);
+
+            // Fecha sugestões ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (!tr.contains(e.target)) sugestoesDiv.style.display = 'none';
+            });
+
+            document.getElementById('tabela-pecas').appendChild(tr);
         }
 
-        // 3. CÁLCULO DE HORAS
+        // 4. CÁLCULO DE HORAS
         function calcularTotal() {
-            let inputs = document.getElementsByClassName('hr-input');
             let total = 0;
-            for (let i = 0; i < inputs.length; i++) {
-                let valor = parseFloat(inputs[i].value);
-                if (!isNaN(valor)) total += valor;
-            }
+            document.querySelectorAll('.hr-input').forEach(i => total += (parseFloat(i.value) || 0));
             document.getElementById('total-horas').innerText = total;
         }
 
-        // 4. PREVIEW DE FOTOS
+        // 5. GALERIA DE FOTOS
         function previewFotos(event) {
             const container = document.getElementById('container-fotos');
-            const files = event.target.files;
-            for (let i = 0; i < files.length; i++) {
+            for (let f of event.target.files) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = e => {
                     const div = document.createElement('div');
                     div.className = 'foto-item';
                     div.innerHTML = `
+                        <button class="btn-remove no-print" onclick="this.parentElement.remove()">X</button>
                         <img src="${e.target.result}" class="foto-preview">
-                        <textarea class="obs-foto" rows="2" placeholder="Observação da imagem..."></textarea>
+                        <textarea class="obs-foto" rows="2" placeholder="Observação da foto..." oninput="autoResize(this)"></textarea>
                     `;
                     container.appendChild(div);
-                }
-                reader.readAsDataURL(files[i]);
+                };
+                reader.readAsDataURL(f);
             }
         }
 
-        // INICIALIZAÇÃO AO CARREGAR
-        window.onload = function() {
-            configurarDataAtual();
-            calcularTotal();
-            // Inicia com as 3 linhas padrão
-            for(let i=0; i<3; i++) { criarLinhaPeca(); }
+        // 6. UTILITÁRIOS
+        function autoResize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+
+        window.onload = () => {
+            document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
+            for(let i=0; i<2; i++) { criarLinhaPeca(); } // Inicia com 2 linhas
         };
     </script>
 </body>
