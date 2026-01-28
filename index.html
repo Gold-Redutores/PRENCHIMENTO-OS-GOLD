@@ -4,22 +4,16 @@
     <meta charset="UTF-8">
     <title>Relatório de Manutenção - Gold Redutores</title>
     <style>
-        /* CSS INTEGRADO */
         body { font-family: Arial, sans-serif; margin: 20px; color: #003366; background-color: #fff; }
         .header { text-align: center; border-bottom: 3px solid #ed1c24; padding-bottom: 10px; margin-bottom: 10px; }
         .header h2 { margin: 0; font-size: 24px; text-transform: uppercase; }
-        
         .section { background: #d9d9d9; padding: 6px; margin-top: 15px; font-weight: bold; text-align: center; border: 1px solid #333; text-transform: uppercase; font-size: 13px; }
-        
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 0; }
         table, th, td { border: 1px solid #333; }
         td { padding: 6px; font-size: 11px; vertical-align: middle; }
         th { background: #eee; padding: 8px; font-size: 11px; text-align: center; color: #003366; }
-        
         input[type="text"], input[type="number"], textarea { width: 98%; border: none; outline: none; background: transparent; font-size: 11px; color: #000; font-family: Arial, sans-serif; }
-        textarea { resize: none; overflow: hidden; }
-
-        /* AUTOCOMPLETE */
+        
         .autocomplete-wrapper { position: relative; }
         .suggestions { 
             position: absolute; background: white; border: 2px solid #333; 
@@ -29,21 +23,17 @@
         .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; font-size: 10px; line-height: 1.3; text-align: left;}
         .suggestion-item:hover { background-color: #ed1c24; color: white; }
 
-        /* FOTOS */
         .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .foto-item { border: 1px solid #333; padding: 5px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; }
         .foto-preview { max-width: 100%; max-height: 280px; display: block; margin: 0 auto 5px; }
         .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; }
 
-        /* PAINEL SUPERIOR */
         .no-print { margin: 15px 0; background: #f0f4f8; padding: 15px; border: 1px solid #003366; border-radius: 8px; }
         .status-db { font-size: 12px; font-weight: bold; margin-bottom: 10px; display: block; }
         button { padding: 12px 30px; background: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #ed1c24; }
         
         @media print { 
             .no-print, .suggestions, .btn-remove { display: none !important; } 
-            body { margin: 5px; }
             .section { -webkit-print-color-adjust: exact; background-color: #d9d9d9 !important; }
         }
     </style>
@@ -60,7 +50,7 @@
 
     <div class="no-print">
         <span id="db-status" class="status-db" style="color: orange;">⏳ Conectando à base de dados do GitHub...</span>
-        <label>📸 Adicionar Fotos do Redutor: </label>
+        <label>📸 Adicionar Fotos: </label>
         <input type="file" accept="image/*" multiple onchange="previewFotos(event)">
     </div>
 
@@ -72,7 +62,7 @@
         </tr>
         <tr>
             <td><label>Redutor:</label> <input type="text" id="campo-redutor"></td>
-            <td><label>Redução:</label> <input type="text" placeholder="Ex: 15,53"></td>
+            <td><label>Redução:</label> <input type="text"></td>
             <td colspan="2"><label>Série:</label> <input type="text" id="campo-serie"></td>
         </tr>
     </table>
@@ -93,7 +83,7 @@
     </table>
 
     <div class="section">RESUMO DE MÃO DE OBRA</div>
-    <table>
+    <table id="tabela-mao-obra">
         <tbody>
             <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
             <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
@@ -120,14 +110,12 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DOS LINKS GITHUB (SUBSTITUA PELOS SEUS LINKS RAW)
-        const URL_CSV_OS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/refs/heads/main/dmsoser00000045.csv';
-        const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/refs/heads/main/relatlisatagemprodutosdetalhada.csv';
+        const URL_CSV_OS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/dmsoser00000045.csv';
+        const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/relatlisatagemprodutosdetalhada.csv';
 
         let dadosOS = [];
         let listaProdutos = [];
 
-        // 1. CARREGAMENTO AUTOMÁTICO VIA GITHUB
         async function carregarDadosGitHub() {
             const status = document.getElementById('db-status');
             try {
@@ -136,35 +124,37 @@
                     fetch(URL_CSV_PRODUTOS)
                 ]);
 
+                if (!resOS.ok || !resProd.ok) throw new Error("Erro ao baixar arquivos.");
+
                 const textOS = await resOS.text();
-                dadosOS = textOS.split('\n').map(l => l.replace(/"/g, '').split(','));
+                dadosOS = textOS.split(/\r?\n/).filter(line => line.trim() !== "").map(l => l.replace(/"/g, '').split(','));
 
                 const textProd = await resProd.text();
-                listaProdutos = textProd.split('\n').map(l => l.replace(/"/g, '').split(','));
+                listaProdutos = textProd.split(/\r?\n/).filter(line => line.trim() !== "").map(l => l.replace(/"/g, '').split(','));
 
-                status.innerText = "✅ Base de dados sincronizada com GitHub.";
+                status.innerText = "✅ Base de dados sincronizada!";
                 status.style.color = "green";
             } catch (error) {
-                status.innerText = "❌ Erro ao carregar dados do GitHub.";
+                status.innerText = "❌ Erro na conexão GitHub. Verifique os links.";
                 status.style.color = "red";
                 console.error(error);
             }
         }
 
-        // 2. BUSCA DE OS
         function buscarDadosOS() {
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
+            
+            // Procura a OS (geralmente está na coluna 20 ou 21 dependendo do CSV)
             const linha = dadosOS.find(col => col.some(c => c.trim() === osVal));
             if (linha) {
                 const i = linha.indexOf(osVal);
-                document.getElementById('campo-serie').value = linha[i + 1] || linha[i + 2] || "";
-                document.getElementById('campo-redutor').value = linha[i + 2] || linha[i + 3] || "";
-                document.getElementById('campo-cliente').value = linha[i + 5] || linha[i + 4] || "";
+                document.getElementById('campo-serie').value = linha[i + 1] || "";
+                document.getElementById('campo-redutor').value = linha[i + 2] || "";
+                document.getElementById('campo-cliente').value = linha[i + 4] || "";
             }
         }
 
-        // 3. AUTOCOMPLETE COM REGEX (%)
         function criarLinhaPeca() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -188,9 +178,11 @@
                 const termos = busca.split('%').filter(t => t !== "");
                 const regex = new RegExp(termos.join('.*'), 'i');
 
+                // Índices ajustados: Código [16], Nome [17] baseado no seu arquivo detalhado
                 const filtrados = listaProdutos.filter(p => {
-                    const textoCompleto = ((p[21] || "") + " " + (p[22] || "")).toLowerCase();
-                    return regex.test(textoCompleto);
+                    const nome = (p[17] || "").toLowerCase();
+                    const codigo = (p[16] || "").toLowerCase();
+                    return regex.test(nome) || regex.test(codigo);
                 }).slice(0, 15);
 
                 if (filtrados.length > 0) {
@@ -198,10 +190,10 @@
                     filtrados.forEach(p => {
                         const item = document.createElement('div');
                         item.className = 'suggestion-item';
-                        item.innerText = `${p[21]} | ${p[22]}`;
+                        item.innerText = `${p[16]} | ${p[17]}`;
                         item.onclick = () => {
-                            inputNome.value = p[22];
-                            inputCod.value = p[21];
+                            inputNome.value = p[17];
+                            inputCod.value = p[16];
                             sugestoesDiv.style.display = 'none';
                             if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
                         };
@@ -213,7 +205,6 @@
             document.getElementById('tabela-pecas').appendChild(tr);
         }
 
-        // 4. FUNÇÕES GERAIS
         function calcularTotal() {
             let total = 0;
             document.querySelectorAll('.hr-input').forEach(i => total += (parseFloat(i.value) || 0));
@@ -228,7 +219,7 @@
                     div.className = 'foto-item';
                     div.innerHTML = `<button class="btn-remove no-print" onclick="this.parentElement.remove()">X</button>
                                      <img src="${e.target.result}" class="foto-preview">
-                                     <textarea class="obs-foto" rows="2" placeholder="Obs..."></textarea>`;
+                                     <textarea rows="2" placeholder="Obs..."></textarea>`;
                     document.getElementById('container-fotos').appendChild(div);
                 };
                 reader.readAsDataURL(f);
