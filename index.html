@@ -174,8 +174,8 @@
                 
                 // Filtra: Nome está na Coluna 22 (índice 21), Código na 21 (índice 20)
                 const filtrados = listaProdutos.filter(p => {
-                    if (!p[21]) return false;
-                    const nomePeca = p[21].toLowerCase();
+                    if (!p[18]) return false;
+                    const nomePeca = p[18].toLowerCase();
                     return termos.every(t => nomePeca.includes(t));
                 }).slice(0, 10);
 
@@ -184,10 +184,10 @@
                     filtrados.forEach(p => {
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        div.innerText = `${p[20]} | ${p[21]}`;
+                        div.innerText = `${p[17]} | ${p[18]}`;
                         div.onclick = () => {
-                            input.value = p[21];
-                            codInput.value = p[20];
+                            input.value = p[18];
+                            codInput.value = p[17];
                             sugestoes.style.display = 'none';
                             if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
                         };
