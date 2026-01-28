@@ -2,51 +2,48 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Relatório de Manutenção Preventiva - Gold Redutores</title>
+    <title>Relatório de Manutenção - Gold Redutores</title>
     <style>
-        /* CONFIGURAÇÕES GERAIS E CORES PADRÃO */
+        /* CSS INTEGRADO */
         body { font-family: Arial, sans-serif; margin: 20px; color: #003366; background-color: #fff; }
         .header { text-align: center; border-bottom: 3px solid #ed1c24; padding-bottom: 10px; margin-bottom: 10px; }
         .header h2 { margin: 0; font-size: 24px; text-transform: uppercase; }
         
         .section { background: #d9d9d9; padding: 6px; margin-top: 15px; font-weight: bold; text-align: center; border: 1px solid #333; text-transform: uppercase; font-size: 13px; }
         
-        /* TABELAS */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 0; }
         table, th, td { border: 1px solid #333; }
         td { padding: 6px; font-size: 11px; vertical-align: middle; }
         th { background: #eee; padding: 8px; font-size: 11px; text-align: center; color: #003366; }
         
-        /* INPUTS E TEXTAREAS */
         input[type="text"], input[type="number"], textarea { width: 98%; border: none; outline: none; background: transparent; font-size: 11px; color: #000; font-family: Arial, sans-serif; }
         textarea { resize: none; overflow: hidden; }
 
-        /* AUTOCOMPLETE (BUSCA INTELIGENTE) */
+        /* AUTOCOMPLETE */
         .autocomplete-wrapper { position: relative; }
         .suggestions { 
             position: absolute; background: white; border: 2px solid #333; 
-            width: 200%; z-index: 9999; max-height: 250px; overflow-y: auto; 
+            width: 220%; z-index: 9999; max-height: 250px; overflow-y: auto; 
             box-shadow: 5px 5px 15px rgba(0,0,0,0.5); display: none; left: 0; top: 100%;
         }
-        .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; font-size: 10px; line-height: 1.3; }
+        .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; font-size: 10px; line-height: 1.3; text-align: left;}
         .suggestion-item:hover { background-color: #ed1c24; color: white; }
 
-        /* GALERIA DE FOTOS */
+        /* FOTOS */
         .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .foto-item { border: 1px solid #333; padding: 5px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; }
-        .foto-preview { max-width: 100%; max-height: 280px; display: block; margin: 0 auto 5px; border-bottom: 1px solid #eee; }
-        .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; z-index: 10; }
+        .foto-preview { max-width: 100%; max-height: 280px; display: block; margin: 0 auto 5px; }
+        .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; }
 
-        /* PAINEL DE CONTROLE (NÃO SAI NA IMPRESSÃO) */
-        .no-print { margin: 15px 0; background: #f0f4f8; padding: 15px; border: 2px dashed #003366; border-radius: 8px; }
-        .no-print label { font-size: 12px; display: block; margin-bottom: 5px; }
-        button { padding: 12px 30px; background: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        /* PAINEL SUPERIOR */
+        .no-print { margin: 15px 0; background: #f0f4f8; padding: 15px; border: 1px solid #003366; border-radius: 8px; }
+        .status-db { font-size: 12px; font-weight: bold; margin-bottom: 10px; display: block; }
+        button { padding: 12px 30px; background: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         button:hover { background: #ed1c24; }
         
         @media print { 
             .no-print, .suggestions, .btn-remove { display: none !important; } 
             body { margin: 5px; }
-            input::placeholder { color: transparent; }
             .section { -webkit-print-color-adjust: exact; background-color: #d9d9d9 !important; }
         }
     </style>
@@ -57,50 +54,39 @@
         <h2>RELATÓRIO DE MANUTENÇÃO PREVENTIVA</h2>
         <div style="margin-top: 10px;">
             <label style="font-weight: bold;">Nº ORDEM DE SERVIÇO: </label>
-            <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px;" placeholder="Ex: 5449" oninput="buscarDadosOS()">
+            <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px;" placeholder="Digite a OS..." oninput="buscarDadosOS()">
         </div>
     </div>
 
     <div class="no-print">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div>
-                <label>📂 1. Base de Ordens de Serviço (CSV):</label>
-                <input type="file" id="csv-os" accept=".csv">
-            </div>
-            <div>
-                <label>📦 2. Lista de Produtos/Peças (CSV):</label>
-                <input type="file" id="csv-produtos" accept=".csv">
-            </div>
-        </div>
+        <span id="db-status" class="status-db" style="color: orange;">⏳ Conectando à base de dados do GitHub...</span>
+        <label>📸 Adicionar Fotos do Redutor: </label>
+        <input type="file" accept="image/*" multiple onchange="previewFotos(event)">
     </div>
 
     <div class="section">DADOS DO CLIENTE E EQUIPAMENTO</div>
     <table>
         <tr>
-            <td colspan="2"><label>Cliente: </label> <input type="text" id="campo-cliente" placeholder="Aguardando OS..."></td>
-            <td colspan="2"><label>Data: </label> <span id="data-atual" style="font-weight: bold; color: #000;"></span></td>
+            <td colspan="2"><label>Cliente: </label> <input type="text" id="campo-cliente"></td>
+            <td colspan="2"><label>Data: </label> <span id="data-atual" style="font-weight: bold;"></span></td>
         </tr>
         <tr>
-            <td><label>Redutor:</label> <input type="text" id="campo-redutor" placeholder="..."></td>
-            <td><label>Redução:</label> <input type="text" placeholder="..."></td>
-            <td colspan="2"><label>Série:</label> <input type="text" id="campo-serie" placeholder="..."></td>
+            <td><label>Redutor:</label> <input type="text" id="campo-redutor"></td>
+            <td><label>Redução:</label> <input type="text" placeholder="Ex: 15,53"></td>
+            <td colspan="2"><label>Série:</label> <input type="text" id="campo-serie"></td>
         </tr>
     </table>
 
     <div class="section">ANÁLISES FOTOGRÁFICAS</div>
-    <div class="no-print" style="background: #eee; padding: 10px; border: 1px solid #ccc; margin-top: 5px;">
-        <label>📸 Selecionar Fotos do Redutor: </label>
-        <input type="file" accept="image/*" multiple onchange="previewFotos(event)">
-    </div>
     <div id="container-fotos" class="foto-container"></div>
 
     <div class="section">PEÇAS NECESSÁRIAS PARA EXECUÇÃO</div>
     <table>
         <thead>
             <tr>
-                <th style="width: 60%;">Descrição (Busca flexível: % termo % termo)</th>
-                <th style="width: 10%;">Qtd</th>
-                <th style="width: 30%;">Cód Gold</th>
+                <th style="width: 65%;">Descrição (Busca: termo % termo)</th>
+                <th>Qtd</th>
+                <th>Cód Gold</th>
             </tr>
         </thead>
         <tbody id="tabela-pecas"></tbody>
@@ -108,13 +94,6 @@
 
     <div class="section">RESUMO DE MÃO DE OBRA</div>
     <table>
-        <thead>
-            <tr>
-                <th>Descrição</th>
-                <th style="width: 80px;">Qtd (hs)</th>
-                <th style="width: 150px;">Cód Gold</th>
-            </tr>
-        </thead>
         <tbody>
             <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
             <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
@@ -134,48 +113,58 @@
     </table>
 
     <div class="section">CONCLUSÕES</div>
-    <div style="margin-top: 5px;">
-        <textarea rows="5" style="width: 100%; border: 1px solid #333; padding: 8px; box-sizing: border-box;" placeholder="Descreva as conclusões técnicas aqui..." oninput="autoResize(this)"></textarea>
-    </div>
+    <textarea rows="5" style="width: 100%; border: 1px solid #333; margin-top: 5px; padding: 8px; box-sizing: border-box;" placeholder="Parecer técnico..." oninput="autoResize(this)"></textarea>
 
     <div class="no-print" style="text-align: right; margin-top: 30px;">
         <button onclick="window.print()">GERAR RELATÓRIO PDF</button>
     </div>
 
     <script>
+        // CONFIGURAÇÃO DOS LINKS GITHUB (SUBSTITUA PELOS SEUS LINKS RAW)
+        const URL_CSV_OS = 'https://raw.githubusercontent.com/USUARIO/REPOSITORIO/main/dmsoser00000045.csv';
+        const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/USUARIO/REPOSITORIO/main/relatlisatagemprodutosdetalhada.csv';
+
         let dadosOS = [];
         let listaProdutos = [];
 
-        // 1. PROCESSAMENTO DOS ARQUIVOS CSV
-        document.getElementById('csv-os').addEventListener('change', e => lerCSV(e, d => dadosOS = d));
-        document.getElementById('csv-produtos').addEventListener('change', e => lerCSV(e, d => listaProdutos = d));
+        // 1. CARREGAMENTO AUTOMÁTICO VIA GITHUB
+        async function carregarDadosGitHub() {
+            const status = document.getElementById('db-status');
+            try {
+                const [resOS, resProd] = await Promise.all([
+                    fetch(URL_CSV_OS),
+                    fetch(URL_CSV_PRODUTOS)
+                ]);
 
-        function lerCSV(e, callback) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = event => {
-                const linhas = event.target.result.split('\n');
-                callback(linhas.map(l => l.replace(/"/g, '').split(',')));
-            };
-            reader.readAsText(file, 'ISO-8859-1');
+                const textOS = await resOS.text();
+                dadosOS = textOS.split('\n').map(l => l.replace(/"/g, '').split(','));
+
+                const textProd = await resProd.text();
+                listaProdutos = textProd.split('\n').map(l => l.replace(/"/g, '').split(','));
+
+                status.innerText = "✅ Base de dados sincronizada com GitHub.";
+                status.style.color = "green";
+            } catch (error) {
+                status.innerText = "❌ Erro ao carregar dados do GitHub.";
+                status.style.color = "red";
+                console.error(error);
+            }
         }
 
-        // 2. BUSCA DE DADOS DA OS
+        // 2. BUSCA DE OS
         function buscarDadosOS() {
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
-            
             const linha = dadosOS.find(col => col.some(c => c.trim() === osVal));
             if (linha) {
                 const i = linha.indexOf(osVal);
-                // Mapeamento: OS[i], Série[i+2], Produto[i+3], Cliente[i+5]
                 document.getElementById('campo-serie').value = linha[i + 1] || linha[i + 2] || "";
                 document.getElementById('campo-redutor').value = linha[i + 2] || linha[i + 3] || "";
                 document.getElementById('campo-cliente').value = linha[i + 5] || linha[i + 4] || "";
             }
         }
 
-        // 3. TABELA DE PEÇAS COM BUSCA FLEXÍVEL (%)
+        // 3. AUTOCOMPLETE COM REGEX (%)
         function criarLinhaPeca() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -184,7 +173,7 @@
                     <div class="suggestions"></div>
                 </td>
                 <td><input type="number" value="1" style="text-align:center;"></td>
-                <td><input type="text" class="cod-gold-peca" readonly style="text-align:center; color:#555;"></td>
+                <td><input type="text" class="cod-gold-peca" readonly style="text-align:center;"></td>
             `;
             
             const inputNome = tr.querySelector('.input-nome-peca');
@@ -192,19 +181,16 @@
             const inputCod = tr.querySelector('.cod-gold-peca');
 
             inputNome.addEventListener('input', function() {
-                const buscaOriginal = this.value.toLowerCase().trim();
+                const busca = this.value.toLowerCase().trim();
                 sugestoesDiv.innerHTML = '';
+                if (busca.length < 2) { sugestoesDiv.style.display = 'none'; return; }
 
-                if (buscaOriginal.length < 2) { sugestoesDiv.style.display = 'none'; return; }
-
-                // Lógica de Busca Flexível (Regex)
-                const termos = buscaOriginal.split('%').filter(t => t !== "");
+                const termos = busca.split('%').filter(t => t !== "");
                 const regex = new RegExp(termos.join('.*'), 'i');
 
-                // Filtra no CSV de Produtos (Cód: col 21, Nome: col 22)
                 const filtrados = listaProdutos.filter(p => {
-                    const texto = (p[21] + " " + p[22]).toLowerCase();
-                    return regex.test(texto);
+                    const textoCompleto = ((p[21] || "") + " " + (p[22] || "")).toLowerCase();
+                    return regex.test(textoCompleto);
                 }).slice(0, 15);
 
                 if (filtrados.length > 0) {
@@ -217,7 +203,6 @@
                             inputNome.value = p[22];
                             inputCod.value = p[21];
                             sugestoesDiv.style.display = 'none';
-                            // Cria nova linha se for a última
                             if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
                         };
                         sugestoesDiv.appendChild(item);
@@ -225,46 +210,37 @@
                 } else { sugestoesDiv.style.display = 'none'; }
             });
 
-            // Fecha sugestões ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!tr.contains(e.target)) sugestoesDiv.style.display = 'none';
-            });
-
             document.getElementById('tabela-pecas').appendChild(tr);
         }
 
-        // 4. CÁLCULO DE HORAS
+        // 4. FUNÇÕES GERAIS
         function calcularTotal() {
             let total = 0;
             document.querySelectorAll('.hr-input').forEach(i => total += (parseFloat(i.value) || 0));
             document.getElementById('total-horas').innerText = total;
         }
 
-        // 5. GALERIA DE FOTOS
         function previewFotos(event) {
-            const container = document.getElementById('container-fotos');
             for (let f of event.target.files) {
                 const reader = new FileReader();
                 reader.onload = e => {
                     const div = document.createElement('div');
                     div.className = 'foto-item';
-                    div.innerHTML = `
-                        <button class="btn-remove no-print" onclick="this.parentElement.remove()">X</button>
-                        <img src="${e.target.result}" class="foto-preview">
-                        <textarea class="obs-foto" rows="2" placeholder="Observação da foto..." oninput="autoResize(this)"></textarea>
-                    `;
-                    container.appendChild(div);
+                    div.innerHTML = `<button class="btn-remove no-print" onclick="this.parentElement.remove()">X</button>
+                                     <img src="${e.target.result}" class="foto-preview">
+                                     <textarea class="obs-foto" rows="2" placeholder="Obs..."></textarea>`;
+                    document.getElementById('container-fotos').appendChild(div);
                 };
                 reader.readAsDataURL(f);
             }
         }
 
-        // 6. UTILITÁRIOS
         function autoResize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
 
         window.onload = () => {
             document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
-            for(let i=0; i<2; i++) { criarLinhaPeca(); } // Inicia com 2 linhas
+            carregarDadosGitHub();
+            for(let i=0; i<3; i++) { criarLinhaPeca(); }
         };
     </script>
 </body>
