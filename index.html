@@ -45,7 +45,7 @@
         <h2>RELATÓRIO DE MANUTENÇÃO PREVENTIVA</h2>
         <div style="margin-top: 10px;">
             <label style="font-weight: bold;">Nº ORDEM DE SERVIÇO: </label>
-            <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px;" placeholder="Digite a OS..." oninput="buscarDadosOS()">
+            <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px;" placeholder="Ex: 5449" oninput="buscarDadosOS()">
         </div>
     </div>
 
@@ -121,12 +121,15 @@
                 const [resOS, resProd] = await Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ]);
                 
                 const textOS = await resOS.text();
-                // O dmsoser usa separador de aspas e vírgula
-                dadosOS = textOS.split(/\r?\n/).map(l => l.split('","').map(c => c.replace(/"/g, '').trim()));
+                // Melhora a limpeza: remove aspas externas de cada célula
+                dadosOS = textOS.split(/\r?\n/).map(l => 
+                    l.split('","').map(c => c.replace(/^"|"$/g, '').trim())
+                );
 
                 const textProd = await resProd.text();
-                // O relatlisatagem também segue o mesmo padrão
-                listaProdutos = textProd.split(/\r?\n/).map(l => l.split('","').map(c => c.replace(/"/g, '').trim()));
+                listaProdutos = textProd.split(/\r?\n/).map(l => 
+                    l.split('","').map(c => c.replace(/^"|"$/g, '').trim())
+                );
 
                 status.innerText = "✅ GitHub Sincronizado!";
                 status.style.color = "green";
@@ -140,13 +143,22 @@
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
 
-            // Busca exata na coluna 20 (índice 18)
-            const linha = dadosOS.find(l => l[21] === osVal);
+            // No seu arquivo CSV:
+            // Índice 20: Número da OS
+            // Índice 22: Série
+            // Índice 23: Produto (Redutor)
+            // Índice 25: Pessoa (Cliente)
+            const linha = dadosOS.find(l => l[20] === osVal);
             
             if (linha) {
-                document.getElementById('campo-serie').value = linha[21] || "";   // Coluna 22
-                document.getElementById('campo-redutor').value = linha[22] || ""; // Coluna 23
-                document.getElementById('campo-cliente').value = linha[26] || ""; // Coluna 25
+                document.getElementById('campo-serie').value = linha[22] || "";  
+                document.getElementById('campo-redutor').value = linha[23] || ""; 
+                document.getElementById('campo-cliente').value = linha[25] || ""; 
+            } else {
+                // Limpa campos se não encontrar nada
+                document.getElementById('campo-serie').value = "";
+                document.getElementById('campo-redutor').value = "";
+                document.getElementById('campo-cliente').value = "";
             }
         }
 
@@ -154,7 +166,7 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="autocomplete-wrapper">
-                    <input type="text" class="input-nome-peca" placeholder="Busca flexível...">
+                    <input type="text" class="input-nome-peca" placeholder="Busca: Rolamento % 6205...">
                     <div class="suggestions"></div>
                 </td>
                 <td><input type="number" value="1" style="text-align:center;"></td>
@@ -170,9 +182,9 @@
                 sugestoes.innerHTML = '';
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
 
-                const termos = busca.split('%').filter(t => t !== "");
+                const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
                 
-                // Filtra: Nome está na Coluna 22 (índice 21), Código na 21 (índice 20)
+                // Filtra produtos na lista (Ajuste os índices 14 e 15 conforme seu arquivo de produtos se necessário)
                 const filtrados = listaProdutos.filter(p => {
                     if (!p[15]) return false;
                     const nomePeca = p[15].toLowerCase();
