@@ -24,17 +24,19 @@
         .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; text-align: left; }
         .suggestion-item:hover { background-color: #ed1c24; color: white; }
 
+        /* Área de Fotos */
+        .foto-upload-container { text-align: center; padding: 10px; background: #f9f9f9; border: 1px dashed #003366; margin-top: 5px; }
         .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .foto-item { border: 1px solid #333; padding: 5px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; }
         .foto-preview { max-width: 100%; max-height: 280px; display: block; margin: 0 auto 5px; }
         .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; }
 
-        .no-print { margin: 15px 0; background: #f0f4f8; padding: 15px; border: 1px solid #003366; border-radius: 8px; }
+        .no-print { margin: 15px 0; }
         .status-db { font-size: 12px; font-weight: bold; margin-bottom: 10px; display: block; }
         button { padding: 12px 30px; background: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
         @media print { 
-            .no-print, .suggestions, .btn-remove { display: none !important; } 
+            .no-print, .suggestions, .btn-remove, .foto-upload-container { display: none !important; } 
             .section { -webkit-print-color-adjust: exact; background-color: #d9d9d9 !important; }
         }
     </style>
@@ -50,9 +52,7 @@
     </div>
 
     <div class="no-print">
-        <span id="db-status" class="status-db" style="color: orange;">⏳ Sincronizando com GitHub...</span>
-        <label>📸 Adicionar Fotos: </label>
-        <input type="file" accept="image/*" multiple onchange="previewFotos(event)">
+        <span id="db-status" class="status-db" style="color: orange; text-align: center;">⏳ Sincronizando com GitHub...</span>
     </div>
 
     <div class="section">DADOS DO CLIENTE E EQUIPAMENTO</div>
@@ -69,6 +69,10 @@
     </table>
 
     <div class="section">ANÁLISES FOTOGRÁFICAS</div>
+    <div class="foto-upload-container no-print">
+        <label style="font-weight: bold; color: #003366;">📸 ADICIONAR FOTOS AO RELATÓRIO: </label>
+        <input type="file" accept="image/*" multiple onchange="previewFotos(event)" style="cursor: pointer;">
+    </div>
     <div id="container-fotos" class="foto-container"></div>
 
     <div class="section">PEÇAS NECESSÁRIAS PARA EXECUÇÃO</div>
@@ -119,18 +123,14 @@
             const status = document.getElementById('db-status');
             try {
                 const [resOS, resProd] = await Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ]);
-                
                 const textOS = await resOS.text();
-                // Regex para separar por vírgula respeitando aspas
                 dadosOS = textOS.split(/\r?\n/).map(linha => 
                     linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim())
                 );
-
                 const textProd = await resProd.text();
                 listaProdutos = textProd.split(/\r?\n/).map(linha => 
                     linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim())
                 );
-
                 status.innerText = "✅ GitHub Sincronizado!";
                 status.style.color = "green";
             } catch (e) {
@@ -142,11 +142,7 @@
         function buscarDadosOS() {
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
-
-            // Índices baseados no arquivo dmsoser00000045.csv:
-            // 21: OS | 23: Série | 24: Produto | 26: Pessoa (Cliente)
             const linha = dadosOS.find(l => l[21] === osVal);
-            
             if (linha) {
                 document.getElementById('campo-serie').value = linha[23] || "";  
                 document.getElementById('campo-redutor').value = linha[24] || ""; 
@@ -168,7 +164,6 @@
                 <td><input type="number" value="1" style="text-align:center;"></td>
                 <td><input type="text" class="cod-gold" readonly style="text-align:center;"></td>
             `;
-            
             const input = tr.querySelector('.input-nome-peca');
             const sugestoes = tr.querySelector('.suggestions');
             const codInput = tr.querySelector('.cod-gold');
@@ -177,15 +172,11 @@
                 const busca = this.value.toLowerCase();
                 sugestoes.innerHTML = '';
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
-
                 const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
-                
-                // Ajuste de índices para a lista de produtos se necessário
                 const filtrados = listaProdutos.filter(p => {
                     const nomePeca = (p[15] || "").toLowerCase();
                     return termos.every(t => nomePeca.includes(t));
                 }).slice(0, 10);
-
                 if (filtrados.length > 0) {
                     sugestoes.style.display = 'block';
                     filtrados.forEach(p => {
@@ -202,7 +193,6 @@
                     });
                 } else { sugestoes.style.display = 'none'; }
             });
-
             document.getElementById('tabela-pecas').appendChild(tr);
         }
 
