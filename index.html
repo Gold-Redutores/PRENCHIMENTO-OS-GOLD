@@ -185,11 +185,11 @@
                     filtrados.forEach(p => {
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        // Posição 20: Código | Posição 21: Nome
-                        div.innerText = `${p[20]} | ${p[21]}`;
+                        // Posição 21: Código | Posição 22: Nome
+                        div.innerText = `${p[21]} | ${p[22]}`;
                         div.onclick = () => {
-                            input.value = p[21]; input.setAttribute('value', p[21]);
-                            codInput.value = p[20]; codInput.setAttribute('value', p[20]);
+                            input.value = p[22]; input.setAttribute('value', p[22]);
+                            codInput.value = p[21]; codInput.setAttribute('value', p[21]);
                             sugestoes.style.display = 'none';
                             if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
                         };
