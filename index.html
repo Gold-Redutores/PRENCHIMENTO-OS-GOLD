@@ -121,14 +121,14 @@
                 const [resOS, resProd] = await Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ]);
                 
                 const textOS = await resOS.text();
-                // Melhora a limpeza: remove aspas externas de cada célula
-                dadosOS = textOS.split(/\r?\n/).map(l => 
-                    l.split('","').map(c => c.replace(/^"|"$/g, '').trim())
+                // Regex para separar por vírgula respeitando aspas
+                dadosOS = textOS.split(/\r?\n/).map(linha => 
+                    linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim())
                 );
 
                 const textProd = await resProd.text();
-                listaProdutos = textProd.split(/\r?\n/).map(l => 
-                    l.split('","').map(c => c.replace(/^"|"$/g, '').trim())
+                listaProdutos = textProd.split(/\r?\n/).map(linha => 
+                    linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim())
                 );
 
                 status.innerText = "✅ GitHub Sincronizado!";
@@ -143,19 +143,15 @@
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
 
-            // No seu arquivo CSV:
-            // Índice 20: Número da OS
-            // Índice 22: Série
-            // Índice 23: Produto (Redutor)
-            // Índice 25: Pessoa (Cliente)
-            const linha = dadosOS.find(l => l[20] === osVal);
+            // Índices baseados no arquivo dmsoser00000045.csv:
+            // 21: OS | 23: Série | 24: Produto | 26: Pessoa (Cliente)
+            const linha = dadosOS.find(l => l[21] === osVal);
             
             if (linha) {
-                document.getElementById('campo-serie').value = linha[22] || "";  
-                document.getElementById('campo-redutor').value = linha[23] || ""; 
-                document.getElementById('campo-cliente').value = linha[25] || ""; 
+                document.getElementById('campo-serie').value = linha[23] || "";  
+                document.getElementById('campo-redutor').value = linha[24] || ""; 
+                document.getElementById('campo-cliente').value = linha[26] || ""; 
             } else {
-                // Limpa campos se não encontrar nada
                 document.getElementById('campo-serie').value = "";
                 document.getElementById('campo-redutor').value = "";
                 document.getElementById('campo-cliente').value = "";
@@ -184,10 +180,9 @@
 
                 const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
                 
-                // Filtra produtos na lista (Ajuste os índices 14 e 15 conforme seu arquivo de produtos se necessário)
+                // Ajuste de índices para a lista de produtos se necessário
                 const filtrados = listaProdutos.filter(p => {
-                    if (!p[15]) return false;
-                    const nomePeca = p[15].toLowerCase();
+                    const nomePeca = (p[15] || "").toLowerCase();
                     return termos.every(t => nomePeca.includes(t));
                 }).slice(0, 10);
 
@@ -212,7 +207,8 @@
         }
 
         function calcularTotal() {
-            let t = 0; document.querySelectorAll('.hr-input').forEach(i => t += (parseFloat(i.value) || 0));
+            let t = 0; 
+            document.querySelectorAll('.hr-input').forEach(i => t += (parseFloat(i.value) || 0));
             document.getElementById('total-horas').innerText = t;
         }
 
