@@ -31,10 +31,11 @@
         .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; z-index: 10; }
 
         .no-print { margin: 15px 0; }
-        .btn-group { text-align: right; margin-top: 30px; display: flex; justify-content: flex-end; gap: 10px; }
-        button { padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
+        .btn-group { text-align: right; margin-top: 30px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+        button { padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
         .btn-pdf { background: #003366; }
         .btn-wpp { background: #25d366; }
+        .btn-save { background: #555; }
         
         @media print { 
             .no-print, .suggestions, .btn-remove, .foto-upload-container, .btn-group { display: none !important; } 
@@ -110,8 +111,9 @@
     <textarea id="conclusoes" rows="5" style="width: 100%; border: 1px solid #333; margin-top: 5px; padding: 8px;" placeholder="Parecer técnico final..."></textarea>
 
     <div class="btn-group no-print">
-        <button class="btn-pdf" onclick="window.print()">IMPRIMIR / PDF</button>
-        <button class="btn-wpp" onclick="enviarWhatsApp()">ENVIAR WHATSAPP (COM DADOS)</button>
+        <button class="btn-save" onclick="salvarHTML()">SALVAR ARQUIVO (.HTML)</button>
+        <button class="btn-wpp" onclick="enviarWhatsApp()">ENVIAR WHATSAPP</button>
+        <button class="btn-pdf" onclick="window.print()">GERAR PDF / IMPRIMIR</button>
     </div>
 
     <script>
@@ -173,7 +175,6 @@
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
                 const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
                 
-                // Busca Global em todas as colunas
                 const filtrados = listaProdutos.filter(p => {
                     const linhaToda = p.join(" ").toLowerCase();
                     return termos.every(t => linhaToda.includes(t));
@@ -184,11 +185,11 @@
                     filtrados.forEach(p => {
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        // Índices do seu CSV: p[21] = Código, p[22] = Descrição
-                        div.innerText = `${p[21]} | ${p[22]}`;
+                        // Posição 20: Código | Posição 21: Nome
+                        div.innerText = `${p[20]} | ${p[21]}`;
                         div.onclick = () => {
-                            input.value = p[22]; input.setAttribute('value', p[22]);
-                            codInput.value = p[21]; codInput.setAttribute('value', p[21]);
+                            input.value = p[21]; input.setAttribute('value', p[21]);
+                            codInput.value = p[20]; codInput.setAttribute('value', p[20]);
                             sugestoes.style.display = 'none';
                             if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
                         };
@@ -216,29 +217,45 @@
             }
         }
 
-        function enviarWhatsApp() {
-            // GRAVA OS DADOS NO HTML ANTES DE ENVIAR
+        // FUNÇÃO CENTRAL PARA PREPARAR O CONTEÚDO
+        function prepararHTML() {
             document.querySelectorAll('input').forEach(i => i.setAttribute('value', i.value));
             document.querySelectorAll('textarea').forEach(t => t.innerHTML = t.value);
+            return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+        }
 
+        function salvarHTML() {
             const os = document.getElementById('input-os').value || "SN";
             const cliente = document.getElementById('campo-cliente').value || "RELATORIO";
-            const htmlCompleto = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-            const blob = new Blob([htmlCompleto], { type: 'text/html' });
+            const conteudo = prepararHTML();
+            const blob = new Blob([conteudo], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `OS_${os}_${cliente}.html`;
+            link.click();
+        }
+
+        function enviarWhatsApp() {
+            const conteudo = prepararHTML();
+            const os = document.getElementById('input-os').value || "SN";
+            const cliente = document.getElementById('campo-cliente').value || "RELATORIO";
+            const blob = new Blob([conteudo], { type: 'text/html' });
             const arquivo = new File([blob], `OS_${os}_${cliente}.html`, { type: 'text/html' });
 
             if (navigator.share) {
                 navigator.share({ title: `Relatório OS ${os}`, files: [arquivo] }).catch(console.error);
             } else {
-                alert("Navegador não suporta compartilhamento. Use Imprimir > Salvar PDF.");
+                alert("Navegador não suporta compartilhamento. Use 'Salvar Arquivo'.");
             }
         }
 
         function calcularTotal() {
             let t = 0; 
-            document.querySelectorAll('.hr-input').forEach(i => t += (parseFloat(i.value) || 0));
+            document.querySelectorAll('.hr-input').forEach(i => {
+                t += (parseFloat(i.value) || 0);
+                i.setAttribute('value', i.value);
+            });
             document.getElementById('total-horas').innerText = t;
-            document.querySelectorAll('input[type="number"]').forEach(i => i.setAttribute('value', i.value));
         }
 
         window.onclick = e => { if (!e.target.matches('.input-nome-peca')) document.querySelectorAll('.suggestions').forEach(s => s.style.display = 'none'); }
