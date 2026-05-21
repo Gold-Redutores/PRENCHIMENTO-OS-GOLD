@@ -14,10 +14,13 @@
         th { background: #eee; padding: 8px; font-size: 11px; text-align: center; color: #003366; }
         input[type="text"], input[type="number"], textarea { width: 98%; border: none; outline: none; background: transparent; font-size: 11px; color: #000; }
         
+        .checkbox-container { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .checkbox-container input { width: auto; margin: 0; }
+
         .autocomplete-wrapper { position: relative; overflow: visible !important; }
         .suggestions { 
             position: absolute; background: white; border: 2px solid #333; 
-            width: 180%; z-index: 99999; max-height: 250px; overflow-y: auto; 
+            width: 100%; z-index: 99999; max-height: 250px; overflow-y: auto; 
             box-shadow: 5px 5px 15px rgba(0,0,0,0.3); display: none; left: 0; top: 100%;
         }
         .suggestion-item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; text-align: left; }
@@ -30,16 +33,17 @@
 
         .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; z-index: 10; }
 
-        .no-print { margin: 15px 0; }
-        .btn-group { text-align: right; margin-top: 30px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
-        button { padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
-        .btn-pdf { background: #003366; }
-        .btn-wpp { background: #25d366; }
-        .btn-save { background: #555; }
+        /* Estilos de Assinatura */
+        .signature-pad { border: 1px solid #eee; background: #fff; width: 95%; height: 80px; cursor: crosshair; touch-action: none; }
+        .name-input { border-bottom: 1px dashed #ccc !important; width: 90%; margin-bottom: 5px; text-align: center; font-weight: bold; text-transform: uppercase; }
         
+        .btn-group { display: flex; gap: 15px; justify-content: center; margin-top: 40px; padding-bottom: 50px; }
+        .btn-action { padding: 12px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; }
+
         @media print { 
-            .no-print, .suggestions, .btn-remove, .foto-upload-container, .btn-group { display: none !important; } 
-            .section { -webkit-print-color-adjust: exact; background-color: #d9d9d9 !important; }
+            .no-print { display: none !important; } 
+            body { padding: 0; margin: 0; } 
+            .signature-pad { border: none; }
         }
     </style>
 </head>
@@ -64,9 +68,57 @@
             <td colspan="2"><label><strong>Data:</strong></label> <span id="data-atual" style="font-weight: bold;"></span></td>
         </tr>
         <tr>
-            <td><label><strong>Redutor:</strong></label> <input type="text" id="campo-redutor"></td>
+            <td><label><strong>Equipamento:</strong></label> <input type="text" id="campo-redutor"></td>
             <td><label><strong>Redução:</strong></label> <input type="text" id="campo-reducao" placeholder="Ex: 1:40"></td>
             <td colspan="2"><label><strong>Série:</strong></label> <input type="text" id="campo-serie"></td>
+        </tr>
+    </table>
+
+    <div class="section" style="text-align: left; padding-left: 10px;">Serviço executado:</div>
+    <table>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Desligamento e retirada da base (15%)</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> Montagem (65%)</label></td>
+        </tr>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Desmont. de acoplam. e tampas (20%)</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> Montagem na base (75%)</label></td>
+        </tr>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Testes elétricos (25%)</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> Religação elétrica (85%)</label></td>
+        </tr>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Análise Eletromecânica (40%)</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> Alinhamento a laser (90%)</label></td>
+        </tr>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Troca de rolamentos (50%)</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> Acoplagem mecânica (100%)</label></td>
+        </tr>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Lubrificação dos rolamentos (55%)</label></td>
+            <td></td>
+        </tr>
+    </table>
+
+    <div class="section" style="text-align: left; padding-left: 10px;">Anomalias encontradas:</div>
+    <table>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Tampa traseira condenada</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> Base de rolamento traseiro condenado</label></td>
+        </tr>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Tampa dianteira condenada</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> Base de rolamento dianteiro condenado</label></td>
+        </tr>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Baixa resistência de isolamento</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> Resistências ôhmicas dos enrolamentos desbalanceadas</label></td>
+        </tr>
+        <tr>
+            <td><label class="checkbox-container"><input type="checkbox"> Contaminação no bobinado</label></td>
+            <td><label class="checkbox-container"><input type="checkbox"> <strong>Sem anomalias</strong></label></td>
         </tr>
     </table>
 
@@ -81,39 +133,59 @@
     <table>
         <thead>
             <tr>
-                <th style="width: 65%;">Descrição (Busca Global: termo % termo)</th>
-                <th>Qtd</th>
-                <th>Cód Gold</th>
+                <th style="width: 85%;">Descrição da Peça (Busca Global: termo % termo)</th>
+                <th style="width: 15%;">Qtd</th>
             </tr>
         </thead>
         <tbody id="tabela-pecas"></tbody>
     </table>
 
-    <div class="section">RESUMO DE MÃO DE OBRA</div>
-    <table>
-        <tbody>
-            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
-            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
-            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
-            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
-            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
-        </tbody>
-        <tfoot>
-            <tr style="background:#f2f2f2; font-weight:bold;">
-                <td style="text-align: right; padding-right: 15px;">TOTAL DE HORAS TÉCNICAS:</td>
-                <td id="total-horas" style="text-align: center; color: #ed1c24; font-size: 14px;">0</td>
-                <td></td>
-            </tr>
-        </tfoot>
-    </table>
-
     <div class="section">CONCLUSÕES</div>
     <textarea id="conclusoes" rows="5" style="width: 100%; border: 1px solid #333; margin-top: 5px; padding: 8px;" placeholder="Parecer técnico final..."></textarea>
 
+    <div style="margin-top: 30px;">
+        <table style="border: none;">
+            <tr>
+                <td style="border: 1px solid #333; padding: 0; background: #fafafa;">
+                    <div style="text-align: center; padding: 10px;">
+                        <input type="text" class="name-input" placeholder="NOME DO TÉCNICO (LEGÍVEL)">
+                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="pad-tecnico" class="signature-pad"></canvas>
+                        </div>
+                        <button class="no-print" onclick="limparAssinatura('pad-tecnico')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
+                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">ASSINATURA DO TÉCNICO RESPONSÁVEL</div>
+                    </div>
+                </td>
+                <td style="border: 1px solid #333; padding: 0; background: #fafafa;">
+                    <div style="text-align: center; padding: 10px;">
+                        <input type="text" class="name-input" placeholder="NOME DO RESPONSÁVEL (LEGÍVEL)">
+                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="pad-empresa" class="signature-pad"></canvas>
+                        </div>
+                        <button class="no-print" onclick="limparAssinatura('pad-empresa')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
+                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">ASSINATURA DO RESPONSÁVEL DA EMPRESA</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #333; padding: 0; background: #fafafa;">
+                    <div style="text-align: center; padding: 10px;">
+                        <input type="text" class="name-input" placeholder="NOME DO RESPONSÁVEL INPASA (LEGÍVEL)" style="width: 50%;">
+                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="pad-inpasa" class="signature-pad" style="width: 60%;"></canvas>
+                        </div>
+                        <button class="no-print" onclick="limparAssinatura('pad-inpasa')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
+                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">RESPONSÁVEL MANUTENÇÃO - INPASA</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
     <div class="btn-group no-print">
-        <button class="btn-save" onclick="salvarHTML()">SALVAR ARQUIVO (.HTML)</button>
-        <button class="btn-wpp" onclick="enviarWhatsApp()">ENVIAR WHATSAPP</button>
-        <button class="btn-pdf" onclick="window.print()">GERAR PDF / IMPRIMIR</button>
+        <button class="btn-action" style="background: #003366;" onclick="salvarHTML()">SALVAR ARQUIVO (.HTML)</button>
+        <button class="btn-action" style="background: #25d366;" onclick="enviarWhatsApp()">ENVIAR WHATSAPP</button>
+        <button class="btn-action" style="background: #ed1c24;" onclick="window.print()">GERAR PDF / IMPRIMIR</button>
     </div>
 
     <script>
@@ -121,80 +193,95 @@
         const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/refs/heads/main/relalisatagemprodutosdetada.csv';
         let dadosOS = []; let listaProdutos = [];
 
-        // ALTERAÇÃO DO PARSER: Une linhas quebradas por aspas no meio do nome (Ex: Kit Válvula)
+        /* ===================================================================================
+           CORREÇÃO CRÍTICA: NOVA LOGÍSTICA DE PARSE DE CSV À PROVA DE "ENTER" DENTRO DE ASPAS
+           ===================================================================================
+           O antigo split(/\r?\n/) quebrava a linha fisicamente se houvesse um Enter no nome do 
+           produto. Esta nova função analisa caractere por caractere (State Machine). 
+           Se encontrar um "Enter" estando dentro de aspas, ela entende que é apenas parte do 
+           nome e não quebra o registro em dois, mantendo o índice p[22] estável e correto.
+        */
         function parseCSV(text) {
-            if (!text) return [];
-            
-            let linhasTratadas = [];
-            let linhasBrutas = text.split(/\r?\n/);
-            let linhaAcumulada = "";
+            let linhas = [];
+            let linhaAtual = [];
+            let campoAtual = '';
+            let dentroDeAspas = false;
 
-            for (let i = 0; i < linhasBrutas.length; i++) {
-                let linhaAtual = linhasBrutas[i];
-                
-                if (linhaAcumulada !== "") {
-                    linhaAcumulada += "\n" + linhaAtual;
-                } else {
-                    linhaAcumulada = linhaAtual;
-                }
+            // Laço caractere por caractere para avaliar o contexto real do arquivo CSV
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                let proximoChar = text[i + 1];
 
-                // Verifica se a aspa foi aberta mas não fechou na mesma linha
-                let totalAspas = (linhaAcumulada.match(/"/g) || []).length;
-                if (totalAspas % 2 === 0) {
-                    linhasTratadas.push(linhaAcumulada);
-                    linhaAcumulada = "";
+                // Controle e tratamento de aspas
+                if (char === '"') {
+                    // Se encontrar duas aspas seguidas (""), o sistema escapa e põe apenas uma aspa comum
+                    if (dentroDeAspas && proximoChar === '"') {
+                        campoAtual += '"';
+                        i++; // Pula a aspa duplicada de proteção
+                    } else {
+                        // Inverte o estado: se estava fora, entra nas aspas. Se estava dentro, sai.
+                        dentroDeAspas = !dentroDeAspas;
+                    }
+                } 
+                // Se encontrar uma vírgula (ou ponto e vírgula) FORA das aspas, fecha o campo atual
+                else if (char === ',' && !dentroDeAspas) {
+                    linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                    campoAtual = '';
+                } 
+                // Se encontrar um ENTER (\n ou \r) FORA das aspas, fecha a linha de dados com segurança
+                else if ((char === '\n' || char === '\r') && !dentroDeAspas) {
+                    if (char === '\r' && proximoChar === '\n') i++; // Ignora o \n se for um padrão do Windows \r\n
+                    linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                    
+                    // Validação para garantir que a linha possui dados úteis antes de salvar
+                    if (linhaAtual.length > 5) {
+                        linhas.push(linhaAtual);
+                    }
+                    linhaAtual = [];
+                    campoAtual = '';
+                } 
+                // Se for qualquer outro caractere (incluindo o ENTER dentro de aspas), ele vira texto puro do nome
+                else {
+                    campoAtual += char;
                 }
             }
-            if (linhaAcumulada !== "") linhasTratadas.push(linhaAcumulada);
 
-            const resultado = [];
-            for (let i = 0; i < linhasTratadas.length; i++) {
-                let linha = linhasTratadas[i].trim();
-                if (!linha) continue;
-
-                // Divide de forma limpa sem estourar o limite do navegador
-                let partes = linha.split('","');
-                if (partes.length < 5) {
-                    partes = linha.split(';');
-                }
-
-                const colunasLimpas = partes.map(c => c.replace(/^"+|"+$/g, '').trim());
-                resultado.push(colunasLimpas);
+            // Armazena o último registro pendente caso o arquivo não termine com quebra de linha
+            if (campoAtual || linhaAtual.length > 0) {
+                linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                if (linhaAtual.length > 5) linhas.push(linhaAtual);
             }
-            return resultado;
+
+            return linhas;
         }
 
-        async function carregarDados() {
+        function carregarDados() {
             const status = document.getElementById('db-status');
-            try {
-                const [resOS, resProd] = await Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ]);
-                
-                dadosOS = parseCSV(await resOS.text());
-                listaProdutos = parseCSV(await resProd.text());
-                
-                status.innerText = "✅ GitHub Sincronizado!";
-                status.style.color = "green";
-                console.log("Produtos carregados:", listaProdutos.length);
-            } catch (e) {
-                status.innerText = "❌ Erro na sincronização.";
-                status.style.color = "red";
-                console.error("Erro ao carregar dados:", e);
-            }
+            Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ])
+                .then(([resOS, resProd]) => Promise.all([resOS.text(), resProd.text()]))
+                .then(([textOS, textProd]) => {
+                    dadosOS = parseCSV(textOS);
+                    listaProdutos = parseCSV(textProd);
+                    status.innerText = "✅ GitHub Sincronizado!";
+                    status.style.color = "green";
+                })
+                .catch(e => {
+                    status.innerText = "❌ Erro na sincronização.";
+                    status.style.color = "red";
+                });
         }
 
         function buscarDadosOS() {
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
-            
-            const linha = dadosOS.find(l => l && l.length > 5 && l.join(" ").includes(osVal));
+            const linha = dadosOS.find(l => l[21] === osVal);
             if (linha) {
-                const campoSerie = document.getElementById('campo-serie');
-                const campoRedutor = document.getElementById('campo-redutor');
-                const campoCliente = document.getElementById('campo-cliente');
-
-                if (campoSerie) { campoSerie.value = linha[23] || ""; campoSerie.setAttribute('value', campoSerie.value); }
-                if (campoRedutor) { campoRedutor.value = linha[24] || ""; campoRedutor.setAttribute('value', campoRedutor.value); }
-                if (campoCliente) { campoCliente.value = linha[26] || linha[5] || ""; campoCliente.setAttribute('value', campoCliente.value); }
+                const campos = { 'campo-serie': 23, 'campo-redutor': 24, 'campo-cliente': 26 };
+                for (let id in campos) {
+                    let input = document.getElementById(id);
+                    input.value = linha[campos[id]] || "";
+                    input.setAttribute('value', input.value);
+                }
             }
         }
 
@@ -202,15 +289,13 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="autocomplete-wrapper">
-                    <input type="text" class="input-nome-peca" placeholder="Busca global...">
+                    <input type="text" class="input-nome-peca" placeholder="Busca global de peças...">
                     <div class="suggestions"></div>
                 </td>
                 <td><input type="number" value="1" style="text-align:center;" oninput="this.setAttribute('value', this.value)"></td>
-                <td><input type="text" class="cod-gold" readonly style="text-align:center;"></td>
             `;
             const input = tr.querySelector('.input-nome-peca');
             const sugestoes = tr.querySelector('.suggestions');
-            const codInput = tr.querySelector('.cod-gold');
 
             input.addEventListener('input', function() {
                 const busca = this.value.toLowerCase();
@@ -218,30 +303,25 @@
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
                 const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
                 
+                // Filtra os produtos com base na busca por token (%)
                 const filtrados = listaProdutos.filter(p => {
-                    if (!p || p.length < 4) return false;
-                    const linhaTexto = p.join(" ").toLowerCase();
-                    return termos.every(t => linhaTexto.includes(t));
+                    const linhaToda = p.join(" ").toLowerCase();
+                    return termos.every(t => linhaToda.includes(t));
                 }).slice(0, 15);
 
                 if (filtrados.length > 0) {
                     sugestoes.style.display = 'block';
                     filtrados.forEach(p => {
-                        let codigo = p.find(c => c.match(/^(VG\d+|000\d+|[A-Z]{2,}\d+|\d{6,})/i)) || "S/C";
-                        let nome = p.find(c => c.length > 5 && !c.includes("Listagem") && !c.includes("ATIVO") && c !== codigo) || "Sem Descrição";
-
-                        // Remove eventuais quebras de linha estéticas restantes no nome do produto final
-                        nome = nome.replace(/\n|\r/g, " ");
-
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        div.innerText = `${codigo} | ${nome}`;
-                        
+                        // Como o parser corrigiu o Enter interno, p[22] permanece intacto com o nome correto
+                        div.innerText = p[22]; 
                         div.onclick = () => {
-                            input.value = nome; input.setAttribute('value', nome);
-                            codInput.value = codigo; codInput.setAttribute('value', codigo);
+                            input.value = p[22]; 
+                            input.setAttribute('value', p[22]);
                             sugestoes.style.display = 'none';
-                            if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
+                            const todasLinhas = document.querySelectorAll('#tabela-pecas tr');
+                            if (tr === todasLinhas[todasLinhas.length - 1]) criarLinhaPeca();
                         };
                         sugestoes.appendChild(div);
                     });
@@ -267,17 +347,64 @@
             }
         }
 
+        // Lógica de Assinatura Digital
+        function configurarAssinatura(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext("2d");
+            let desenhando = false;
+
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            function obterPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function iniciar(e) { desenhando = true; mover(e); }
+            function parar() { desenhando = false; ctx.beginPath(); }
+            function mover(e) {
+                if (!desenhando) return;
+                const pos = obterPos(e);
+                ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#000";
+                ctx.lineTo(pos.x, pos.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+                if(e.cancelable) e.preventDefault();
+            }
+
+            canvas.addEventListener("mousedown", iniciar);
+            canvas.addEventListener("mousemove", mover);
+            window.addEventListener("mouseup", parar);
+            canvas.addEventListener("touchstart", iniciar);
+            canvas.addEventListener("touchmove", mover);
+            canvas.addEventListener("touchend", parar);
+        }
+
+        function limparAssinatura(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
         function prepararHTML() {
-            document.querySelectorAll('input').forEach(i => i.setAttribute('value', i.value));
-            document.querySelectorAll('textarea').forEach(t => t.innerHTML = t.value);
+            document.querySelectorAll('input, textarea').forEach(i => {
+                if(i.type === "checkbox") {
+                    if(i.checked) i.setAttribute('checked', 'checked');
+                    else i.removeAttribute('checked');
+                } else {
+                    i.setAttribute('value', i.value);
+                    if(i.tagName === "TEXTAREA") i.innerHTML = i.value;
+                }
+            });
             return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
         }
 
         function salvarHTML() {
             const os = document.getElementById('input-os').value || "SN";
             const cliente = document.getElementById('campo-cliente').value || "RELATORIO";
-            const conteudo = prepararHTML();
-            const blob = new Blob([conteudo], { type: 'text/html' });
+            const blob = new Blob([prepararHTML()], { type: 'text/html' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `OS_${os}_${cliente}.html`;
@@ -285,35 +412,20 @@
         }
 
         function enviarWhatsApp() {
-            const conteudo = prepararHTML();
             const os = document.getElementById('input-os').value || "SN";
-            const cliente = document.getElementById('campo-cliente').value || "RELATORIO";
-            const blob = new Blob([conteudo], { type: 'text/html' });
-            const arquivo = new File([blob], `OS_${os}_${cliente}.html`, { type: 'text/html' });
-
-            if (navigator.share) {
-                navigator.share({ title: `Relatório OS ${os}`, files: [arquivo] }).catch(console.error);
-            } else {
-                alert("Navegador não suporta compartilhamento. Use 'Salvar Arquivo'.");
-            }
+            alert("Instrução: Clique em 'GERAR PDF', salve o arquivo e anexe no WhatsApp do cliente.");
         }
-
-        function calcularTotal() {
-            let t = 0; 
-            document.querySelectorAll('.hr-input').forEach(i => {
-                t += (parseFloat(i.value) || 0);
-                i.setAttribute('value', i.value);
-            });
-            document.getElementById('total-horas').innerText = t;
-        }
-
-        window.onclick = e => { if (!e.target.matches('.input-nome-peca')) document.querySelectorAll('.suggestions').forEach(s => s.style.display = 'none'); }
 
         window.onload = () => {
             document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
             carregarDados();
             criarLinhaPeca();
+            configurarAssinatura('pad-tecnico');
+            configurarAssinatura('pad-empresa');
+            configurarAssinatura('pad-inpasa');
         };
+
+        window.onclick = e => { if (!e.target.matches('.input-nome-peca')) document.querySelectorAll('.suggestions').forEach(s => s.style.display = 'none'); }
     </script>
 </body>
 </html>
