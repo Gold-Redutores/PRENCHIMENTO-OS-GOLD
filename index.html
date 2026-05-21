@@ -3,12 +3,13 @@
         const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/refs/heads/main/relalisatagemprodutosdetada.csv';
         let dadosOS = []; let listaProdutos = [];
 
-        // CORREÇÃO: Nova função parseCSV mais robusta que aceita linhas menores e trata aspas corretamente
+        // CORREÇÃO 1: Trata o separador correto (;) e limpa aspas extras que vêm no arquivo
         function parseCSV(text) {
             return text.split(/\r?\n/).map(linha => {
                 if (!linha.trim()) return [];
-                return linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-            }).filter(l => l.length > 0); // Remove apenas linhas vazias
+                // Quebra por ponto e vírgula (;) e limpa aspas repetidas do sistema
+                return linha.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            }).filter(l => l.length > 5);
         }
 
         async function carregarDados() {
@@ -19,7 +20,6 @@
                 listaProdutos = parseCSV(await resProd.text());
                 status.innerText = "✅ GitHub Sincronizado!";
                 status.style.color = "green";
-                console.log("Produtos carregados:", listaProdutos.length); // Linha para teste no F12
             } catch (e) {
                 status.innerText = "❌ Erro na sincronização.";
                 status.style.color = "red";
@@ -30,6 +30,7 @@
         function buscarDadosOS() {
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
+            // Se o arquivo de OS também usar ponto e vírgula, o índice 21 pode variar. Ajuste se necessário.
             const linha = dadosOS.find(l => l[21] === osVal);
             if (linha) {
                 const campos = { 'campo-serie': 23, 'campo-redutor': 24, 'campo-cliente': 26 };
@@ -63,11 +64,13 @@
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
                 const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
                 
-                // CORREÇÃO: Verifica se a linha possui as colunas necessárias antes de ler os índices 21 e 22
+                // CORREÇÃO 2: Mapeamento para os índices reais (16 e 17) do seu arquivo
                 const filtrados = listaProdutos.filter(p => {
-                    if (p.length <= 22) return false; // Ignora linhas que não possuem a coluna do nome/código
-                    const linhaToda = p.join(" ").toLowerCase();
-                    return termos.every(t => linhaToda.includes(t));
+                    if (p.length <= 17) return false; 
+                    
+                    // Buscamos apenas no Código (coluna 16) e Nome (coluna 17) para evitar falsos positivos com o cabeçalho
+                    const textoBusca = (p[16] + " " + p[17]).toLowerCase();
+                    return termos.every(t => textoBusca.includes(t));
                 }).slice(0, 15);
 
                 if (filtrados.length > 0) {
@@ -75,11 +78,15 @@
                     filtrados.forEach(p => {
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        // Posição 21: Código | Posição 22: Nome
-                        div.innerText = `${p[21]} | ${p[22]}`;
+                        
+                        // CORREÇÃO 3: Exibe Posição 16 (Código) e Posição 17 (Nome)
+                        const codigo = p[16];
+                        const nome = p[17];
+                        
+                        div.innerText = `${codigo} | ${nome}`;
                         div.onclick = () => {
-                            input.value = p[22]; input.setAttribute('value', p[22]);
-                            codInput.value = p[21]; codInput.setAttribute('value', p[21]);
+                            input.value = nome; input.setAttribute('value', nome);
+                            codInput.value = codigo; codInput.setAttribute('value', codigo);
                             sugestoes.style.display = 'none';
                             if (tr === document.querySelector('#tabela-pecas tr:last-child')) criarLinhaPeca();
                         };
