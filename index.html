@@ -133,8 +133,9 @@
     <table>
         <thead>
             <tr>
-                <th style="width: 85%;">Descrição da Peça (Busca Global: termo % termo)</th>
+                <th style="width: 65%;">Descrição da Peça (Busca Global: termo % termo)</th>
                 <th style="width: 15%;">Qtd</th>
+                <th style="width: 20%;">Cód Gold</th>
             </tr>
         </thead>
         <tbody id="tabela-pecas"></tbody>
@@ -194,12 +195,11 @@
         let dadosOS = []; let listaProdutos = [];
 
         /* ===================================================================================
-           CORREÇÃO CRÍTICA: NOVA LOGÍSTICA DE PARSE DE CSV À PROVA DE "ENTER" DENTRO DE ASPAS
+           EXPLICAÇÃO: PARSER INTELIGENTE À PROVA DE "ENTER" INTERNO NAS COLUNAS
            ===================================================================================
-           O antigo split(/\r?\n/) quebrava a linha fisicamente se houvesse um Enter no nome do 
-           produto. Esta nova função analisa caractere por caractere (State Machine). 
-           Se encontrar um "Enter" estando dentro de aspas, ela entende que é apenas parte do 
-           nome e não quebra o registro em dois, mantendo o índice p[22] estável e correto.
+           Se houver um "Enter" dentro de um campo envolvido por aspas (Ex: nome do produto),
+           esta lógica não corta a linha. Ela adiciona o caractere de quebra de linha como parte
+           do texto do nome e só encerra a linha se encontrar um Enter FORA de aspas.
         */
         function parseCSV(text) {
             let linhas = [];
@@ -207,46 +207,37 @@
             let campoAtual = '';
             let dentroDeAspas = false;
 
-            // Laço caractere por caractere para avaliar o contexto real do arquivo CSV
             for (let i = 0; i < text.length; i++) {
                 let char = text[i];
                 let proximoChar = text[i + 1];
 
-                // Controle e tratamento de aspas
                 if (char === '"') {
-                    // Se encontrar duas aspas seguidas (""), o sistema escapa e põe apenas uma aspa comum
                     if (dentroDeAspas && proximoChar === '"') {
-                        campoAtual += '"';
-                        i++; // Pula a aspa duplicada de proteção
+                        campoAtual += '"'; // Converte "" em uma única aspa literal
+                        i++;
                     } else {
-                        // Inverte o estado: se estava fora, entra nas aspas. Se estava dentro, sai.
-                        dentroDeAspas = !dentroDeAspas;
+                        dentroDeAspas = !dentroDeAspas; // Chaveia o estado (dentro/fora de aspas)
                     }
                 } 
-                // Se encontrar uma vírgula (ou ponto e vírgula) FORA das aspas, fecha o campo atual
                 else if (char === ',' && !dentroDeAspas) {
                     linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
                     campoAtual = '';
                 } 
-                // Se encontrar um ENTER (\n ou \r) FORA das aspas, fecha a linha de dados com segurança
                 else if ((char === '\n' || char === '\r') && !dentroDeAspas) {
-                    if (char === '\r' && proximoChar === '\n') i++; // Ignora o \n se for um padrão do Windows \r\n
+                    if (char === '\r' && proximoChar === '\n') i++;
                     linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
                     
-                    // Validação para garantir que a linha possui dados úteis antes de salvar
                     if (linhaAtual.length > 5) {
                         linhas.push(linhaAtual);
                     }
                     linhaAtual = [];
                     campoAtual = '';
                 } 
-                // Se for qualquer outro caractere (incluindo o ENTER dentro de aspas), ele vira texto puro do nome
                 else {
-                    campoAtual += char;
+                    campoAtual += char; // Captura qualquer caractere (inclusive Enters dentro das aspas)
                 }
             }
 
-            // Armazena o último registro pendente caso o arquivo não termine com quebra de linha
             if (campoAtual || linhaAtual.length > 0) {
                 linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
                 if (linhaAtual.length > 5) linhas.push(linhaAtual);
@@ -285,6 +276,13 @@
             }
         }
 
+        /* ===================================================================================
+           EXPLICAÇÃO: CRIAÇÃO DA LINHA DE PEÇAS REINCORPORANDO A COLUNA DO CÓDIGO GOLD
+           ===================================================================================
+           Esta função renderiza o campo de Descrição da Peça, Quantidade e o input readonly 
+           do "Cód Gold". Quando o usuário clica em uma sugestão, os dados não desalinhados são
+           corretamente atribuídos.
+        */
         function criarLinhaPeca() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -293,9 +291,11 @@
                     <div class="suggestions"></div>
                 </td>
                 <td><input type="number" value="1" style="text-align:center;" oninput="this.setAttribute('value', this.value)"></td>
+                <td><input type="text" class="input-cod-gold" readonly style="text-align:center; background: #eee;"></td>
             `;
             const input = tr.querySelector('.input-nome-peca');
             const sugestoes = tr.querySelector('.suggestions');
+            const codInput = tr.querySelector('.input-cod-gold'); // Elemento de input do código restaurado
 
             input.addEventListener('input', function() {
                 const busca = this.value.toLowerCase();
@@ -303,7 +303,6 @@
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
                 const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
                 
-                // Filtra os produtos com base na busca por token (%)
                 const filtrados = listaProdutos.filter(p => {
                     const linhaToda = p.join(" ").toLowerCase();
                     return termos.every(t => linhaToda.includes(t));
@@ -314,11 +313,21 @@
                     filtrados.forEach(p => {
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        // Como o parser corrigiu o Enter interno, p[22] permanece intacto com o nome correto
-                        div.innerText = p[22]; 
+                        
+                        // Garante o alinhamento absoluto dos índices após a proteção contra o "Enter"
+                        const codigo = p[21] || '';
+                        const nome = p[22] || '';
+                        
+                        div.innerText = codigo + " | " + nome; 
                         div.onclick = () => {
-                            input.value = p[22]; 
-                            input.setAttribute('value', p[22]);
+                            // Insere o nome limpo no input de busca
+                            input.value = nome; 
+                            input.setAttribute('value', nome);
+                            
+                            // Insere o código correspondente no campo Cód Gold da linha atual
+                            codInput.value = codigo;
+                            codInput.setAttribute('value', codigo);
+                            
                             sugestoes.style.display = 'none';
                             const todasLinhas = document.querySelectorAll('#tabela-pecas tr');
                             if (tr === todasLinhas[todasLinhas.length - 1]) criarLinhaPeca();
@@ -401,6 +410,13 @@
             return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
         }
 
+        /* ===================================================================================
+           EXPLICAÇÃO: PERSISTÊNCIA DAS COLUNAS DINÂMICAS AO SALVAR
+           ===================================================================================
+           Garante que todos os novos valores de inputs criados via javascript (como a descrição
+           e o Cód Gold associado) sejam incorporados ao atributo 'value' das tags antes de 
+           escrever o arquivo .html final em disco.
+        */
         function salvarHTML() {
             const os = document.getElementById('input-os').value || "SN";
             const cliente = document.getElementById('campo-cliente').value || "RELATORIO";
