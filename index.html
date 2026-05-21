@@ -3,34 +3,49 @@
         const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/refs/heads/main/relalisatagemprodutosdetada.csv';
         let dadosOS = []; let listaProdutos = [];
 
-        // CORREÇÃO 1: Trata o separador correto (;) e limpa aspas extras que vêm no arquivo
+        // FUNÇÃO CORRIGIDA: Processa a estrutura exata do seu arquivo de produtos
         function parseCSV(text) {
+            if (!text) return [];
+            
             return text.split(/\r?\n/).map(linha => {
-                if (!linha.trim()) return [];
-                // Quebra por ponto e vírgula (;) e limpa aspas repetidas do sistema
-                return linha.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            }).filter(l => l.length > 5);
+                let l = linha.trim();
+                if (!l) return [];
+
+                // Remove aspas no extremo início e fim da linha se sobrarem do sistema
+                if (l.startsWith('"') && l.endsWith('"')) {
+                    l = l.substring(1, l.length - 1);
+                }
+
+                // Divide por ponto e vírgula de forma limpa
+                return l.split(';').map(coluna => {
+                    // Limpa aspas duplas repetidas (""Texto"" -> Texto)
+                    return coluna.replace(/^"+|"+$/g, '').replace(/""/g, '"').trim();
+                });
+            }).filter(l => l.length > 15); // Garante que só entram linhas com dados completos
         }
 
         async function carregarDados() {
             const status = document.getElementById('db-status');
             try {
                 const [resOS, resProd] = await Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ]);
+                
                 dadosOS = parseCSV(await resOS.text());
                 listaProdutos = parseCSV(await resProd.text());
+                
                 status.innerText = "✅ GitHub Sincronizado!";
                 status.style.color = "green";
             } catch (e) {
                 status.innerText = "❌ Erro na sincronização.";
                 status.style.color = "red";
-                console.error(e);
+                console.error("Erro ao carregar arquivos:", e);
             }
         }
 
         function buscarDadosOS() {
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
-            // Se o arquivo de OS também usar ponto e vírgula, o índice 21 pode variar. Ajuste se necessário.
+            
+            // Busca a OS. Nota: se o arquivo de OS também usar ponto e vírgula, valide o índice correspondente
             const linha = dadosOS.find(l => l[21] === osVal);
             if (linha) {
                 const campos = { 'campo-serie': 23, 'campo-redutor': 24, 'campo-cliente': 26 };
@@ -64,12 +79,15 @@
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
                 const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
                 
-                // CORREÇÃO 2: Mapeamento para os índices reais (16 e 17) do seu arquivo
+                // Filtra associando estritamente os índices reais 16 (Código) e 17 (Nome)
                 const filtrados = listaProdutos.filter(p => {
                     if (p.length <= 17) return false; 
                     
-                    // Buscamos apenas no Código (coluna 16) e Nome (coluna 17) para evitar falsos positivos com o cabeçalho
-                    const textoBusca = (p[16] + " " + p[17]).toLowerCase();
+                    const codigo = p[16] || "";
+                    const nome = p[17] || "";
+                    
+                    // Une apenas o código e o nome para a busca (ignora o cabeçalho repetido da coluna 0)
+                    const textoBusca = (codigo + " " + nome).toLowerCase();
                     return termos.every(t => textoBusca.includes(t));
                 }).slice(0, 15);
 
@@ -79,7 +97,6 @@
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
                         
-                        // CORREÇÃO 3: Exibe Posição 16 (Código) e Posição 17 (Nome)
                         const codigo = p[16];
                         const nome = p[17];
                         
