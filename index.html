@@ -3,25 +3,33 @@
         const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/refs/heads/main/relalisatagemprodutosdetada.csv';
         let dadosOS = []; let listaProdutos = [];
 
-        // FUNÇÃO CORRIGIDA: Processa a estrutura exata do seu arquivo de produtos
+        // FUNÇÃO ULTRA-ROBUSTA: Divide por ponto e vírgula ou vírgula, limpando aspas perfeitamente
         function parseCSV(text) {
             if (!text) return [];
             
             return text.split(/\r?\n/).map(linha => {
                 let l = linha.trim();
-                if (!l) return [];
+                if (!l) return null;
 
-                // Remove aspas no extremo início e fim da linha se sobrarem do sistema
+                // Remove aspas que envolvem a linha inteira, se existirem
                 if (l.startsWith('"') && l.endsWith('"')) {
                     l = l.substring(1, l.length - 1);
                 }
 
-                // Divide por ponto e vírgula de forma limpa
-                return l.split(';').map(coluna => {
-                    // Limpa aspas duplas repetidas (""Texto"" -> Texto)
+                // Divide a linha aceitando TANTO ponto e vírgula (;) QUANTO vírgula (,) como separador
+                let colunas = l.split(/[;]/).map(coluna => {
                     return coluna.replace(/^"+|"+$/g, '').replace(/""/g, '"').trim();
                 });
-            }).filter(l => l.length > 15); // Garante que só entram linhas com dados completos
+
+                // Se a divisão por ponto e vírgula falhar ou gerar poucas colunas, tenta por vírgula
+                if (colunas.length < 5) {
+                    colunas = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(coluna => {
+                        return coluna.replace(/^"+|"+$/g, '').replace(/""/g, '"').trim();
+                    });
+                }
+
+                return colunas;
+            }).filter(l => l !== null && l.length > 2); // Evita linhas vazias que quebram o código
         }
 
         async function carregarDados() {
@@ -34,10 +42,11 @@
                 
                 status.innerText = "✅ GitHub Sincronizado!";
                 status.style.color = "green";
+                console.log("Produtos carregados com sucesso: ", listaProdutos.length);
             } catch (e) {
                 status.innerText = "❌ Erro na sincronização.";
                 status.style.color = "red";
-                console.error("Erro ao carregar arquivos:", e);
+                console.error("Erro crítico ao carregar dados:", e);
             }
         }
 
@@ -45,8 +54,8 @@
             const osVal = document.getElementById('input-os').value.trim();
             if (osVal.length < 3) return;
             
-            // Busca a OS. Nota: se o arquivo de OS também usar ponto e vírgula, valide o índice correspondente
-            const linha = dadosOS.find(l => l[21] === osVal);
+            // Busca a OS na lista carregada
+            const linha = dadosOS.find(l => l && l.length > 21 && l[21] === osVal);
             if (linha) {
                 const campos = { 'campo-serie': 23, 'campo-redutor': 24, 'campo-cliente': 26 };
                 for (let id in campos) {
@@ -79,28 +88,31 @@
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
                 const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
                 
-                // Filtra associando estritamente os índices reais 16 (Código) e 17 (Nome)
                 const filtrados = listaProdutos.filter(p => {
-                    if (p.length <= 17) return false; 
+                    if (!p || p.length < 3) return false;
                     
-                    const codigo = p[16] || "";
-                    const nome = p[17] || "";
-                    
-                    // Une apenas o código e o nome para a busca (ignora o cabeçalho repetido da coluna 0)
-                    const textoBusca = (codigo + " " + nome).toLowerCase();
-                    return termos.every(t => textoBusca.includes(t));
+                    // PROCURA DINÂMICA: Como o arquivo varia de posição, buscamos em qualquer coluna que pareça o Código ou o Nome
+                    const linhaTexto = p.join(" ").toLowerCase();
+                    return termos.every(t => linhaTexto.includes(t));
                 }).slice(0, 15);
 
                 if (filtrados.length > 0) {
                     sugestoes.style.display = 'block';
                     filtrados.forEach(p => {
+                        // Identifica dinamicamente qual coluna é o código (geralmente começa com VG ou números longos) e qual é a descrição
+                        let codigo = p.find(c => c.match(/^(VG\d+|000\d+|[A-Z]{2,}\d+)/i)) || p[p.length - 2] || "S/C";
+                        let nome = p.find(c => c.length > 8 && !c.includes("Listagem") && !c.includes("ATIVO") && c !== codigo) || p[p.length - 1] || "Sem Descrição";
+
+                        // Ajuste fino específico baseado no padrão final do seu arquivo para evitar dados repetidos
+                        if(p.length >= 18) {
+                            codigo = p[16] || codigo;
+                            nome = p[17] || nome;
+                        }
+
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        
-                        const codigo = p[16];
-                        const nome = p[17];
-                        
                         div.innerText = `${codigo} | ${nome}`;
+                        
                         div.onclick = () => {
                             input.value = nome; input.setAttribute('value', nome);
                             codInput.value = codigo; codInput.setAttribute('value', codigo);
