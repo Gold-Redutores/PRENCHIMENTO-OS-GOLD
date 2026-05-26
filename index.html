@@ -146,23 +146,92 @@
 
        
  
-    <div class="section">RESUMO DE MÃO DE OBRA</div>
+     <div class="section">RESUMO DE MÃO DE OBRA</div>
     <table>
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th style="width: 80px;">Qtd (hs)</th>
+                <th style="width: 150px;">Cód Gold</th>
+            </tr>
+        </thead>
         <tbody>
-            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
-            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
-            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
-            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
-            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
+            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" value="8" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
+            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" value="3" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
+            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" value="2" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
+            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" value="20" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
+            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" value="1" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
+            <tr><td>PINTURA FINAL</td><td><input type="number" class="hr-input" value="4" oninput="calcularTotal()"></td><td>SVG1174</td></tr>
+            <tr><td>SACAR ACOPLAMENTOS</td><td><input type="number" class="hr-input" value="2" oninput="calcularTotal()"></td><td>SVG1262</td></tr>
         </tbody>
         <tfoot>
-            <tr style="background:#f2f2f2; font-weight:bold;">
+            <tr class="total-row">
                 <td style="text-align: right; padding-right: 15px;">TOTAL DE HORAS TÉCNICAS:</td>
-                <td id="total-horas" style="text-align: center; color: #ed1c24; font-size: 14px;">0</td>
+                <td id="total-horas" style="text-align: center;">40</td>
                 <td></td>
             </tr>
         </tfoot>
     </table>
+
+    <div class="no-print">
+        <button onclick="window.print()">GERAR RELATÓRIO / PDF</button>
+    </div>
+
+    <script>
+        // --- LÓGICA DAS PEÇAS (LINHAS AUTOMÁTICAS) ---
+        const corpoTabelaPecas = document.getElementById('tabela-pecas');
+
+        function criarLinhaPeca() {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="input-peca" placeholder="Digite a peça..."></td>
+                <td><input type="number" placeholder="0"></td>
+                <td><input type="text" placeholder="SVG..."></td>
+            `;
+            // Quando digitar na descrição, verifica se precisa criar nova linha
+            tr.querySelector('.input-peca').addEventListener('input', gerenciarLinhas);
+            corpoTabelaPecas.appendChild(tr);
+        }
+
+        function gerenciarLinhas() {
+            const inputs = document.querySelectorAll('.input-peca');
+            const ultimoInput = inputs[inputs.length - 1];
+            // Se o último input estiver preenchido, cria mais uma linha
+            if (ultimoInput.value.trim() !== "") {
+                criarLinhaPeca();
+            }
+        }
+
+        // Inicializa com 3 linhas
+        for(let i=0; i<3; i++) { criarLinhaPeca(); }
+
+        // --- LÓGICA DE FOTOS ---
+        function previewFotos(event) {
+            const container = document.getElementById('container-fotos');
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'foto-item';
+                    div.innerHTML = `<img src="${e.target.result}" class="foto-preview">
+                                     <textarea class="obs-foto" rows="2" placeholder="Observação da foto..."></textarea>`;
+                    container.appendChild(div);
+                }
+                reader.readAsDataURL(files[i]);
+            }
+        }
+
+        // --- LÓGICA DE CÁLCULO DE HORAS ---
+        function calcularTotal() {
+            let inputs = document.getElementsByClassName('hr-input');
+            let total = 0;
+            for (let i = 0; i < inputs.length; i++) {
+                let valor = parseFloat(inputs[i].value);
+                if (!isNaN(valor)) total += valor;
+            }
+            document.getElementById('total-horas').innerText = total;
+        }
 
 
     <div class="section">CONCLUSÕES</div>
