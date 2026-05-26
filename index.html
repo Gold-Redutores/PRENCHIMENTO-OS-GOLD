@@ -152,13 +152,13 @@
             </tr>
         </thead>
         <tbody>
-            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" value="8" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
-            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" value="3" oninput="cheerful_loader()"" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
-            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" value="2" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
-            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" value="20" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
-            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" value="1" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
-            <tr><td>PINTURA FINAL</td><td><input type="number" class="hr-input" value="4" oninput="calcularTotal()"></td><td>SVG1174</td></tr>
-            <tr><td>SACAR ACOPLAMENTOS</td><td><input type="number" class="hr-input" value="2" oninput="calcularTotal()"></td><td>SVG1262</td></tr>
+            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" placeholder="1" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
+            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" placeholder="1" oninput="cheerful_loader()"" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
+            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" placeholder="1" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
+            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" placeholder="1" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
+            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" placeholder="1" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
+            <tr><td>PINTURA FINAL</td><td><input type="number" class="hr-input" placeholder="1" oninput="calcularTotal()"></td><td>SVG1174</td></tr>
+            <tr><td>SACAR ACOPLAMENTOS</td><td><input type="number" class="hr-input" placeholder="1" oninput="calcularTotal()"></td><td>SVG1262</td></tr>
         </tbody>
         <tfoot>
             <tr class="total-row">
@@ -436,13 +436,13 @@
             carregarDados();
             calcularTotal();
             
-            // Inicializa as 3 linhas de peças vazias padrão
-            for(let i=0; i<3; i++) { criarLinhaPeca(); }
+            // Inicializa as 2 linhas de peças vazias padrão
+            for(let i=0; i<2; i++) { criarLinhaPeca(); }
             
             // Configura os painéis de assinatura digital
             configurarAssinatura('pad-tecnico');
             configurarAssinatura('pad-empresa');
-            configurarAssinatura('pad-inpasa');
+            
         };
 
         window.onclick = e => { 
