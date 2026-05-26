@@ -145,7 +145,8 @@
     </table>
 
      /* CALCULO DE MAO DE OBRA */
-     <div class="section">RESUMO DE MÃO DE OBRA</div>
+ 
+    <div class="section">RESUMO DE MÃO DE OBRA</div>
     <table>
         <tbody>
             <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
@@ -164,7 +165,6 @@
     </table>
 
 
-    
     <div class="section">CONCLUSÕES</div>
     <textarea id="conclusoes" rows="5" style="width: 100%; border: 1px solid #333; margin-top: 5px; padding: 8px;" placeholder="Parecer técnico final..."></textarea>
 
@@ -189,6 +189,18 @@
                         </div>
                         <button class="no-print" onclick="limparAssinatura('pad-empresa')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
                         <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">ASSINATURA DO RESPONSÁVEL DA EMPRESA</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #333; padding: 0; background: #fafafa;">
+                    <div style="text-align: center; padding: 10px;">
+                        <input type="text" class="name-input" placeholder="NOME DO RESPONSÁVEL INPASA (LEGÍVEL)" style="width: 50%;">
+                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="pad-inpasa" class="signature-pad" style="width: 60%;"></canvas>
+                        </div>
+                        <button class="no-print" onclick="limparAssinatura('pad-inpasa')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
+                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">RESPONSÁVEL MANUTENÇÃO - INPASA</div>
                     </div>
                 </td>
             </tr>
