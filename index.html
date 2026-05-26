@@ -144,6 +144,27 @@
         <tbody id="tabela-pecas"></tbody>
     </table>
 
+     /* CALCULO DE MAO DE OBRA */
+ <div class="section">RESUMO DE MÃO DE OBRA</div>
+    <table>
+        <tbody>
+            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
+            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
+            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
+            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
+            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
+        </tbody>
+        <tfoot>
+            <tr style="background:#f2f2f2; font-weight:bold;">
+                <td style="text-align: right; padding-right: 15px;">TOTAL DE HORAS TÉCNICAS:</td>
+                <td id="total-horas" style="text-align: center; color: #ed1c24; font-size: 14px;">0</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+
+    
     <div class="section">CONCLUSÕES</div>
     <textarea id="conclusoes" rows="5" style="width: 100%; border: 1px solid #333; margin-top: 5px; padding: 8px;" placeholder="Parecer técnico final..."></textarea>
 
@@ -390,6 +411,22 @@
         };
 
         window.onclick = e => { if (!e.target.matches('.input-nome-peca')) document.querySelectorAll('.suggestions').forEach(s => s.style.display = 'none'); }
+   
+    // --- LÓGICA DE CÁLCULO DE HORAS ---
+        function calcularTotal() {
+            let inputs = document.getElementsByClassName('hr-input');
+            let total = 0;
+            for (let i = 0; i < inputs.length; i++) {
+                let valor = parseFloat(inputs[i].value);
+                if (!isNaN(valor)) total += valor;
+            }
+            document.getElementById('total-horas').innerText = total;
+        }
+
+        window.onload = calcularTotal
+    
+    
+    
     </script>
 </body>
 </html>
