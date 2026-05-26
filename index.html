@@ -5,15 +5,56 @@
     <title>Relatório de Manutenção - Gold Redutores</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; color: #003366; background-color: #fff; }
-        .header { text-align: center; border-bottom: 3px solid #ed1c24; padding-bottom: 10px; margin-bottom: 10px; }
-        .header h2 { margin: 0; font-size: 24px; text-transform: uppercase; }
+        
+        /* ============================================================
+           MODIFICAÇÃO: NOVO SISTEMA DE CABEÇALHO PARA ALINHAMENTO 
+           ============================================================ */
+        .header-container {
+            display: flex;
+            align-items: center; 
+            justify-content: space-between;
+            border-bottom: 3px solid #ed1c24;
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+
+        .brand-logo {
+            max-height: 80px; /* Ajuste o tamanho do logo aqui */
+            width: auto;
+        }
+
+        .title-area {
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .title-area h2 {
+            margin: 0;
+            font-size: 22px;
+            text-transform: uppercase;
+            color: #003366;
+        }
+
+        .subtitle {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: #666;
+            font-weight: normal;
+        }
+
+        /* Espaçador para garantir que o título fique no centro real */
+        .header-spacer {
+            width: 120px; 
+        }
+        /* ============================================================ */
+
         .section { background: #d9d9d9; padding: 6px; margin-top: 15px; font-weight: bold; text-align: center; border: 1px solid #333; text-transform: uppercase; font-size: 13px; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 0; }
         table, th, td { border: 1px solid #333; }
         td { padding: 6px; font-size: 11px; vertical-align: middle; }
         th { background: #eee; padding: 8px; font-size: 11px; text-align: center; color: #003366; }
         input[type="text"], input[type="number"], textarea { width: 98%; border: none; outline: none; background: transparent; font-size: 11px; color: #000; }
-        
+
         .checkbox-container { display: flex; align-items: center; gap: 5px; cursor: pointer; }
         .checkbox-container input { width: auto; margin: 0; }
 
@@ -27,115 +68,377 @@
         .suggestion-item:hover { background-color: #ed1c24; color: white; }
 
         .foto-upload-container { text-align: center; padding: 15px; background: #f4f4f4; border: 2px dashed #ccc; margin: 10px 0; border-radius: 5px; }
-        .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 05px; }
         .foto-item { border: 1px solid #333; padding: 8px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; display: flex; flex-direction: column; }
         .foto-preview { max-width: 100%; height: auto; max-height: 300px; object-fit: contain; margin-bottom: 8px; }
 
         .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; z-index: 10; }
 
-        /* Estilos de Assinatura */
         .signature-pad { border: 1px solid #eee; background: #fff; width: 95%; height: 80px; cursor: crosshair; touch-action: none; }
         .name-input { border-bottom: 1px dashed #ccc !important; width: 90%; margin-bottom: 5px; text-align: center; font-weight: bold; text-transform: uppercase; }
         
         .btn-group { display: flex; gap: 15px; justify-content: center; margin-top: 40px; padding-bottom: 50px; }
         .btn-action { padding: 12px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; }
-        .btn-save { background-color: #003366; }
-        .btn-print { background-color: #ed1c24; }
 
         @media print { 
             .no-print { display: none !important; } 
             body { padding: 0; margin: 0; } 
             .signature-pad { border: none; }
+            .header-container { border-bottom: 3px solid #ed1c24 !important; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2>Relatório de Manutenção</h2>
-        <div style="color: #ed1c24; font-weight: bold; font-size: 14px;">GOLD REDUTORES</div>
-    </div>
-
-    <div class="section">Informações do Atendimento</div>
-    <table>
-        <tr>
-            <th>Cliente:</th>
-            <td><input type="text" placeholder="Nome do Cliente"></td>
-            <th>Data:</th>
-            <td><input type="text" placeholder="DD/MM/AAAA"></td>
-        </tr>
-        <tr>
-            <th>Equipamento:</th>
-            <td><input type="text" placeholder="Modelo / Tag"></td>
-            <th>O.S. Número:</th>
-            <td><input type="number" placeholder="0000"></td>
-        </tr>
-    </table>
-
-    <div class="section">Serviços Executados</div>
-    <table>
-        <tr>
-            <th>Descrição do Trabalho Realizado:</th>
-        </tr>
-        <tr>
-            <td>
-                <textarea rows="6" placeholder="Descreva aqui os detalhes da manutenção..."></textarea>
-            </td>
-        </tr>
-    </table>
-
-    <div class="section">Evidências Fotográficas</div>
-    <div class="foto-upload-container no-print">
-        <p>Clique abaixo para adicionar fotos ao relatório</p>
-        <input type="file" id="foto-input" accept="image/*" multiple>
-    </div>
-    <div class="foto-container" id="fotos-preview-area">
+    <header class="header-container">
+        <div class="logo-box">
+            <img class="brand-logo" src="GOLD REDUTORES.JPG" alt="Gold Redutores">
         </div>
 
-    <div class="section">Encerramento e Assinaturas</div>
-    <table style="margin-top: 10px;">
+        <div class="title-area">
+            <h2>RELATÓRIO DE MANUTENÇÃO PREVENTIVA</h2>
+        </div>
+
+        </header>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <label style="font-weight: bold; color: #003366;">Nº ORDEM DE SERVIÇO: </label>
+        <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px; color: #ed1c24;" placeholder="Ex: 5449" oninput="buscarDadosOS()">
+    </div>
+
+    <div class="no-print" style="text-align: center; margin-bottom: 10px;">
+        <span id="db-status" style="font-size: 12px; font-weight: bold; color: orange;">⏳ Sincronizando com GitHub...</span>
+    </div>
+
+    <div class="section">DADOS DO CLIENTE E EQUIPAMENTO</div>
+    <table>
         <tr>
-            <td style="text-align: center; width: 50%;">
-                <input type="text" class="name-input" placeholder="NOME DO TÉCNICO"><br>
-                <div style="height: 80px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; color: #999;">
-                    Área para Assinatura Digital
-                </div>
-                <span style="font-size: 9px; color: #666;">Assinatura do Técnico</span>
-            </td>
-            <td style="text-align: center; width: 50%;">
-                <input type="text" class="name-input" placeholder="NOME DO CLIENTE"><br>
-                <div style="height: 80px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; color: #999;">
-                    Área para Assinatura Digital
-                </div>
-                <span style="font-size: 9px; color: #666;">Assinatura do Responsável</span>
-            </td>
+            <td colspan="2"><label><strong>Cliente:</strong></label> <input type="text" id="campo-cliente"></td>
+            <td colspan="2"><label><strong>Data:</strong></label> <span id="data-atual" style="font-weight: bold;"></span></td>
+        </tr>
+        <tr>
+            <td><label><strong>Equipamento:</strong></label> <input type="text" id="campo-redutor"></td>
+            <td><label><strong>Redução:</strong></label> <input type="text" id="campo-reducao" placeholder="Ex: 1:40"></td>
+            <td colspan="2"><label><strong>Série:</strong></label> <input type="text" id="campo-serie"></td>
         </tr>
     </table>
 
+    
+
+    <div class="section">ANÁLISES FOTOGRÁFICAS</div>
+    <div class="foto-upload-container no-print">
+        <label style="font-weight: bold; display: block; margin-bottom: 5px;">📸 ADICIONAR FOTOS</label>
+        <input type="file" accept="image/*" multiple onchange="previewFotos(event)">
+    </div>
+    <div id="container-fotos" class="foto-container"></div>
+
+    <div class="section">PEÇAS NECESSÁRIAS PARA EXECUÇÃO</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 65%;">Descrição da Peça (Busca Global: Utilize o % termo)</th>
+                <th style="width: 15%;">Qtd</th>
+                <th style="width: 20%;">Cód Gold</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-pecas"></tbody>
+    </table>
+
+     /* CALCULO DE MAO DE OBRA */
+ 
+    <div class="section">RESUMO DE MÃO DE OBRA</div>
+    <table>
+        <tbody>
+            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
+            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
+            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
+            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
+            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
+        </tbody>
+        <tfoot>
+            <tr style="background:#f2f2f2; font-weight:bold;">
+                <td style="text-align: right; padding-right: 15px;">TOTAL DE HORAS TÉCNICAS:</td>
+                <td id="total-horas" style="text-align: center; color: #ed1c24; font-size: 14px;">0</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+
+    <div class="section">CONCLUSÕES</div>
+    <textarea id="conclusoes" rows="5" style="width: 100%; border: 1px solid #333; margin-top: 5px; padding: 8px;" placeholder="Parecer técnico final..."></textarea>
+
+    <div style="margin-top: 30px;">
+        <table style="border: none;">
+            <tr>
+                <td style="border: 1px solid #333; padding: 0; background: #fafafa;">
+                    <div style="text-align: center; padding: 10px;">
+                        <input type="text" class="name-input" placeholder="NOME DO TÉCNICO (LEGÍVEL)">
+                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="pad-tecnico" class="signature-pad"></canvas>
+                        </div>
+                        <button class="no-print" onclick="limparAssinatura('pad-tecnico')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
+                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">ASSINATURA DO TÉCNICO RESPONSÁVEL</div>
+                    </div>
+                </td>
+                <td style="border: 1px solid #333; padding: 0; background: #fafafa;">
+                    <div style="text-align: center; padding: 10px;">
+                        <input type="text" class="name-input" placeholder="NOME DO RESPONSÁVEL (LEGÍVEL)">
+                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="pad-empresa" class="signature-pad"></canvas>
+                        </div>
+                        <button class="no-print" onclick="limparAssinatura('pad-empresa')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
+                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">ASSINATURA DO RESPONSÁVEL DA EMPRESA</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border: 1px solid #333; padding: 0; background: #fafafa;">
+                    <div style="text-align: center; padding: 10px;">
+                        <input type="text" class="name-input" placeholder="NOME DO RESPONSÁVEL INPASA (LEGÍVEL)" style="width: 50%;">
+                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="pad-inpasa" class="signature-pad" style="width: 60%;"></canvas>
+                        </div>
+                        <button class="no-print" onclick="limparAssinatura('pad-inpasa')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
+                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">RESPONSÁVEL MANUTENÇÃO - INPASA</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
     <div class="btn-group no-print">
-        <button class="btn-action btn-save" onclick="alert('Relatório Salvo!')">Salvar Dados</button>
-        <button class="btn-action btn-print" onclick="window.print()">Imprimir / Gerar PDF</button>
+        <button class="btn-action" style="background: #003366;" onclick="salvarHTML()">SALVAR ARQUIVO (.HTML)</button>
+        <button class="btn-action" style="background: #ed1c24;" onclick="window.print()">GERAR PDF / IMPRIMIR</button>
     </div>
 
     <script>
-        document.getElementById('foto-input').addEventListener('change', function(e) {
-            const area = document.getElementById('fotos-preview-area');
-            for (let file of e.target.files) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const item = document.createElement('div');
-                    item.className = 'foto-item';
-                    item.innerHTML = `
-                        <button class="btn-remove no-print" onclick="this.parentElement.remove()">X</button>
-                        <img src="${event.target.result}" class="foto-preview">
-                        <input type="text" placeholder="Legenda da foto..." style="text-align:center; border-bottom:1px solid #ccc !important;">
-                    `;
-                    area.appendChild(item);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
+        const URL_CSV_OS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/dmsoser00000045.csv';
+        const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/refs/heads/main/relalisatagemprodutosdetada.csv';
+        let dadosOS = []; let listaProdutos = [];
 
+        function parseCSV(text) {
+            let linhas = [];
+            let linhaAtual = [];
+            let campoAtual = '';
+            let dentroDeAspas = false;
+
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                let proximoChar = text[i + 1];
+
+                if (char === '"') {
+                    if (dentroDeAspas && proximoChar === '"') {
+                        campoAtual += '"'; i++;
+                    } else {
+                        dentroDeAspas = !dentroDeAspas;
+                    }
+                } 
+                else if (char === ',' && !dentroDeAspas) {
+                    linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                    campoAtual = '';
+                } 
+                else if ((char === '\n' || char === '\r') && !dentroDeAspas) {
+                    if (char === '\r' && proximoChar === '\n') i++;
+                    linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                    if (linhaAtual.length > 5) linhas.push(linhaAtual);
+                    linhaAtual = []; campoAtual = '';
+                } 
+                else {
+                    campoAtual += char;
+                }
+            }
+            if (campoAtual || linhaAtual.length > 0) {
+                linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                if (linhaAtual.length > 5) linhas.push(linhaAtual);
+            }
+            return linhas;
+        }
+
+        function carregarDados() {
+            const status = document.getElementById('db-status');
+            Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ])
+                .then(([resOS, resProd]) => Promise.all([resOS.text(), resProd.text()]))
+                .then(([textOS, textProd]) => {
+                    dadosOS = parseCSV(textOS);
+                    listaProdutos = parseCSV(textProd);
+                    status.innerText = "✅ GitHub Sincronizado!";
+                    status.style.color = "green";
+                })
+                .catch(e => {
+                    status.innerText = "❌ Erro na sincronização.";
+                    status.style.color = "red";
+                });
+        }
+
+        function buscarDadosOS() {
+            const osVal = document.getElementById('input-os').value.trim();
+            if (osVal.length < 3) return;
+            const linha = dadosOS.find(l => l[21] === osVal);
+            if (linha) {
+                const campos = { 'campo-serie': 23, 'campo-redutor': 24, 'campo-cliente': 26 };
+                for (let id in campos) {
+                    let input = document.getElementById(id);
+                    input.value = linha[campos[id]] || "";
+                    input.setAttribute('value', input.value);
+                }
+            }
+        }
+
+        function criarLinhaPeca() {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="autocomplete-wrapper">
+                    <input type="text" class="input-nome-peca" placeholder="Busca global de peças...">
+                    <div class="suggestions"></div>
+                </td>
+                <td><input type="number" value="1" style="text-align:center;" oninput="this.setAttribute('value', this.value)"></td>
+                <td><input type="text" class="input-cod-gold" readonly style="text-align:center; background: #eee;"></td>
+            `;
+            const input = tr.querySelector('.input-nome-peca');
+            const sugestoes = tr.querySelector('.suggestions');
+            const codInput = tr.querySelector('.input-cod-gold');
+
+            input.addEventListener('input', function() {
+                const busca = this.value.toLowerCase();
+                sugestoes.innerHTML = '';
+                if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
+                const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
+                
+                const filtrados = listaProdutos.filter(p => {
+                    const linhaToda = p.join(" ").toLowerCase();
+                    return termos.every(t => linhaToda.includes(t));
+                }).slice(0, 15);
+
+                if (filtrados.length > 0) {
+                    sugestoes.style.display = 'block';
+                    filtrados.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        const codigo = p[21] || '';
+                        const nome = p[22] || '';
+                        div.innerText = codigo + " | " + nome; 
+                        div.onclick = () => {
+                            input.value = nome; 
+                            input.setAttribute('value', nome);
+                            codInput.value = codigo;
+                            codInput.setAttribute('value', codigo);
+                            sugestoes.style.display = 'none';
+                            const todasLinhas = document.querySelectorAll('#tabela-pecas tr');
+                            if (tr === todasLinhas[todasLinhas.length - 1]) criarLinhaPeca();
+                        };
+                        sugestoes.appendChild(div);
+                    });
+                } else { sugestoes.style.display = 'none'; }
+            });
+            document.getElementById('tabela-pecas').appendChild(tr);
+        }
+
+        function previewFotos(e) {
+            for (let f of e.target.files) {
+                const r = new FileReader();
+                r.onload = ev => {
+                    const d = document.createElement('div');
+                    d.className = 'foto-item';
+                    d.innerHTML = `
+                        <button class="btn-remove no-print" onclick="this.parentElement.remove()">X</button>
+                        <img src="${ev.target.result}" class="foto-preview">
+                        <textarea rows="3" placeholder="Parecer..." oninput="this.innerHTML = this.value"></textarea>
+                    `;
+                    document.getElementById('container-fotos').appendChild(d);
+                };
+                r.readAsDataURL(f);
+            }
+        }
+
+        function configurarAssinatura(id) {
+            const canvas = document.getElementById(id);
+            if(!canvas) return;
+            const ctx = canvas.getContext("2d");
+            let desenhando = false;
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            function obterPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function iniciar(e) { desenhando = true; mover(e); }
+            function parar() { desenhando = false; ctx.beginPath(); }
+            function mover(e) {
+                if (!desenhando) return;
+                const pos = obterPos(e);
+                ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#000";
+                ctx.lineTo(pos.x, pos.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+                if(e.cancelable) e.preventDefault();
+            }
+
+            canvas.addEventListener("mousedown", iniciar);
+            canvas.addEventListener("mousemove", mover);
+            window.addEventListener("mouseup", parar);
+            canvas.addEventListener("touchstart", iniciar);
+            canvas.addEventListener("touchmove", mover);
+            canvas.addEventListener("touchend", parar);
+        }
+
+        function limparAssinatura(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function prepararHTML() {
+            document.querySelectorAll('input, textarea').forEach(i => {
+                if(i.type === "checkbox") {
+                    if(i.checked) i.setAttribute('checked', 'checked');
+                    else i.removeAttribute('checked');
+                } else {
+                    i.setAttribute('value', i.value);
+                    if(i.tagName === "TEXTAREA") i.innerHTML = i.value;
+                }
+            });
+            return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+        }
+
+        function salvarHTML() {
+            const os = document.getElementById('input-os').value || "SN";
+            const cliente = document.getElementById('campo-cliente').value || "RELATORIO";
+            const blob = new Blob([prepararHTML()], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `OS_${os}_${cliente}.html`;
+            link.click();
+        }
+
+        window.onload = () => {
+            document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
+            carregarDados();
+            criarLinhaPeca();
+            configurarAssinatura('pad-tecnico');
+            configurarAssinatura('pad-empresa');
+        };
+
+        window.onclick = e => { if (!e.target.matches('.input-nome-peca')) document.querySelectorAll('.suggestions').forEach(s => s.style.display = 'none'); }
+   
+    
+        function calcularTotal() {
+            let inputs = document.getElementsByClassName('hr-input');
+            let total = 0;
+            for (let i = 0; i < inputs.length; i++) {
+                let valor = parseFloat(inputs[i].value);
+                if (!isNaN(valor)) total += valor;
+            }
+            document.getElementById('total-horas').innerText = total;
+        }
+
+        window.onload = calcularTotal
+    
+    
+    
+    </script>
 </body>
 </html>
