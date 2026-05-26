@@ -5,56 +5,15 @@
     <title>Relatório de Manutenção - Gold Redutores</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; color: #003366; background-color: #fff; }
-        
-        /* ============================================================
-           MODIFICAÇÃO: NOVO SISTEMA DE CABEÇALHO PARA ALINHAMENTO 
-           ============================================================ */
-        .header-container {
-            display: flex;
-            align-items: center; 
-            justify-content: space-between;
-            border-bottom: 3px solid #ed1c24;
-            padding-bottom: 15px;
-            margin-bottom: 10px;
-        }
-
-        .brand-logo {
-            max-height: 80px; /* Ajuste o tamanho do logo aqui */
-            width: auto;
-        }
-
-        .title-area {
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        .title-area h2 {
-            margin: 0;
-            font-size: 22px;
-            text-transform: uppercase;
-            color: #003366;
-        }
-
-        .subtitle {
-            margin: 5px 0 0 0;
-            font-size: 13px;
-            color: #666;
-            font-weight: normal;
-        }
-
-        /* Espaçador para garantir que o título fique no centro real */
-        .header-spacer {
-            width: 120px; 
-        }
-        /* ============================================================ */
-
+        .header { text-align: center; border-bottom: 3px solid #ed1c24; padding-bottom: 10px; margin-bottom: 10px; }
+        .header h2 { margin: 0; font-size: 24px; text-transform: uppercase; }
         .section { background: #d9d9d9; padding: 6px; margin-top: 15px; font-weight: bold; text-align: center; border: 1px solid #333; text-transform: uppercase; font-size: 13px; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 0; }
         table, th, td { border: 1px solid #333; }
         td { padding: 6px; font-size: 11px; vertical-align: middle; }
         th { background: #eee; padding: 8px; font-size: 11px; text-align: center; color: #003366; }
         input[type="text"], input[type="number"], textarea { width: 98%; border: none; outline: none; background: transparent; font-size: 11px; color: #000; }
-
+        
         .checkbox-container { display: flex; align-items: center; gap: 5px; cursor: pointer; }
         .checkbox-container input { width: auto; margin: 0; }
 
@@ -68,12 +27,13 @@
         .suggestion-item:hover { background-color: #ed1c24; color: white; }
 
         .foto-upload-container { text-align: center; padding: 15px; background: #f4f4f4; border: 2px dashed #ccc; margin: 10px 0; border-radius: 5px; }
-        .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 05px; }
+        .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
         .foto-item { border: 1px solid #333; padding: 8px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; display: flex; flex-direction: column; }
         .foto-preview { max-width: 100%; height: auto; max-height: 300px; object-fit: contain; margin-bottom: 8px; }
 
         .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; z-index: 10; }
 
+        /* Estilos de Assinatura */
         .signature-pad { border: 1px solid #eee; background: #fff; width: 95%; height: 80px; cursor: crosshair; touch-action: none; }
         .name-input { border-bottom: 1px dashed #ccc !important; width: 90%; margin-bottom: 5px; text-align: center; font-weight: bold; text-transform: uppercase; }
         
@@ -84,29 +44,20 @@
             .no-print { display: none !important; } 
             body { padding: 0; margin: 0; } 
             .signature-pad { border: none; }
-            .header-container { border-bottom: 3px solid #ed1c24 !important; }
         }
     </style>
 </head>
 <body>
 
-    <header class="header-container">
-        <div class="logo-box">
-            <img class="brand-logo" src="GOLD REDUTORES.JPG" alt="Gold Redutores">
+    <div class="header">
+        <h2>RELATÓRIO DE MANUTENÇÃO PREVENTIVA</h2>
+        <div style="margin-top: 10px;">
+            <label style="font-weight: bold;">Nº ORDEM DE SERVIÇO: </label>
+            <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px;" placeholder="Ex: 5449" oninput="buscarDadosOS()">
         </div>
-
-        <div class="title-area">
-            <h2>RELATÓRIO DE MANUTENÇÃO PREVENTIVA</h2>
-        </div>
-
-        </header>
-
-    <div style="text-align: center; margin-bottom: 20px;">
-        <label style="font-weight: bold; color: #003366;">Nº ORDEM DE SERVIÇO: </label>
-        <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px; color: #ed1c24;" placeholder="Ex: 5449" oninput="buscarDadosOS()">
     </div>
 
-    <div class="no-print" style="text-align: center; margin-bottom: 10px;">
+    <div class="no-print" style="text-align: center;">
         <span id="db-status" style="font-size: 12px; font-weight: bold; color: orange;">⏳ Sincronizando com GitHub...</span>
     </div>
 
@@ -123,7 +74,7 @@
         </tr>
     </table>
 
-    
+ 
 
     <div class="section">ANÁLISES FOTOGRÁFICAS</div>
     <div class="foto-upload-container no-print">
@@ -132,7 +83,7 @@
     </div>
     <div id="container-fotos" class="foto-container"></div>
 
-    <div class="section">PEÇAS NECESSÁRIAS PARA EXECUÇÃO</div>
+     <div class="section">PEÇAS NECESSÁRIAS PARA EXECUÇÃO</div>
     <table>
         <thead>
             <tr>
@@ -144,8 +95,7 @@
         <tbody id="tabela-pecas"></tbody>
     </table>
 
-     /* CALCULO DE MAO DE OBRA */
- 
+
     <div class="section">RESUMO DE MÃO DE OBRA</div>
     <table>
         <tbody>
@@ -192,23 +142,13 @@
                     </div>
                 </td>
             </tr>
-            <tr>
-                <td colspan="2" style="border: 1px solid #333; padding: 0; background: #fafafa;">
-                    <div style="text-align: center; padding: 10px;">
-                        <input type="text" class="name-input" placeholder="NOME DO RESPONSÁVEL INPASA (LEGÍVEL)" style="width: 50%;">
-                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
-                            <canvas id="pad-inpasa" class="signature-pad" style="width: 60%;"></canvas>
-                        </div>
-                        <button class="no-print" onclick="limparAssinatura('pad-inpasa')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
-                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">RESPONSÁVEL MANUTENÇÃO - INPASA</div>
-                    </div>
-                </td>
-            </tr>
+            
         </table>
     </div>
 
     <div class="btn-group no-print">
         <button class="btn-action" style="background: #003366;" onclick="salvarHTML()">SALVAR ARQUIVO (.HTML)</button>
+        <button class="btn-action" style="background: #25d366;" onclick="enviarWhatsApp()">ENVIAR WHATSAPP</button>
         <button class="btn-action" style="background: #ed1c24;" onclick="window.print()">GERAR PDF / IMPRIMIR</button>
     </div>
 
@@ -218,57 +158,23 @@
         let dadosOS = []; let listaProdutos = [];
 
         function parseCSV(text) {
-            let linhas = [];
-            let linhaAtual = [];
-            let campoAtual = '';
-            let dentroDeAspas = false;
-
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                let proximoChar = text[i + 1];
-
-                if (char === '"') {
-                    if (dentroDeAspas && proximoChar === '"') {
-                        campoAtual += '"'; i++;
-                    } else {
-                        dentroDeAspas = !dentroDeAspas;
-                    }
-                } 
-                else if (char === ',' && !dentroDeAspas) {
-                    linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
-                    campoAtual = '';
-                } 
-                else if ((char === '\n' || char === '\r') && !dentroDeAspas) {
-                    if (char === '\r' && proximoChar === '\n') i++;
-                    linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
-                    if (linhaAtual.length > 5) linhas.push(linhaAtual);
-                    linhaAtual = []; campoAtual = '';
-                } 
-                else {
-                    campoAtual += char;
-                }
-            }
-            if (campoAtual || linhaAtual.length > 0) {
-                linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
-                if (linhaAtual.length > 5) linhas.push(linhaAtual);
-            }
-            return linhas;
+            return text.split(/\r?\n/).map(linha => {
+                return linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+            }).filter(l => l.length > 5);
         }
 
-        function carregarDados() {
+        async function carregarDados() {
             const status = document.getElementById('db-status');
-            Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ])
-                .then(([resOS, resProd]) => Promise.all([resOS.text(), resProd.text()]))
-                .then(([textOS, textProd]) => {
-                    dadosOS = parseCSV(textOS);
-                    listaProdutos = parseCSV(textProd);
-                    status.innerText = "✅ GitHub Sincronizado!";
-                    status.style.color = "green";
-                })
-                .catch(e => {
-                    status.innerText = "❌ Erro na sincronização.";
-                    status.style.color = "red";
-                });
+            try {
+                const [resOS, resProd] = await Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ]);
+                dadosOS = parseCSV(await resOS.text());
+                listaProdutos = parseCSV(await resProd.text());
+                status.innerText = "✅ GitHub Sincronizado!";
+                status.style.color = "green";
+            } catch (e) {
+                status.innerText = "❌ Erro na sincronização.";
+                status.style.color = "red";
+            }
         }
 
         function buscarDadosOS() {
@@ -293,11 +199,9 @@
                     <div class="suggestions"></div>
                 </td>
                 <td><input type="number" value="1" style="text-align:center;" oninput="this.setAttribute('value', this.value)"></td>
-                <td><input type="text" class="input-cod-gold" readonly style="text-align:center; background: #eee;"></td>
             `;
             const input = tr.querySelector('.input-nome-peca');
             const sugestoes = tr.querySelector('.suggestions');
-            const codInput = tr.querySelector('.input-cod-gold');
 
             input.addEventListener('input', function() {
                 const busca = this.value.toLowerCase();
@@ -315,14 +219,10 @@
                     filtrados.forEach(p => {
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        const codigo = p[21] || '';
-                        const nome = p[22] || '';
-                        div.innerText = codigo + " | " + nome; 
+                        div.innerText = p[22]; 
                         div.onclick = () => {
-                            input.value = nome; 
-                            input.setAttribute('value', nome);
-                            codInput.value = codigo;
-                            codInput.setAttribute('value', codigo);
+                            input.value = p[22]; 
+                            input.setAttribute('value', p[22]);
                             sugestoes.style.display = 'none';
                             const todasLinhas = document.querySelectorAll('#tabela-pecas tr');
                             if (tr === todasLinhas[todasLinhas.length - 1]) criarLinhaPeca();
@@ -351,11 +251,12 @@
             }
         }
 
+        // Lógica de Assinatura Digital
         function configurarAssinatura(id) {
             const canvas = document.getElementById(id);
-            if(!canvas) return;
             const ctx = canvas.getContext("2d");
             let desenhando = false;
+
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
 
@@ -414,17 +315,22 @@
             link.click();
         }
 
+        function enviarWhatsApp() {
+            const os = document.getElementById('input-os').value || "SN";
+            alert("Instrução: Clique em 'GERAR PDF', salve o arquivo e anexe no WhatsApp do cliente.");
+        }
+
         window.onload = () => {
             document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
             carregarDados();
             criarLinhaPeca();
             configurarAssinatura('pad-tecnico');
             configurarAssinatura('pad-empresa');
+           
         };
 
         window.onclick = e => { if (!e.target.matches('.input-nome-peca')) document.querySelectorAll('.suggestions').forEach(s => s.style.display = 'none'); }
-   
-    
+           // --- LÓGICA DE CÁLCULO DE HORAS ---
         function calcularTotal() {
             let inputs = document.getElementsByClassName('hr-input');
             let total = 0;
