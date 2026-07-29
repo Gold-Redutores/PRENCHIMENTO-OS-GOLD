@@ -67,7 +67,7 @@
         .suggestion-item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; text-align: left; }
         .suggestion-item:hover { background-color: #ed1c24; color: white; }
 
-        .foto-upload-container { text-align: center; padding: 15px; background: #f4f4f4; border: 2px dashed #ccc; margin: 10px 0; border-radius: 5px; }
+        .foto-upload-container { text-align: center; padding: 15px; background: #f4f4f4; border: 2px dashed #ccc; margin: 10px 0; border-radius: 5px; transition: border-color 0.2s; cursor: pointer; }
         .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 05px; }
         .foto-item { border: 1px solid #333; padding: 8px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; display: flex; flex-direction: column; }
         .foto-preview { max-width: 100%; height: auto; max-height: 300px; object-fit: contain; margin-bottom: 8px; }
@@ -124,10 +124,20 @@
     </table>
 
     <div class="section">ANÁLISES FOTOGRÁFICAS</div>
-    <div class="foto-upload-container no-print">
-        <label style="font-weight: bold; display: block; margin-bottom: 5px;">📸 ADICIONAR FOTOS</label>
-        <input type="file" accept="image/*" multiple onchange="previewFotos(event)">
+    
+    <!-- ZONA DE ARRASTE E CLIQUE ATUALIZADA -->
+    <div class="foto-upload-container no-print" 
+         id="drop-zone"
+         ondragover="event.preventDefault(); this.style.borderColor='#ed1c24';"
+         ondragleave="this.style.borderColor='#ccc';"
+         ondrop="handleDrop(event)"
+         onclick="document.getElementById('file-input').click()">
+        <label style="font-weight: bold; display: block; margin-bottom: 5px; cursor: pointer;">
+            📸 ARRASTE FOTOS AQUI OU CLIQUE PARA SELECIONAR
+        </label>
+        <input type="file" id="file-input" accept="image/*" multiple onchange="previewFotos(event)" style="display:none;">
     </div>
+    
     <div id="container-fotos" class="foto-container"></div>
 
     <div class="section">PEÇAS NECESSÁRIAS PARA EXECUÇÃO</div>
@@ -141,7 +151,7 @@
         </thead>
         <tbody id="tabela-pecas"></tbody>
     </table>
-       
+        
     <div class="section">RESUMO DE MÃO DE OBRA</div>
     <table>
         <thead>
@@ -152,13 +162,13 @@
             </tr>
         </thead>
         <tbody>
-            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input"  oninput="calcularTotal()"></td><td>SVG1192</td></tr>
-            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input"  oninput="cheerful_loader()"" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
-            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" " oninput="calcularTotal()"></td><td>SVG1194</td></tr>
-            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input"  oninput="calcularTotal()"></td><td>SVG1210</td></tr>
-            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input"  oninput="calcularTotal()"></td><td>SVG1200</td></tr>
-            <tr><td>PINTURA FINAL</td><td><input type="number" class="hr-input"  oninput="calcularTotal()"></td><td>SVG1174</td></tr>
-            <tr><td>SACAR ACOPLAMENTOS</td><td><input type="number" class="hr-input"  oninput="calcularTotal()"></td><td>SVG1262</td></tr>
+            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
+            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
+            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
+            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
+            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
+            <tr><td>PINTURA FINAL</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1174</td></tr>
+            <tr><td>SACAR ACOPLAMENTOS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1262</td></tr>
         </tbody>
         <tfoot>
             <tr class="total-row">
@@ -171,9 +181,7 @@
 
     <div class="section">CONCLUSÕES</div>
     <textarea id="conclusoes" rows="5" style="width: 100%; border: 1px solid #333; margin-top: 5px; padding: 8px;" placeholder="Parecer técnico final..."></textarea>
-    
 
-    
     <div style="margin-top: 30px;">
         <table style="border: none;">
             <tr>
@@ -187,9 +195,7 @@
                         <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">ASSINATURA DO TÉCNICO RESPONSÁVEL</div>
                     </div>
                 </td>
-              
             </tr>
-            
         </table>
     </div>
 
@@ -322,6 +328,16 @@
             document.getElementById('tabela-pecas').appendChild(tr);
         }
 
+        // FUNÇÃO DE PROCESSAMENTO DO ARRASTE DE IMAGENS
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('drop-zone').style.borderColor = '#ccc';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                previewFotos({ target: { files: files } });
+            }
+        }
+
         function previewFotos(e) {
             for (let f of e.target.files) {
                 const r = new FileReader();
@@ -375,6 +391,7 @@
 
         function limparAssinatura(id) {
             const canvas = document.getElementById(id);
+            if(!canvas) return;
             const ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
@@ -412,7 +429,7 @@
             document.getElementById('total-horas').innerText = total;
         }
 
-        // UNIFICAÇÃO DA INICIALIZAÇÃO DA PÁGINA (Executa tudo junto perfeitamente)
+        // UNIFICAÇÃO DA INICIALIZAÇÃO DA PÁGINA
         window.onload = () => {
             document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
             carregarDados();
@@ -421,10 +438,8 @@
             // Inicializa as 2 linhas de peças vazias padrão
             for(let i=0; i<2; i++) { criarLinhaPeca(); }
             
-            // Configura os painéis de assinatura digital
+            // Configura o painel de assinatura digital
             configurarAssinatura('pad-tecnico');
-            configurarAssinatura('pad-empresa');
-            
         };
 
         window.onclick = e => { 
