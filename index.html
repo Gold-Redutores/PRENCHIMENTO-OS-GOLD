@@ -114,12 +114,12 @@
     <table>
         <tr>
             <td colspan="2"><label><strong>Cliente:</strong></label> <input type="text" id="campo-cliente"></td>
-            <td colspan="2"><label><strong>Data:</strong></label> <span id="data-atual" style="font-weight: bold;"></span></td>
+            <td colspan="2"><label><strong>Data de Criação:</strong></label> <span id="campo-data-criacao" style="font-weight: bold;"></span></td>
         </tr>
         <tr>
             <td><label><strong>Equipamento:</strong></label> <input type="text" id="campo-redutor"></td>
             <td><label><strong>Redução:</strong></label> <input type="text" id="campo-reducao" placeholder="Ex: 1:40"></td>
-            <td colspan="2"><label><strong>Série:</strong></label> <input type="text" id="campo-serie"></td>
+            <td colspan="2"><label><strong>Série / Cód Gold:</strong></label> <input type="text" id="campo-serie"></td>
         </tr>
     </table>
 
@@ -205,9 +205,11 @@
     </div>
 
     <script>
-        const URL_CSV_OS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/dmsoser00000045.csv';
-        const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/refs/heads/main/relalisatagemprodutosdetada.csv';
-        let dadosOS = []; let listaProdutos = [];
+        const URL_JSON_OS = 'https://raw.githubusercontent.com/Gold-Redutores/OS-MANUTEN-A-INPASA/main/dados_os.json';
+        const URL_CSV_OS_BACKUP = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/dmsoser00000045.csv';
+        const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/OS-MANUTEN-A-INPASA/main/relalisatagemprodutosdetada.csv';
+        let dadosOS = {};
+        let listaProdutos = [];
 
         function parseCSV(text) {
             let linhas = [];
@@ -227,12 +229,12 @@
                     }
                 } 
                 else if (char === ',' && !dentroDeAspas) {
-                    linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                    linhaAtual.push(campoAtual.trim());
                     campoAtual = '';
                 } 
                 else if ((char === '\n' || char === '\r') && !dentroDeAspas) {
                     if (char === '\r' && proximoChar === '\n') i++;
-                    linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                    linhaAtual.push(campoAtual.trim());
                     if (linhaAtual.length > 5) linhas.push(linhaAtual);
                     linhaAtual = []; campoAtual = '';
                 } 
@@ -241,42 +243,91 @@
                 }
             }
             if (campoAtual || linhaAtual.length > 0) {
-                linhaAtual.push(campoAtual.replace(/^"|"$/g, '').trim());
+                linhaAtual.push(campoAtual.trim());
                 if (linhaAtual.length > 5) linhas.push(linhaAtual);
             }
             return linhas;
         }
 
-        function carregarDados() {
+        async function carregarDados() {
             const status = document.getElementById('db-status');
-            Promise.all([ fetch(URL_CSV_OS), fetch(URL_CSV_PRODUTOS) ])
-                .then(([resOS, resProd]) => Promise.all([resOS.text(), resProd.text()]))
-                .then(([textOS, textProd]) => {
-                    dadosOS = parseCSV(textOS);
-                    listaProdutos = parseCSV(textProd);
-                    status.innerText = "✅ GitHub Sincronizado!";
-                    status.style.color = "green";
-                })
-                .catch(e => {
-                    status.innerText = "❌ Erro na sincronização.";
-                    status.style.color = "red";
-                });
+            const timestamp = Date.now();
+            try {
+                try {
+                    const resJSON = await fetch(`${URL_JSON_OS}?t=${timestamp}`);
+                    if (resJSON.ok) dadosOS = await resJSON.json();
+                } catch (eJSON) {
+                    console.warn('JSON não disponível, tentando CSV de backup...', eJSON);
+                }
+
+                if (!dadosOS || Object.keys(dadosOS).length === 0) {
+                    const resCSV = await fetch(`${URL_CSV_OS_BACKUP}?t=${timestamp}`);
+                    if (!resCSV.ok) throw new Error(`Falha ao carregar CSV: HTTP ${resCSV.status}`);
+                    const linhas = parseCSV(await resCSV.text());
+                    dadosOS = {};
+                    linhas.forEach(linha => {
+                        const os = (linha[21] || '').trim();
+                        if (os) {
+                            dadosOS[os] = {
+                                os,
+                                serie: linha[23] || '',
+                                redutor: linha[24] || '',
+                                cliente: linha[26] || ''
+                            };
+                        }
+                    });
+                }
+
+                if (Object.keys(dadosOS).length === 0) {
+                    throw new Error('Nenhuma ordem de serviço foi carregada.');
+                }
+
+                try {
+                    const resProd = await fetch(`${URL_CSV_PRODUTOS}?t=${timestamp}`);
+                    if (!resProd.ok) throw new Error(`Falha ao carregar produtos: HTTP ${resProd.status}`);
+                    listaProdutos = parseCSV(await resProd.text());
+                } catch (eProd) {
+                    console.warn('Produtos não carregados:', eProd);
+                }
+
+                buscarDadosOS();
+                status.innerText = '✅ GitHub Sincronizado!';
+                status.style.color = 'green';
+            } catch (e) {
+                status.innerText = '❌ Erro na sincronização.';
+                status.style.color = 'red';
+                console.error(e);
+            }
+        }
+
+        function formatarDataCriacao(valor) {
+            const correspondencia = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(valor || '').trim());
+            return correspondencia
+                ? `${correspondencia[3]}/${correspondencia[2]}/${correspondencia[1]}`
+                : String(valor || '');
         }
 
         function buscarDadosOS() {
             const osVal = document.getElementById('input-os').value.trim();
-            if (osVal.length < 3) return;
-            const linha = dadosOS.find(l => l[21] === osVal);
-            if (linha) {
-                const campos = { 'campo-serie': 23, 'campo-redutor': 24, 'campo-cliente': 26 };
-                for (let id in campos) {
-                    let input = document.getElementById(id);
-                    if(input) {
-                        input.value = linha[campos[id]] || "";
-                        input.setAttribute('value', input.value);
-                    }
-                }
-            }
+            const item = osVal.length >= 3 ? dadosOS[osVal] : null;
+            const campos = {
+                cliente: document.getElementById('campo-cliente'),
+                redutor: document.getElementById('campo-redutor'),
+                reducao: document.getElementById('campo-reducao')
+            };
+
+            Object.entries(campos).forEach(([campo, input]) => {
+                input.value = item?.[campo] ?? '';
+                input.setAttribute('value', input.value);
+            });
+
+            const codigoGold = item && Object.prototype.hasOwnProperty.call(item, 'codigoGold')
+                ? item.codigoGold ?? ''
+                : item?.serie ?? '';
+            const campoSerie = document.getElementById('campo-serie');
+            campoSerie.value = codigoGold;
+            campoSerie.setAttribute('value', codigoGold);
+            document.getElementById('campo-data-criacao').innerText = formatarDataCriacao(item?.dataCriacao);
         }
 
         function criarLinhaPeca() {
@@ -297,10 +348,10 @@
                 const busca = this.value.toLowerCase();
                 sugestoes.innerHTML = '';
                 if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
-                const termos = busca.split('%').map(t => t.trim()).filter(t => t !== "");
+                const termos = busca.split('%').map(t => t.trim()).filter(t => t !== '');
                 
                 const filtrados = listaProdutos.filter(p => {
-                    const linhaToda = p.join(" ").toLowerCase();
+                    const linhaToda = p.join(' ').toLowerCase();
                     return termos.every(t => linhaToda.includes(t));
                 }).slice(0, 15);
 
@@ -311,9 +362,9 @@
                         div.className = 'suggestion-item';
                         const codigo = p[21] || '';
                         const nome = p[22] || '';
-                        div.innerText = codigo + " | " + nome; 
+                        div.innerText = codigo + ' | ' + nome;
                         div.onclick = () => {
-                            input.value = nome; 
+                            input.value = nome;
                             input.setAttribute('value', nome);
                             codInput.value = codigo;
                             codInput.setAttribute('value', codigo);
@@ -358,7 +409,7 @@
         function configurarAssinatura(id) {
             const canvas = document.getElementById(id);
             if(!canvas) return;
-            const ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext('2d');
             let desenhando = false;
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
@@ -375,43 +426,43 @@
             function mover(e) {
                 if (!desenhando) return;
                 const pos = obterPos(e);
-                ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#000";
+                ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
                 ctx.lineTo(pos.x, pos.y); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
                 if(e.cancelable) e.preventDefault();
             }
 
-            canvas.addEventListener("mousedown", iniciar);
-            canvas.addEventListener("mousemove", mover);
-            window.addEventListener("mouseup", parar);
-            canvas.addEventListener("touchstart", iniciar);
-            canvas.addEventListener("touchmove", mover);
-            canvas.addEventListener("touchend", parar);
+            canvas.addEventListener('mousedown', iniciar);
+            canvas.addEventListener('mousemove', mover);
+            window.addEventListener('mouseup', parar);
+            canvas.addEventListener('touchstart', iniciar);
+            canvas.addEventListener('touchmove', mover);
+            canvas.addEventListener('touchend', parar);
         }
 
         function limparAssinatura(id) {
             const canvas = document.getElementById(id);
             if(!canvas) return;
-            const ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
         function prepararHTML() {
             document.querySelectorAll('input, textarea').forEach(i => {
-                if(i.type === "checkbox") {
+                if(i.type === 'checkbox') {
                     if(i.checked) i.setAttribute('checked', 'checked');
                     else i.removeAttribute('checked');
                 } else {
                     i.setAttribute('value', i.value);
-                    if(i.tagName === "TEXTAREA") i.innerHTML = i.value;
+                    if(i.tagName === 'TEXTAREA') i.innerHTML = i.value;
                 }
             });
-            return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            return '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
         }
 
         function salvarHTML() {
-            const os = document.getElementById('input-os').value || "SN";
-            const cliente = document.getElementById('campo-cliente').value || "RELATORIO";
+            const os = document.getElementById('input-os').value || 'SN';
+            const cliente = document.getElementById('campo-cliente').value || 'RELATORIO';
             const blob = new Blob([prepararHTML()], { type: 'text/html' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -431,14 +482,9 @@
 
         // UNIFICAÇÃO DA INICIALIZAÇÃO DA PÁGINA
         window.onload = () => {
-            document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
             carregarDados();
             calcularTotal();
-            
-            // Inicializa as 2 linhas de peças vazias padrão
             for(let i=0; i<2; i++) { criarLinhaPeca(); }
-            
-            // Configura o painel de assinatura digital
             configurarAssinatura('pad-tecnico');
         };
 
