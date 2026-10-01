@@ -491,7 +491,7 @@
                  "codigoGold":  "GD.20283",
                  "dataCriacao":  "2026-09-17",
                  "classe":  "DRIVE",
-                 "fase":  "Aguardando Análise",
+                 "fase":  "Orçamento Emitido",
                  "reducao":  ""
              },
     "6257":  {
@@ -1081,8 +1081,8 @@
                  "os":  "6251",
                  "cliente":  "PANAMBI PRESTACIONAL LTDA",
                  "redutor":  "REDUTOR WEG CESTARI GK06",
-                 "serie":  "GM.20997",
-                 "codigoGold":  "GM.20997",
+                 "serie":  "GR.20247",
+                 "codigoGold":  "GR.20247",
                  "dataCriacao":  "2026-09-22",
                  "classe":  "REDUTOR",
                  "fase":  "Equipamento Entregue",
@@ -1514,7 +1514,7 @@
                  "codigoGold":  "GM.20387",
                  "dataCriacao":  "2025-12-30",
                  "classe":  "MOTOR",
-                 "fase":  "EM LINHA DE PRODUÇÃO",
+                 "fase":  "Qualidade Revisada",
                  "reducao":  ""
              },
     "5651":  {
@@ -2185,7 +2185,7 @@
                  "codigoGold":  "GM.20888",
                  "dataCriacao":  "2026-07-02",
                  "classe":  "MOTOR",
-                 "fase":  "Orçamento Aprovado",
+                 "fase":  "Qualidade Revisada",
                  "reducao":  ""
              },
     "5626":  {
@@ -4190,17 +4190,6 @@
                  "fase":  "Equipamento Entregue",
                  "reducao":  ""
              },
-    "6217":  {
-                 "os":  "6217",
-                 "cliente":  "CLAUDIO JOSE RAVANINI E OUTROS",
-                 "redutor":  "REDUTOR GEREMIAS GD60",
-                 "serie":  "GR.20240",
-                 "codigoGold":  "GR.20240",
-                 "dataCriacao":  "2026-08-28",
-                 "classe":  "REDUTOR",
-                 "fase":  "Aguardando Peças",
-                 "reducao":  ""
-             },
     "5324":  {
                  "os":  "5324",
                  "cliente":  "INPASA AGROINDUSTRIAL S/A",
@@ -6049,6 +6038,17 @@
                  "fase":  "Orçamento Aprovado",
                  "reducao":  ""
              },
+    "6276":  {
+                 "os":  "6276",
+                 "cliente":  "FORTUNCERES S.A",
+                 "redutor":  "DRIVE SOFT - STARTER SSW900",
+                 "serie":  "GD.20289",
+                 "codigoGold":  "GD.20289",
+                 "dataCriacao":  "2026-10-01",
+                 "classe":  "DRIVE",
+                 "fase":  "Aguardando Análise",
+                 "reducao":  ""
+             },
     "5132":  {
                  "os":  "5132",
                  "cliente":  "CARGILL AGRICOLA S.A",
@@ -7589,6 +7589,17 @@
                  "fase":  "Equipamento Entregue",
                  "reducao":  ""
              },
+    "6221":  {
+                 "os":  "6221",
+                 "cliente":  "INPASA AGROINDUSTRIAL S/A",
+                 "redutor":  "MOTOR 25 CV 3F 4 POLOS WEG",
+                 "serie":  "GM.20741",
+                 "codigoGold":  "GM.20741",
+                 "dataCriacao":  "2026-08-27",
+                 "classe":  "MOTOR",
+                 "fase":  "Conclusão da Análise",
+                 "reducao":  ""
+             },
     "5481":  {
                  "os":  "5481",
                  "cliente":  "SERGIO DE MARCO E OUTROS",
@@ -7752,6 +7763,17 @@
                  "dataCriacao":  "2025-10-08",
                  "classe":  "DRIVE",
                  "fase":  "Orçamento Emitido",
+                 "reducao":  ""
+             },
+    "6275":  {
+                 "os":  "6275",
+                 "cliente":  "PANAMBI PRESTACIONAL LTDA",
+                 "redutor":  "REDUTOR WEG CESTARI GK06",
+                 "serie":  "GR.20247",
+                 "codigoGold":  "GR.20247",
+                 "dataCriacao":  "2026-10-01",
+                 "classe":  "REDUTOR",
+                 "fase":  "Aguardando Análise",
                  "reducao":  ""
              },
     "4822":  {
@@ -8114,7 +8136,7 @@
                  "codigoGold":  "GM.21008",
                  "dataCriacao":  "2026-09-28",
                  "classe":  "MOTOR",
-                 "fase":  "Aguardando Análise",
+                 "fase":  "Conclusão da Análise",
                  "reducao":  ""
              },
     "4808":  {
@@ -8205,15 +8227,15 @@
                  "fase":  "Equipamento Entregue",
                  "reducao":  ""
              },
-    "6221":  {
-                 "os":  "6221",
-                 "cliente":  "INPASA AGROINDUSTRIAL S/A",
-                 "redutor":  "MOTOR 25 CV 3F 4 POLOS WEG",
-                 "serie":  "GM.20741",
-                 "codigoGold":  "GM.20741",
-                 "dataCriacao":  "2026-08-27",
-                 "classe":  "MOTOR",
-                 "fase":  "Aguardando Análise",
+    "6217":  {
+                 "os":  "6217",
+                 "cliente":  "CLAUDIO JOSE RAVANINI E OUTROS",
+                 "redutor":  "REDUTOR GEREMIAS GD60",
+                 "serie":  "GR.20240",
+                 "codigoGold":  "GR.20240",
+                 "dataCriacao":  "2026-08-28",
+                 "classe":  "REDUTOR",
+                 "fase":  "Aguardando Peças",
                  "reducao":  ""
              },
     "5276":  {
@@ -10578,7 +10600,7 @@
                  "codigoGold":  "GR.20004",
                  "dataCriacao":  "2025-04-01",
                  "classe":  "REDUTOR",
-                 "fase":  "Orçamento Emitido",
+                 "fase":  "Orçamento Aprovado",
                  "reducao":  ""
              },
     "6055":  {
@@ -11172,7 +11194,7 @@
                  "codigoGold":  "GM.20988",
                  "dataCriacao":  "2026-09-21",
                  "classe":  "MOTOR",
-                 "fase":  "Aguardando Análise",
+                 "fase":  "Conclusão da Análise",
                  "reducao":  ""
              },
     "15":  {
@@ -13515,7 +13537,7 @@
                  "codigoGold":  "GM.20995",
                  "dataCriacao":  "2026-09-21",
                  "classe":  "MOTOR",
-                 "fase":  "Aguardando Análise",
+                 "fase":  "Conclusão da Análise",
                  "reducao":  ""
              },
     "6095":  {
