@@ -495,12 +495,36 @@
                                 <td><input name="chaveta-instrumento" type="text" value="Paquímetro / Micrômetro"></td>
                                 <td><input name="chaveta-tag" type="text" placeholder="TAG Gold"></td>
                             </tr>
+                            <tr>
+                                <td>Chaveta (largura b)<span id="tol_desc_chaveta_largura" class="lbl-tolerancia"></span></td>
+                                <td><input type="number" id="nom_chaveta_largura" name="nom_chaveta_largura" step="0.01" readonly style="background:#edf2f5; font-weight:bold; color:var(--blue);"></td>
+                                <td><input type="number" step="0.001" id="med_chaveta_largura" name="chaveta-largura-medicao" placeholder="0.000" oninput="atualizarValidacaoChaveta('largura')"></td>
+                                <td><select id="res_chaveta_largura" name="chaveta-largura-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input name="chaveta-largura-instrumento" type="text" value="Paquímetro / Micrômetro"></td>
+                                <td><input name="chaveta-largura-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+                            <tr>
+                                <td>Chaveta (altura h)<span id="tol_desc_chaveta_altura" class="lbl-tolerancia"></span></td>
+                                <td><input type="number" id="nom_chaveta_altura" name="nom_chaveta_altura" step="0.01" readonly style="background:#edf2f5; font-weight:bold; color:var(--blue);"></td>
+                                <td><input type="number" step="0.001" id="med_chaveta_altura" name="chaveta-altura-medicao" placeholder="0.000" oninput="atualizarValidacaoChaveta('altura')"></td>
+                                <td><select id="res_chaveta_altura" name="chaveta-altura-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input name="chaveta-altura-instrumento" type="text" value="Paquímetro / Micrômetro"></td>
+                                <td><input name="chaveta-altura-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+                            <tr>
+                                <td>Chaveta (comprimento L)<span id="tol_desc_chaveta_comprimento" class="lbl-tolerancia"></span></td>
+                                <td><input type="number" id="nom_chaveta_comprimento" name="nom_chaveta_comprimento" step="0.01" min="0" placeholder="Conforme desenho" oninput="atualizarValidacaoChaveta('comprimento')"></td>
+                                <td><input type="number" step="0.001" id="med_chaveta_comprimento" name="chaveta-comprimento-medicao" placeholder="0.000" oninput="atualizarValidacaoChaveta('comprimento')"></td>
+                                <td><select id="res_chaveta_comprimento" name="chaveta-comprimento-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input name="chaveta-comprimento-instrumento" type="text" value="Paquímetro"></td>
+                                <td><input name="chaveta-comprimento-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="info-normas-box">
-                    <span><strong>Normas aplicadas:</strong> ISO 286 / IEC 60072-1 (Assentos e Ponta de Eixo j6/k5/k6/m5/m6) · DIN 6885-1 (Rasgo Chaveta ajuste N9 completo para eixos de 6 a 130+ mm).</span>
+                    <span><strong>Normas aplicadas:</strong> ISO 286 / IEC 60072-1 (Assentos e Ponta de Eixo j6/k5/k6/m5/m6) · DIN 6885-1 (rasgo de chaveta) · ISO 773 (chaveta b × h × L; h9 / h11 / h14).</span>
                 </div>
             </section>
 
@@ -968,41 +992,100 @@
         // 1. DIN 6885-1: Seleciona largura nominal e limites N9 com base no diâmetro do eixo
         function obterChavetaDIN6885(d) {
             if (!d || d <= 0) return null;
-            let b = 0, tolMin = 0, tolMax = 0;
-            
-            if (d > 6 && d <= 8) { b = 2; tolMin = -0.025; }
-            else if (d > 8 && d <= 10) { b = 3; tolMin = -0.025; }
-            else if (d > 10 && d <= 12) { b = 4; tolMin = -0.030; }
-            else if (d > 12 && d <= 17) { b = 5; tolMin = -0.030; }
-            else if (d > 17 && d <= 22) { b = 6; tolMin = -0.030; }
-            else if (d > 22 && d <= 30) { b = 8; tolMin = -0.036; }
-            else if (d > 30 && d <= 38) { b = 10; tolMin = -0.036; }
-            else if (d > 38 && d <= 44) { b = 12; tolMin = -0.043; }
-            else if (d > 44 && d <= 50) { b = 14; tolMin = -0.043; }
-            else if (d > 50 && d <= 58) { b = 16; tolMin = -0.043; }
-            else if (d > 58 && d <= 65) { b = 18; tolMin = -0.043; }
-            else if (d > 65 && d <= 75) { b = 20; tolMin = -0.052; }
-            else if (d > 75 && d <= 85) { b = 22; tolMin = -0.052; }
-            else if (d > 85 && d <= 95) { b = 25; tolMin = -0.052; }
-            else if (d > 95 && d <= 110) { b = 28; tolMin = -0.052; }
-            else if (d > 110 && d <= 130) { b = 32; tolMin = -0.062; }
-            else if (d > 130 && d <= 150) { b = 36; tolMin = -0.062; }
-            else if (d > 150 && d <= 170) { b = 40; tolMin = -0.062; }
-            else if (d > 170 && d <= 200) { b = 45; tolMin = -0.062; }
-            else {
-                b = Math.round(d * 0.25);
-                tolMin = -0.052;
-            }
+            let b = 0, h = 0, tolMin = 0, tolMax = 0;
+
+            if (d > 6 && d <= 8) { b = 2; h = 2; tolMin = -0.025; }
+            else if (d > 8 && d <= 10) { b = 3; h = 3; tolMin = -0.025; }
+            else if (d > 10 && d <= 12) { b = 4; h = 4; tolMin = -0.030; }
+            else if (d > 12 && d <= 17) { b = 5; h = 5; tolMin = -0.030; }
+            else if (d > 17 && d <= 22) { b = 6; h = 6; tolMin = -0.030; }
+            else if (d > 22 && d <= 30) { b = 8; h = 7; tolMin = -0.036; }
+            else if (d > 30 && d <= 38) { b = 10; h = 8; tolMin = -0.036; }
+            else if (d > 38 && d <= 44) { b = 12; h = 8; tolMin = -0.043; }
+            else if (d > 44 && d <= 50) { b = 14; h = 9; tolMin = -0.043; }
+            else if (d > 50 && d <= 58) { b = 16; h = 10; tolMin = -0.043; }
+            else if (d > 58 && d <= 65) { b = 18; h = 11; tolMin = -0.043; }
+            else if (d > 65 && d <= 75) { b = 20; h = 12; tolMin = -0.052; }
+            else if (d > 75 && d <= 85) { b = 22; h = 14; tolMin = -0.052; }
+            else if (d > 85 && d <= 95) { b = 25; h = 14; tolMin = -0.052; }
+            else if (d > 95 && d <= 110) { b = 28; h = 16; tolMin = -0.052; }
+            else if (d > 110 && d <= 130) { b = 32; h = 18; tolMin = -0.062; }
+            else if (d > 130 && d <= 150) { b = 36; h = 20; tolMin = -0.062; }
+            else if (d > 150 && d <= 170) { b = 40; h = 22; tolMin = -0.062; }
+            else if (d > 170 && d <= 200) { b = 45; h = 25; tolMin = -0.062; }
+            else if (d > 200 && d <= 230) { b = 50; h = 28; tolMin = -0.062; }
+            else if (d > 230 && d <= 260) { b = 56; h = 32; tolMin = -0.074; }
+            else if (d > 260 && d <= 290) { b = 63; h = 32; tolMin = -0.074; }
+            else if (d > 290 && d <= 330) { b = 70; h = 36; tolMin = -0.074; }
+            else if (d > 330 && d <= 380) { b = 80; h = 40; tolMin = -0.074; }
+            else if (d > 380 && d <= 440) { b = 90; h = 45; tolMin = -0.087; }
+            else if (d > 440 && d <= 500) { b = 100; h = 50; tolMin = -0.087; }
+            else return null;
             tolMax = 0.000;
 
             return {
                 larguraNominal: b,
+                alturaNominal: h,
                 classe: 'N9',
                 desvioInf: tolMin,
                 desvioSup: tolMax,
                 minimo: Number((b + tolMin).toFixed(3)),
                 maximo: Number((b + tolMax).toFixed(3))
             };
+        }
+
+        const TOLERANCIAS_CHAVETA_ISO773 = [
+            { minimo: 1, maximo: 3, h9: 0.025, h11: 0.060, h14: 0.250 },
+            { minimo: 3, maximo: 6, h9: 0.030, h11: 0.075, h14: 0.300 },
+            { minimo: 6, maximo: 10, h9: 0.036, h11: 0.090, h14: 0.360 },
+            { minimo: 10, maximo: 18, h9: 0.043, h11: 0.110, h14: 0.430 },
+            { minimo: 18, maximo: 30, h9: 0.052, h11: 0.130, h14: 0.520 },
+            { minimo: 30, maximo: 50, h9: 0.062, h11: 0.160, h14: 0.620 },
+            { minimo: 50, maximo: 80, h9: 0.074, h11: 0.190, h14: 0.740 },
+            { minimo: 80, maximo: 120, h9: 0.087, h11: 0.220, h14: 0.870 },
+            { minimo: 120, maximo: 180, h9: 0.100, h11: 0.250, h14: 1.000 },
+            { minimo: 180, maximo: 250, h9: 0.115, h11: 0.290, h14: 1.150 },
+            { minimo: 250, maximo: 315, h9: 0.130, h11: 0.320, h14: 1.300 },
+            { minimo: 315, maximo: 400, h9: 0.140, h11: 0.360, h14: 1.400 },
+            { minimo: 400, maximo: 500, h9: 0.155, h11: 0.400, h14: 1.550 }
+        ];
+
+        function atualizarValidacaoChaveta(tipo) {
+            const campos = {
+                largura: { nominal: 'nom_chaveta_largura', medicao: 'med_chaveta_largura', resultado: 'res_chaveta_largura', descricao: 'tol_desc_chaveta_largura', classe: 'h9' },
+                altura: { nominal: 'nom_chaveta_altura', medicao: 'med_chaveta_altura', resultado: 'res_chaveta_altura', descricao: 'tol_desc_chaveta_altura', classe: 'h11' },
+                comprimento: { nominal: 'nom_chaveta_comprimento', medicao: 'med_chaveta_comprimento', resultado: 'res_chaveta_comprimento', descricao: 'tol_desc_chaveta_comprimento', classe: 'h14' }
+            }[tipo];
+            if (!campos) return;
+
+            const nominal = parseFloat(document.getElementById(campos.nominal).value);
+            const medicao = document.getElementById(campos.medicao);
+            const resultado = document.getElementById(campos.resultado);
+            const descricao = document.getElementById(campos.descricao);
+            const faixa = TOLERANCIAS_CHAVETA_ISO773.find(item => nominal > item.minimo && nominal <= item.maximo);
+
+            if (!faixa) {
+                descricao.textContent = 'Informe uma dimensão nominal entre 1 e 500 mm';
+                resultado.value = '';
+                resultado.className = 'status-pendente';
+                return;
+            }
+
+            const tolerancia = faixa[campos.classe];
+            const minimo = Number((nominal - tolerancia).toFixed(3));
+            const maximo = Number(nominal.toFixed(3));
+            descricao.innerHTML = '<span class="norma-badge">ISO 773 ' + campos.classe + '</span> <span class="tol-range">[' + minimo.toFixed(3) + ' ~ ' + maximo.toFixed(3) + ' mm]</span>';
+
+            if (medicao.value.trim() === '') {
+                resultado.value = '';
+                resultado.className = 'status-pendente';
+                return;
+            }
+
+            const valorMedido = parseFloat(medicao.value);
+            const aprovado = !isNaN(valorMedido) && valorMedido >= (minimo - 0.0001) && valorMedido <= (maximo + 0.0001);
+            resultado.value = aprovado ? 'Aprovado' : 'Reprovado';
+            resultado.className = aprovado ? 'status-aprovado' : 'status-reprovado';
         }
 
         // 2. IEC 60072-1 / ISO 286-2: Ponta de Eixo de Motores CA
@@ -1154,9 +1237,16 @@
             const tolChaveta = obterChavetaDIN6885(nPonta);
             if (tolChaveta) {
                 document.getElementById('nom_chaveta').value = tolChaveta.larguraNominal;
-                document.getElementById('tol_desc_chaveta').innerHTML = 
-                    `<span class="norma-badge">DIN 6885-1 ${tolChaveta.classe}</span> <span class="tol-range">[${tolChaveta.minimo.toFixed(3)} ~ ${tolChaveta.maximo.toFixed(3)} mm]</span> (largura ${tolChaveta.larguraNominal}mm | ${formatarDesvio(tolChaveta.desvioInf)} / ${formatarDesvio(tolChaveta.desvioSup)})`;
+                document.getElementById('nom_chaveta_largura').value = tolChaveta.larguraNominal;
+                document.getElementById('nom_chaveta_altura').value = tolChaveta.alturaNominal;
+                document.getElementById('tol_desc_chaveta').innerHTML =
+                    '<span class="norma-badge">DIN 6885-1 ' + tolChaveta.classe + '</span> <span class="tol-range">[' + tolChaveta.minimo.toFixed(3) + ' ~ ' + tolChaveta.maximo.toFixed(3) + ' mm]</span> (largura ' + tolChaveta.larguraNominal + 'mm | ' + formatarDesvio(tolChaveta.desvioInf) + ' / ' + formatarDesvio(tolChaveta.desvioSup) + ')';
+            } else {
+                document.getElementById('nom_chaveta').value = '';
+                document.getElementById('nom_chaveta_largura').value = '';
+                document.getElementById('nom_chaveta_altura').value = '';
             }
+            ['largura', 'altura', 'comprimento'].forEach(atualizarValidacaoChaveta);
 
             // Tampa LA
             const nTampaLA = parseFloat(document.getElementById('nom_tampa_la').value);
