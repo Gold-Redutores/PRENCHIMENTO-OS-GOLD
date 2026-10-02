@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RQ 028 - Controle Dimensional Motores CA</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #17334b;
+            --blue: #245675;
+            --blue-dark: #193d54;
+            --red: #b94d20;
+            --green: #2e695d;
+            --line: #bdc9d1;
+            --soft: #edf2f5;
+            --field: #f8fafb;
+            --muted: #5d6d78;
+            --bg-aprovado: #d4edda;
+            --text-aprovado: #155724;
+            --border-aprovado: #c3e6cb;
+            --bg-reprovado: #f8d7da;
+            --text-reprovado: #721c24;
+            --border-reprovado: #f5c6cb;
+            --badge-bg: #e2eaf0;
+            --badge-text: #245675;
+            --highlight-limit: #fffae6;
+            --highlight-border: #d4a017;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #e7edf1 0%, #f6f8f9 100%);
+            color: var(--ink);
+            font: 14px/1.4 "Aptos", "Segoe UI", sans-serif;
+        }
+
+        .page {
+            width: min(1120px, calc(100% - 32px));
+            margin: 24px auto;
+            padding: 28px 32px 24px;
+            background: #fff;
+            border-top: 5px solid var(--red);
+            box-shadow: 0 8px 28px rgba(23, 51, 75, .12);
+            border-radius: 2px;
+        }
+
+        .document-header {
+            display: grid;
+            grid-template-columns: 1fr minmax(230px, 1.6fr) 1fr;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand-logo {
+            display: block;
+            width: 100%;
+            max-width: 175px;
+            max-height: 56px;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        .title { text-align: center; }
+        .title h1 { margin: 0; color: var(--ink); font-size: 21px; line-height: 1.2; font-weight: 800; }
+        .title p { margin: 5px 0 0; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+
+        .doc-meta {
+            justify-self: end;
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 3px 10px;
+            font-size: 11px;
+        }
+
+        .doc-meta dt { color: var(--muted); }
+        .doc-meta dd { margin: 0; text-align: right; font-weight: 700; }
+
+        .intro-fields {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr 1fr 1fr;
+            gap: 12px;
+            margin: 18px 0 20px;
+            padding: 14px;
+            background: var(--soft);
+            border: 1px solid #d6e0e6;
+            border-radius: 4px;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+        .field label { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .field input, .field textarea, .field select { width: 100%; }
+
+        input, select, textarea {
+            min-height: 34px;
+            padding: 6px 8px;
+            border: 1px solid var(--line);
+            border-radius: 3px;
+            background: var(--field);
+            color: #172d3e;
+            font: inherit;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid rgba(36, 86, 117, .25);
+            border-color: var(--blue);
+            background: #fff;
+        }
+
+        .section { margin-top: 20px; }
+        .section-heading {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-left: 4px solid var(--red);
+            background: var(--soft);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .section-heading .number { color: var(--red); font-size: 12px; font-weight: 800; }
+        .section-heading h2 { margin: 0; color: var(--ink); font-size: 13px; text-transform: uppercase; font-weight: 700; }
+        .section-heading small { color: var(--muted); font-size: 10px; }
+        
+        .section-config {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--blue-dark);
+            background: #fff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--line);
+        }
+        .section-config label { text-transform: uppercase; font-size: 10px; }
+        .section-config input, .section-config select {
+            min-height: 26px;
+            height: 26px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            border-color: var(--blue);
+        }
+
+        .table-scroll { width: 100%; overflow-x: auto; }
+        table { width: 100%; min-width: 820px; border-collapse: collapse; table-layout: fixed; margin-bottom: 6px; }
+        th, td { padding: 6px 8px; border: 1px solid var(--line); vertical-align: middle; }
+        th { background: #f4f7f9; color: var(--blue); font-size: 10px; text-align: left; text-transform: uppercase; font-weight: 700; }
+        td { height: 44px; font-size: 12px; }
+        td:first-child { font-weight: 600; }
+        td input, td select { min-height: 30px; padding: 4px 6px; font-size: 12px; width: 100%; }
+        
+        .col-item { width: 28%; }
+        .col-nominal { width: 13%; }
+        .col-measure { width: 15%; }
+        .col-result { width: 14%; }
+        .col-instrument { width: 16%; }
+        .col-tag { width: 14%; }
+
+        .repair-check-table { min-width: 920px; }
+        .repair-check-table th { text-align: center; }
+        .repair-check-table td { height: 48px; }
+        .approval-options { display: flex; justify-content: center; gap: 10px; white-space: nowrap; }
+        .approval-options label { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; cursor: pointer; }
+        .approval-options input { width: auto; min-height: auto; margin: 0; accent-color: var(--green); }
+        
+        .instrument-row td { height: auto; background: #f8fafb; }
+        .instrument-row .instrument-fields { margin: 0; }
+
+        .instrument-fields {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 12px;
+            margin: 0 0 8px;
+        }
+
+        /* Classes de Destaque Automático de Tolerâncias e Status */
+        .lbl-tolerancia {
+            display: block;
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: normal;
+            margin-top: 3px;
+            line-height: 1.2;
+        }
+        .norma-badge {
+            display: inline-block;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 700;
+            font-size: 9px;
+            margin-right: 4px;
+            text-transform: uppercase;
+        }
+        .tol-range {
+            font-weight: 700;
+            color: #17334b;
+        }
+
+        .status-aprovado {
+            background-color: var(--bg-aprovado) !important;
+            color: var(--text-aprovado) !important;
+            border-color: var(--border-aprovado) !important;
+            font-weight: 800 !important;
+        }
+        .status-reprovado {
+            background-color: var(--bg-reprovado) !important;
+            color: var(--text-reprovado) !important;
+            border-color: var(--border-reprovado) !important;
+            font-weight: 800 !important;
+        }
+        .status-pendente {
+            background-color: var(--field) !important;
+            color: var(--muted) !important;
+            font-weight: normal !important;
+        }
+
+        .info-normas-box {
+            background: #f8fafc;
+            border: 1px solid #d0dce5;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .info-normas-box strong { color: var(--blue); }
+
+        .diagnosis { margin-top: 18px; }
+        .diagnosis textarea { min-height: 86px; resize: vertical; }
+
+        .vibration-reference {
+            display: grid;
+            grid-template-columns: minmax(220px, .8fr) minmax(0, 1.5fr);
+            gap: 14px;
+            align-items: center;
+            margin: 18px 0;
+            padding: 12px;
+            border: 1px solid var(--line);
+            background: #f8fafb;
+            break-inside: avoid;
+        }
+        .vibration-image { display: block; width: 100%; max-height: 180px; object-fit: contain; }
+        .vibration-reference figcaption { margin-top: 5px; color: var(--muted); font-size: 10px; text-align: center; }
+        .vibration-limits { min-width: 0; }
+        .vibration-limits caption { padding: 0 0 7px; color: var(--ink); font-size: 11px; font-weight: 700; text-align: left; }
+        .vibration-limits th, .vibration-limits td { height: auto; padding: 6px 4px; text-align: center; transition: all 0.2s ease; }
+        .vibration-limits td:first-child { text-align: left; font-weight: 600; }
+        .vibration-note { margin: 5px 0 0; color: var(--muted); font-size: 9px; }
+
+        /* Célula ativa na Tabela 11 */
+        .active-limit-cell {
+            background-color: var(--bg-aprovado) !important;
+            color: var(--text-aprovado) !important;
+            font-weight: 800 !important;
+            border: 2px solid var(--green) !important;
+        }
+
+        .footer-note {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 18px;
+            padding-top: 9px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 22px 0 6px; }
+        .actions button {
+            min-height: 40px;
+            padding: 9px 15px;
+            border: 0;
+            border-radius: 3px;
+            color: white;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .primary { background: var(--blue); }
+        .secondary { background: var(--green); }
+        .quiet { background: #687883; }
+        .actions button:hover { filter: brightness(.92); transform: translateY(-1px); }
+
+        @media (max-width: 760px) {
+            .page { width: 100%; margin: 0; padding: 18px 14px; box-shadow: none; }
+            .document-header { grid-template-columns: 1fr auto; gap: 12px; }
+            .brand-logo { max-width: 145px; }
+            .title { grid-column: 1 / -1; grid-row: 2; text-align: left; }
+            .doc-meta { grid-column: 2; grid-row: 1; }
+            .intro-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 10px; }
+            .instrument-fields { grid-template-columns: 1fr; }
+            .section-heading small { display: none; }
+            .vibration-reference { grid-template-columns: 1fr; }
+            .vibration-image { max-height: 240px; }
+        }
+
+        @page { size: A4 portrait; margin: 10mm; }
+        @media print {
+            body { background: white; font-size: 10px; }
+            .page { width: 100%; margin: 0; padding: 0; border-top-width: 3px; box-shadow: none; }
+            .no-print { display: none !important; }
+            .document-header { padding-bottom: 10px; }
+            .brand-logo { max-height: 44px; }
+            .intro-fields { margin: 10px 0 12px; padding: 8px; gap: 8px; }
+            .field input, .field select { min-height: 27px; padding: 3px 5px; }
+            .section { margin-top: 11px; break-inside: avoid; }
+            .section-heading { margin-bottom: 5px; padding: 5px 8px; }
+            .section-config { display: none; }
+            .vibration-reference { grid-template-columns: 32% 1fr; gap: 8px; margin: 8px 0; padding: 7px; }
+            .vibration-image { max-height: 125px; }
+            .vibration-reference figcaption, .vibration-note { font-size: 7px; }
+            .vibration-limits caption { font-size: 8px; }
+            .vibration-limits th, .vibration-limits td { padding: 3px 2px; font-size: 7px; }
+            .table-scroll { overflow: visible; }
+            table { min-width: 0; }
+            .repair-check-table { min-width: 0; }
+            .repair-check-table th, .repair-check-table td { padding: 3px 2px; font-size: 8px; }
+            .approval-options { gap: 4px; }
+            .approval-options label { gap: 2px; font-size: 8px; }
+            th, td { padding: 4px; }
+            td { height: 32px; }
+            td input, td select { min-height: 24px; padding: 2px 4px; font-size: 10px; }
+            .diagnosis textarea { min-height: 60px; }
+            .footer-note { margin-top: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="document-header">
+            <img class="brand-logo" src="https://i.ibb.co/zWgjxdtj/logo.png" alt="Gold Soluções e Serviços">
+            <div class="title">
+                <h1>Controle Dimensional</h1>
+                <p>MOTORES CA</p>
+            </div>
+            <dl class="doc-meta">
+                <dt>Documento</dt><dd>RQ 028</dd>
+                <dt>Revisão</dt><dd>03 / 02</dd>
+                <dt>Data do documento</dt><dd>05/12/2018</dd>
+            </dl>
+        </header>
+
+        <form id="rq028-form">
+            <section class="intro-fields" aria-label="Identificação do ensaio">
+                <div class="field">
+                    <label for="os">OS</label>
+                    <input id="os" name="os" type="text" autocomplete="off" placeholder="Ex: 5449">
+                </div>
+                <div class="field">
+                    <label for="tag-equipamento">TAG / Equipamento</label>
+                    <input id="tag-equipamento" name="tag-equipamento" type="text" placeholder="Motor CA 75CV">
+                </div>
+                <div class="field">
+                    <label for="executante">Executante</label>
+                    <input id="executante" name="executante" type="text" placeholder="Nome do técnico">
+                </div>
+                <div class="field">
+                    <label for="data-ensaio">Data do ensaio</label>
+                    <input id="data-ensaio" name="data-ensaio" type="text" class="report-date" readonly>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 01 - EIXO E COMPONENTES -->
+            <section class="section" aria-labelledby="secao-eixo">
+                <div class="section-heading">
+                    <span class="number">01</span>
+                    <h2 id="secao-eixo">Verificação dimensional do eixo e componentes</h2>
+                    <small>Folha 1 de 2</small>
+                </div>
+                
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-item">Componente / Item</th>
+                                <th class="col-nominal">Ø Nominal (mm)</th>
+                                <th class="col-measure">Medição Inicial (mm)</th>
+                                <th class="col-result">Resultado</th>
+                                <th class="col-instrument">Instrumento</th>
+                                <th class="col-tag">TAG Instrumento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Eixo Ø3 (Rolamento LA) -->
+                            <tr>
+                                <td>
+                                    Eixo Ø3 (Rolamento LA)
+                                    <span id="tol_desc_eixo3" class="lbl-tolerancia"></span>
+                                </td>
+                                <td>
+                                    <input type="number" id="nom_eixo3" name="nom_eixo3" step="0.01" value="70" oninput="calcularTolerancias()">
+                                </td>
+                                <td>
+                                    <input type="number" step="0.001" id="med_eixo3" name="eixo-3-medicao" placeholder="0.000" oninput="validarItem('eixo3')">
+                                </td>
+                                <td>
+                                    <select id="res_eixo3" name="eixo-3-resultado">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td><input name="eixo-3-instrumento" type="text" value="Micrômetro externo"></td>
+                                <td><input name="eixo-3-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+
+                            <!-- Eixo Ø4 (Rolamento LOA) -->
+                            <tr>
+                                <td>
+                                    Eixo Ø4 (Rolamento LOA)
+                                    <span id="tol_desc_eixo4" class="lbl-tolerancia"></span>
+                                </td>
+                                <td>
+                                    <input type="number" id="nom_eixo4" name="nom_eixo4" step="0.01" value="70" oninput="calcularTolerancias()">
+                                </td>
+                                <td>
+                                    <input type="number" step="0.001" id="med_eixo4" name="eixo-4-medicao" placeholder="0.000" oninput="validarItem('eixo4')">
+                                </td>
+                                <td>
+                                    <select id="res_eixo4" name="eixo-4-resultado">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td><input name="eixo-4-instrumento" type="text" value="Micrômetro externo"></td>
+                                <td><input name="eixo-4-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+
+                            <!-- Medição ponta de eixo -->
+                            <tr>
+                                <td>
+                                    Medição ponta de eixo
+                                    <span id="tol_desc_ponta" class="lbl-tolerancia"></span>
+                                </td>
+                                <td>
+                                    <input type="number" id="nom_ponta" name="nom_ponta" step="0.01" value="65" oninput="calcularTolerancias()">
+                                </td>
+                                <td>
+                                    <input type="number" step="0.001" id="med_ponta" name="ponta-eixo-medicao" placeholder="0.000" oninput="validarItem('ponta')">
+                                </td>
+                                <td>
+                                    <select id="res_ponta" name="ponta-eixo-resultado">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td><input name="ponta-eixo-instrumento" type="text" value="Micrômetro externo"></td>
+                                <td><input name="ponta-eixo-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+
+                            <!-- Rasgo de chaveta (Largura N9 DIN 6885-1) -->
+                            <tr>
+                                <td>
+                                    Rasgo de chaveta (Largura)
+                                    <span id="tol_desc_chaveta" class="lbl-tolerancia"></span>
+                                </td>
+                                <td>
+                                    <input type="number" id="nom_chaveta" name="nom_chaveta" step="0.01" value="18" readonly style="background:#edf2f5; font-weight:bold; color:var(--blue);" title="Largura nominal da chaveta calculada por DIN 6885-1 com base no Ø da ponta de eixo">
+                                </td>
+                                <td>
+                                    <input type="number" step="0.001" id="med_chaveta" name="chaveta-medicao" placeholder="0.000" oninput="validarItem('chaveta')">
+                                </td>
+                                <td>
+                                    <select id="res_chaveta" name="chaveta-resultado">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td><input name="chaveta-instrumento" type="text" value="Paquímetro / Micrômetro"></td>
+                                <td><input name="chaveta-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-normas-box">
+                    <span><strong>Normas aplicadas:</strong> ISO 286 / IEC 60072-1 (Assentos e Ponta de Eixo j6/k5/k6/m5/m6) · DIN 6885-1 (Rasgo Chaveta ajuste N9 completo para eixos de 6 a 130+ mm).</span>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 02 - TAMPAS (ANSI/EASA AR100 / ISO 286 H6/H7) -->
+            <section class="section" aria-labelledby="secao-tampas">
+                <div class="section-heading">
+                    <span class="number">02</span>
+                    <h2 id="secao-tampas">Verificação dimensional das tampas (Alojamento dos Rolamentos)</h2>
+                </div>
+                
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-item">Local de medição</th>
+                                <th class="col-nominal">Ø Nominal (mm)</th>
+                                <th class="col-measure">Medição inicial (mm)</th>
+                                <th class="col-result">Resultado</th>
+                                <th class="col-instrument">Instrumento</th>
+                                <th class="col-tag">TAG instrumento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Tampa LA (Ø1) -->
+                            <tr>
+                                <td>
+                                    Tampa LA (Ø1)
+                                    <span id="tol_desc_tampa_la" class="lbl-tolerancia"></span>
+                                </td>
+                                <td>
+                                    <input type="number" id="nom_tampa_la" name="nom_tampa_la" step="0.01" value="150" oninput="calcularTolerancias()">
+                                </td>
+                                <td>
+                                    <input type="number" step="0.001" id="med_tampa_la" name="tampa-la-medicao" placeholder="0.000" oninput="validarItem('tampa_la')">
+                                </td>
+                                <td>
+                                    <select id="res_tampa_la" name="tampa-la-resultado">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td><input name="tampa-la-instrumento" type="text" value="Súbito / Micrômetro interno"></td>
+                                <td><input name="tampa-la-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+
+                            <!-- Tampa LOA (Ø1) -->
+                            <tr>
+                                <td>
+                                    Tampa LOA (Ø1)
+                                    <span id="tol_desc_tampa_loa" class="lbl-tolerancia"></span>
+                                </td>
+                                <td>
+                                    <input type="number" id="nom_tampa_loa" name="nom_tampa_loa" step="0.01" value="150" oninput="calcularTolerancias()">
+                                </td>
+                                <td>
+                                    <input type="number" step="0.001" id="med_tampa_loa" name="tampa-loa-medicao" placeholder="0.000" oninput="validarItem('tampa_loa')">
+                                </td>
+                                <td>
+                                    <select id="res_tampa_loa" name="tampa-loa-resultado">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td><input name="tampa-loa-instrumento" type="text" value="Súbito / Micrômetro interno"></td>
+                                <td><input name="tampa-loa-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-normas-box">
+                    <span><strong>Norma aplicada:</strong> ANSI/EASA AR100 / ISO 286-2 (Alojamento de rolamentos em tampas de motores padrão H6 / folga calculada automaticamente).</span>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 03 - CONCENTRICIDADE -->
+            <section class="section" aria-labelledby="secao-concentricidade">
+                <div class="section-heading">
+                    <span class="number">03</span>
+                    <h2 id="secao-concentricidade">Medição de concentricidade</h2>
+                </div>
+                <div class="table-scroll">
+                    <table class="repair-check-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Flange</th>
+                                <th colspan="4">Verificação inicial</th>
+                                <th colspan="3">Verificação após reparo</th>
+                            </tr>
+                            <tr>
+                                <th>Medição (mm)</th>
+                                <th>Aprovado</th>
+                                <th>Executante</th>
+                                <th>Data</th>
+                                <th>Medição (mm)</th>
+                                <th>Executante</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Flange</td>
+                                <td><input aria-label="Concentricidade: medição inicial" name="concentricidade-medicao-inicial" type="number" step="0.001" placeholder="0.000"></td>
+                                <td><div class="approval-options">
+                                    <label><input name="concentricidade-aprovado" type="radio" value="sim"> Sim</label>
+                                    <label><input name="concentricidade-aprovado" type="radio" value="nao"> Não</label>
+                                </div>
+                                </td>
+                                <td><input aria-label="Concentricidade: executante inicial" name="concentricidade-executante-inicial" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Concentricidade: data inicial" name="concentricidade-data-inicial" type="text" class="report-date" readonly></td>
+                                <td><input aria-label="Concentricidade: medição após reparo" name="concentricidade-medicao-reparo" type="number" step="0.001" placeholder="0.000"></td>
+                                <td><input aria-label="Concentricidade: executante após reparo" name="concentricidade-executante-reparo" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Concentricidade: data após reparo" name="concentricidade-data-reparo" type="text" class="report-date" readonly></td>
+                            </tr>
+                            <tr class="instrument-row">
+                                <td colspan="8">
+                                    <div class="instrument-fields">
+                                        <div class="field"><label for="instrumento-concentricidade">Instrumento de medição</label><input id="instrumento-concentricidade" name="instrumento-concentricidade" type="text" value="Relógio comparador"></div>
+                                        <div class="field"><label for="tag-concentricidade">TAG Gold</label><input id="tag-concentricidade" name="tag-concentricidade" type="text" placeholder="TAG Gold"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 04 - PERPENDICULARIDADE -->
+            <section class="section" aria-labelledby="secao-perpendicularidade">
+                <div class="section-heading">
+                    <span class="number">04</span>
+                    <h2 id="secao-perpendicularidade">Medição de perpendicularidade</h2>
+                </div>
+                <div class="table-scroll">
+                    <table class="repair-check-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Flange</th>
+                                <th colspan="4">Verificação inicial</th>
+                                <th colspan="3">Verificação após reparo</th>
+                            </tr>
+                            <tr>
+                                <th>Medição (mm)</th>
+                                <th>Aprovado</th>
+                                <th>Executante</th>
+                                <th>Data</th>
+                                <th>Medição (mm)</th>
+                                <th>Executante</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Flange</td>
+                                <td><input aria-label="Perpendicularidade: medição inicial" name="perpendicularidade-medicao-inicial" type="number" step="0.001" placeholder="0.000"></td>
+                                <td><div class="approval-options">
+                                    <label><input name="perpendicularidade-aprovado" type="radio" value="sim"> Sim</label>
+                                    <label><input name="perpendicularidade-aprovado" type="radio" value="nao"> Não</label>
+                                </div>
+                                </td>
+                                <td><input aria-label="Perpendicularidade: executante inicial" name="perpendicularidade-executante-inicial" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Perpendicularidade: data inicial" name="perpendicularidade-data-inicial" type="text" class="report-date" readonly></td>
+                                <td><input aria-label="Perpendicularidade: medição após reparo" name="perpendicularidade-medicao-reparo" type="number" step="0.001" placeholder="0.000"></td>
+                                <td><input aria-label="Perpendicularidade: executante após reparo" name="perpendicularidade-executante-reparo" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Perpendicularidade: data após reparo" name="perpendicularidade-data-reparo" type="text" class="report-date" readonly></td>
+                            </tr>
+                            <tr class="instrument-row">
+                                <td colspan="8">
+                                    <div class="instrument-fields">
+                                        <div class="field"><label for="instrumento-perpendicularidade">Instrumento de medição</label><input id="instrumento-perpendicularidade" name="instrumento-perpendicularidade" type="text" value="Relógio comparador"></div>
+                                        <div class="field"><label for="tag-perpendicularidade">TAG Gold</label><input id="tag-perpendicularidade" name="tag-perpendicularidade" type="text" placeholder="TAG Gold"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 05 - BATIMENTO EM PONTA DE EIXO / FLANGE -->
+            <section class="section" aria-labelledby="secao-batimento">
+                <div class="section-heading">
+                    <span class="number">05</span>
+                    <h2 id="secao-batimento">Batimento em ponta de eixo / flange</h2>
+                    <small>Folha 2 de 2</small>
+                </div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-item">Condição / Local</th>
+                                <th class="col-nominal">Limite Máx. (mm)</th>
+                                <th class="col-measure">Medição Inicial (mm)</th>
+                                <th class="col-result">Resultado</th>
+                                <th class="col-instrument">Instrumento</th>
+                                <th class="col-tag">TAG Instrumento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Com Flange -->
+                            <tr>
+                                <td>
+                                    Com flange (Face / Encaixe)
+                                    <span id="tol_desc_bat_com_flange" class="lbl-tolerancia"><span class="norma-badge">DIN 42955</span> <span class="tol-range">[0.000 ~ 0.050 mm]</span></span>
+                                </td>
+                                <td style="font-weight: bold; color: var(--blue); font-size: 11px;">≤ 0,050 mm</td>
+                                <td>
+                                    <input aria-label="Medição inicial: Com flange" id="med_bat_com_flange" name="com-flange-medicao" type="number" step="0.001" placeholder="0.000" oninput="validarBatimento('com_flange')">
+                                </td>
+                                <td>
+                                    <select id="res_bat_com_flange" aria-label="Resultado: Com flange" name="com-flange-resultado">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td><input aria-label="Instrumento: Com flange" name="com-flange-instrumento" type="text" value="Relógio comparador"></td>
+                                <td><input aria-label="TAG do instrumento: Com flange" name="com-flange-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+
+                            <!-- Sem Flange (Ponta de Eixo) -->
+                            <tr>
+                                <td>
+                                    Sem flange (Ponta de eixo)
+                                    <span id="tol_desc_bat_sem_flange" class="lbl-tolerancia"><span class="norma-badge">IEC 60072-1</span> <span class="tol-range">[0.000 ~ 0.030 mm]</span></span>
+                                </td>
+                                <td style="font-weight: bold; color: var(--blue); font-size: 11px;">≤ 0,030 mm</td>
+                                <td>
+                                    <input aria-label="Medição inicial: Sem flange" id="med_bat_sem_flange" name="sem-flange-medicao" type="number" step="0.001" placeholder="0.000" oninput="validarBatimento('sem_flange')">
+                                </td>
+                                <td>
+                                    <select id="res_bat_sem_flange" aria-label="Resultado: Sem flange" name="sem-flange-resultado">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td><input aria-label="Instrumento: Sem flange" name="sem-flange-instrumento" type="text" value="Relógio comparador"></td>
+                                <td><input aria-label="TAG do instrumento: Sem flange" name="sem-flange-tag" type="text" placeholder="TAG Gold"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-normas-box">
+                    <span><strong>Normas aplicadas:</strong> DIN 42955 / IEC 60072-1 / ABNT NBR 15623 (Tolerâncias de batimento radial e axial em eixos e flanges de máquinas elétricas girantes).</span>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 06 - VIBRAÇÃO (ABNT NBR IEC 60034-14) -->
+            <section class="section" aria-labelledby="secao-vibracao">
+                <div class="section-heading">
+                    <span class="number">06</span>
+                    <h2 id="secao-vibracao">Medição do nível de vibração (ABNT NBR IEC 60034-14)</h2>
+                    
+                    <div class="section-config no-print" style="gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <label for="carcaca_vibracao">Carcaça (H):</label>
+                            <select id="carcaca_vibracao" name="carcaca_vibracao" onchange="atualizarParametrosVibracao()">
+                                <option value="56_132">56 ≤ H ≤ 132</option>
+                                <option value="132_280" selected>132 &lt; H ≤ 280</option>
+                                <option value="gt_280">H &gt; 280</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <label for="grau_vibracao">Grau:</label>
+                            <select id="grau_vibracao" name="grau_vibracao" onchange="atualizarParametrosVibracao()">
+                                <option value="A" selected>Grau A (padrão)</option>
+                                <option value="B">Grau B (especial)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="instrument-fields">
+                    <div class="field">
+                        <label for="instrumento-vibracao">Instrumento de medição</label>
+                        <input id="instrumento-vibracao" name="instrumento-vibracao" type="text" value="Analisador / Caneta de vibração">
+                    </div>
+                    <div class="field">
+                        <label for="tag-vibracao">TAG do instrumento</label>
+                        <input id="tag-vibracao" name="tag-vibracao" type="text" placeholder="TAG Gold">
+                    </div>
+                </div>
+
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-item">Ponto de Medição</th>
+                                <th class="col-nominal">Limite Máx.</th>
+                                <th class="col-measure">Medição (mm/s RMS)</th>
+                                <th class="col-result">Resultado</th>
+                                <th class="col-instrument">Executante</th>
+                                <th class="col-tag">Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Ponto 1 -->
+                            <tr>
+                                <td>
+                                    Ponto 1 (Mancal LA - Horiz.)
+                                    <span id="tol_desc_vib_1" class="lbl-tolerancia"></span>
+                                </td>
+                                <td class="col-limite-vib" style="font-weight:bold; color:var(--blue); font-size:11px;">≤ 2,2 mm/s</td>
+                                <td><input aria-label="Medição de vibração: Ponto 1" id="med_vib_1" name="vibracao-ponto-1-medicao" type="number" step="0.01" placeholder="0.00" oninput="validarVibracao(1)"></td>
+                                <td><select id="res_vib_1" name="vibracao-ponto-1-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input aria-label="Executante: Ponto 1" name="vibracao-ponto-1-executante" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Data: Ponto 1" name="vibracao-ponto-1-data" type="text" class="report-date" readonly></td>
+                            </tr>
+
+                            <!-- Ponto 2 -->
+                            <tr>
+                                <td>
+                                    Ponto 2 (Mancal LA - Vert.)
+                                    <span id="tol_desc_vib_2" class="lbl-tolerancia"></span>
+                                </td>
+                                <td class="col-limite-vib" style="font-weight:bold; color:var(--blue); font-size:11px;">≤ 2,2 mm/s</td>
+                                <td><input aria-label="Medição de vibração: Ponto 2" id="med_vib_2" name="vibracao-ponto-2-medicao" type="number" step="0.01" placeholder="0.00" oninput="validarVibracao(2)"></td>
+                                <td><select id="res_vib_2" name="vibracao-ponto-2-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input aria-label="Executante: Ponto 2" name="vibracao-ponto-2-executante" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Data: Ponto 2" name="vibracao-ponto-2-data" type="text" class="report-date" readonly></td>
+                            </tr>
+
+                            <!-- Ponto 3 -->
+                            <tr>
+                                <td>
+                                    Ponto 3 (Mancal LA - Axial)
+                                    <span id="tol_desc_vib_3" class="lbl-tolerancia"></span>
+                                </td>
+                                <td class="col-limite-vib" style="font-weight:bold; color:var(--blue); font-size:11px;">≤ 2,2 mm/s</td>
+                                <td><input aria-label="Medição de vibração: Ponto 3" id="med_vib_3" name="vibracao-ponto-3-medicao" type="number" step="0.01" placeholder="0.00" oninput="validarVibracao(3)"></td>
+                                <td><select id="res_vib_3" name="vibracao-ponto-3-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input aria-label="Executante: Ponto 3" name="vibracao-ponto-3-executante" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Data: Ponto 3" name="vibracao-ponto-3-data" type="text" class="report-date" readonly></td>
+                            </tr>
+
+                            <!-- Ponto 4 -->
+                            <tr>
+                                <td>
+                                    Ponto 4 (Mancal LOA - Horiz.)
+                                    <span id="tol_desc_vib_4" class="lbl-tolerancia"></span>
+                                </td>
+                                <td class="col-limite-vib" style="font-weight:bold; color:var(--blue); font-size:11px;">≤ 2,2 mm/s</td>
+                                <td><input aria-label="Medição de vibração: Ponto 4" id="med_vib_4" name="vibracao-ponto-4-medicao" type="number" step="0.01" placeholder="0.00" oninput="validarVibracao(4)"></td>
+                                <td><select id="res_vib_4" name="vibracao-ponto-4-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input aria-label="Executante: Ponto 4" name="vibracao-ponto-4-executante" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Data: Ponto 4" name="vibracao-ponto-4-data" type="text" class="report-date" readonly></td>
+                            </tr>
+
+                            <!-- Ponto 5 -->
+                            <tr>
+                                <td>
+                                    Ponto 5 (Mancal LOA - Vert.)
+                                    <span id="tol_desc_vib_5" class="lbl-tolerancia"></span>
+                                </td>
+                                <td class="col-limite-vib" style="font-weight:bold; color:var(--blue); font-size:11px;">≤ 2,2 mm/s</td>
+                                <td><input aria-label="Medição de vibração: Ponto 5" id="med_vib_5" name="vibracao-ponto-5-medicao" type="number" step="0.01" placeholder="0.00" oninput="validarVibracao(5)"></td>
+                                <td><select id="res_vib_5" name="vibracao-ponto-5-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input aria-label="Executante: Ponto 5" name="vibracao-ponto-5-executante" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Data: Ponto 5" name="vibracao-ponto-5-data" type="text" class="report-date" readonly></td>
+                            </tr>
+
+                            <!-- Ponto 6 -->
+                            <tr>
+                                <td>
+                                    Ponto 6 (Mancal LOA - Axial)
+                                    <span id="tol_desc_vib_6" class="lbl-tolerancia"></span>
+                                </td>
+                                <td class="col-limite-vib" style="font-weight:bold; color:var(--blue); font-size:11px;">≤ 2,2 mm/s</td>
+                                <td><input aria-label="Medição de vibração: Ponto 6" id="med_vib_6" name="vibracao-ponto-6-medicao" type="number" step="0.01" placeholder="0.00" oninput="validarVibracao(6)"></td>
+                                <td><select id="res_vib_6" name="vibracao-ponto-6-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option><option value="N/A">N/A</option></select></td>
+                                <td><input aria-label="Executante: Ponto 6" name="vibracao-ponto-6-executante" type="text" class="executante-relatorio"></td>
+                                <td><input aria-label="Data: Ponto 6" name="vibracao-ponto-6-data" type="text" class="report-date" readonly></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-normas-box">
+                    <span id="info_resumo_vibracao"><strong>Critério ativo:</strong> ABNT NBR IEC 60034-14 · Grau A (padrão) · Carcaça 132 &lt; H ≤ 280 · Limite máximo permitido: <strong>2,2 mm/s RMS</strong>.</span>
+                </div>
+            </section>
+
+            <!-- FIGURA E TABELA 11 DA NORMA NBR IEC 60034-14 -->
+            <figure class="vibration-reference" aria-labelledby="vibration-caption">
+                <div>
+                    <img class="vibration-image" src="https://i.ibb.co/HL9dr6Pc/VIBRACAO-MOTOR.jpg" alt="Diagrama dos pontos de medição de vibração do motor">
+                    <figcaption id="vibration-caption">Figura 20: Pontos de medição</figcaption>
+                </div>
+                <div>
+                    <table class="vibration-limits" id="tabela_referencia_vibracao">
+                        <caption>Valores máximos de velocidade de vibração por tamanho da carcaça</caption>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Grau de vibração</th>
+                                <th colspan="3">Tamanho da carcaça (H)</th>
+                            </tr>
+                            <tr>
+                                <th>56 ≤ H ≤ 132</th>
+                                <th>132 &lt; H ≤ 280</th>
+                                <th>H &gt; 280</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>A (padrão)</td>
+                                <td id="cell_A_56_132">1,6 mm/s</td>
+                                <td id="cell_A_132_280" class="active-limit-cell">2,2 mm/s</td>
+                                <td id="cell_A_gt_280">2,8 mm/s</td>
+                            </tr>
+                            <tr>
+                                <td>B (especial)</td>
+                                <td id="cell_B_56_132">0,7 mm/s</td>
+                                <td id="cell_B_132_280">1,1 mm/s</td>
+                                <td id="cell_B_gt_280">1,8 mm/s</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="vibration-note">Tabela 11: Limites da ABNT NBR IEC 60034-14 para suspensão livre, em mm/s RMS.</p>
+                </div>
+            </figure>
+
+            <section class="diagnosis">
+                <div class="section-heading">
+                    <span class="number">07</span>
+                    <h2>Resumo do diagnóstico dimensional</h2>
+                </div>
+                <div class="field">
+                    <label for="diagnostico">Observações e conclusão</label>
+                    <textarea id="diagnostico" name="diagnostico" placeholder="Insira o parecer técnico e conclusões do ensaio dimensional..."></textarea>
+                </div>
+            </section>
+
+            <div class="footer-note">
+                <span>RQ 028 · Controle dimensional de motores CA</span>
+                <span>Formulário de coleta calibrado por normas ISO / DIN / EASA / ABNT NBR IEC</span>
+            </div>
+
+            <div class="actions no-print">
+                <button class="primary" type="button" onclick="window.print()">Imprimir / Salvar PDF</button>
+                <button class="secondary" type="button" onclick="baixarFormulario()">Baixar HTML Preenchido</button>
+                <button class="quiet" type="reset" onclick="setTimeout(calcularTolerancias, 100); return confirm('Limpar todos os campos preenchidos?')">Limpar Formulário</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        /**
+         * MATRIZ COMPLETA DE TOLERÂNCIAS CONFORME NORMAS INTERNACIONAIS:
+         * 1. DIN 6885-1: Chaveta Paralela e Rasgos de Chaveta (Ajuste N9) para eixos de 6mm a 200mm
+         * 2. IEC 60072-1 & ISO 286-2: Ponta de Eixo Cilíndrica (j6 / k6 / m6)
+         * 3. ISO 286-2 & SKF/WEG/EASA AR100: Assentos de Rolamentos no Eixo (k5 / m5 / k6 / m6)
+         * 4. ANSI/EASA AR100 & ISO 286-2 H6: Alojamento dos Rolamentos nas Tampas
+         * 5. DIN 42955 / IEC 60072-1: Batimento Radial e Axial de Ponta de Eixo e Flange
+         * 6. ABNT NBR IEC 60034-14: Tabela 11 de Limites Máximos de Velocidade de Vibração RMS
+         */
+
+        // 1. DIN 6885-1: Seleciona largura nominal e limites N9 com base no diâmetro do eixo
+        function obterChavetaDIN6885(d) {
+            if (!d || d <= 0) return null;
+            let b = 0, tolMin = 0, tolMax = 0;
+            
+            if (d > 6 && d <= 8) { b = 2; tolMin = -0.025; }
+            else if (d > 8 && d <= 10) { b = 3; tolMin = -0.025; }
+            else if (d > 10 && d <= 12) { b = 4; tolMin = -0.030; }
+            else if (d > 12 && d <= 17) { b = 5; tolMin = -0.030; }
+            else if (d > 17 && d <= 22) { b = 6; tolMin = -0.030; }
+            else if (d > 22 && d <= 30) { b = 8; tolMin = -0.036; }
+            else if (d > 30 && d <= 38) { b = 10; tolMin = -0.036; }
+            else if (d > 38 && d <= 44) { b = 12; tolMin = -0.043; }
+            else if (d > 44 && d <= 50) { b = 14; tolMin = -0.043; }
+            else if (d > 50 && d <= 58) { b = 16; tolMin = -0.043; }
+            else if (d > 58 && d <= 65) { b = 18; tolMin = -0.043; }
+            else if (d > 65 && d <= 75) { b = 20; tolMin = -0.052; }
+            else if (d > 75 && d <= 85) { b = 22; tolMin = -0.052; }
+            else if (d > 85 && d <= 95) { b = 25; tolMin = -0.052; }
+            else if (d > 95 && d <= 110) { b = 28; tolMin = -0.052; }
+            else if (d > 110 && d <= 130) { b = 32; tolMin = -0.062; }
+            else if (d > 130 && d <= 150) { b = 36; tolMin = -0.062; }
+            else if (d > 150 && d <= 170) { b = 40; tolMin = -0.062; }
+            else if (d > 170 && d <= 200) { b = 45; tolMin = -0.062; }
+            else {
+                b = Math.round(d * 0.25);
+                tolMin = -0.052;
+            }
+            tolMax = 0.000;
+
+            return {
+                larguraNominal: b,
+                classe: 'N9',
+                desvioInf: tolMin,
+                desvioSup: tolMax,
+                minimo: Number((b + tolMin).toFixed(3)),
+                maximo: Number((b + tolMax).toFixed(3))
+            };
+        }
+
+        // 2. IEC 60072-1 / ISO 286-2: Ponta de Eixo de Motores CA
+        function obterTolPontaEixo(d) {
+            if (!d || d <= 0) return null;
+            let classe = 'j6', desvioInf = 0, desvioSup = 0;
+
+            if (d <= 28) {
+                classe = 'j6';
+                if (d <= 10) { desvioInf = -0.002; desvioSup = +0.007; }
+                else if (d <= 18) { desvioInf = -0.003; desvioSup = +0.008; }
+                else { desvioInf = -0.004; desvioSup = +0.009; }
+            } else if (d <= 50) {
+                classe = 'k6';
+                if (d <= 30) { desvioInf = +0.002; desvioSup = +0.015; }
+                else { desvioInf = +0.002; desvioSup = +0.018; }
+            } else {
+                classe = 'm6';
+                if (d <= 80) { desvioInf = +0.011; desvioSup = +0.030; }
+                else if (d <= 120) { desvioInf = +0.013; desvioSup = +0.035; }
+                else if (d <= 180) { desvioInf = +0.015; desvioSup = +0.040; }
+                else { desvioInf = +0.017; desvioSup = +0.046; }
+            }
+
+            return {
+                classe: classe,
+                desvioInf: desvioInf,
+                desvioSup: desvioSup,
+                minimo: Number((d + desvioInf).toFixed(3)),
+                maximo: Number((d + desvioSup).toFixed(3))
+            };
+        }
+
+        // 3. ISO 286-2 / Assento de Rolamentos no Eixo (k5 / m5 / k6 / m6)
+        function obterTolAssentoEixo(d) {
+            if (!d || d <= 0) return null;
+            let classe = 'k5', desvioInf = 0, desvioSup = 0;
+
+            if (d <= 18) {
+                classe = 'k5';
+                desvioInf = +0.001; desvioSup = +0.009;
+            } else if (d <= 30) {
+                classe = 'k5';
+                desvioInf = +0.002; desvioSup = +0.011;
+            } else if (d <= 50) {
+                classe = 'k5';
+                desvioInf = +0.002; desvioSup = +0.013;
+            } else if (d <= 80) {
+                classe = 'm5';
+                desvioInf = +0.011; desvioSup = +0.024;
+            } else if (d <= 120) {
+                classe = 'm5';
+                desvioInf = +0.013; desvioSup = +0.028;
+            } else if (d <= 180) {
+                classe = 'm5';
+                desvioInf = +0.015; desvioSup = +0.033;
+            } else {
+                classe = 'm5';
+                desvioInf = +0.017; desvioSup = +0.037;
+            }
+
+            return {
+                classe: classe,
+                desvioInf: desvioInf,
+                desvioSup: desvioSup,
+                minimo: Number((d + desvioInf).toFixed(3)),
+                maximo: Number((d + desvioSup).toFixed(3))
+            };
+        }
+
+        // 4. ANSI/EASA AR100 / ISO 286-2 H6 (Alojamento dos Rolamentos nas Tampas)
+        function obterTolTampaAlojamento(D) {
+            if (!D || D <= 0) return null;
+            let classe = 'H6 (EASA AR100)', desvioInf = 0.000, desvioSup = 0;
+
+            if (D <= 30) { desvioSup = +0.013; }
+            else if (D <= 50) { desvioSup = +0.016; }
+            else if (D <= 80) { desvioSup = +0.019; }
+            else if (D <= 120) { desvioSup = +0.022; }
+            else if (D <= 150) { desvioSup = +0.025; }
+            else if (D <= 180) { desvioSup = +0.025; }
+            else if (D <= 250) { desvioSup = +0.029; }
+            else if (D <= 315) { desvioSup = +0.032; }
+            else { desvioSup = +0.036; }
+
+            return {
+                classe: classe,
+                desvioInf: desvioInf,
+                desvioSup: desvioSup,
+                minimo: Number((D + desvioInf).toFixed(3)),
+                maximo: Number((D + desvioSup).toFixed(3))
+            };
+        }
+
+        // 5. ABNT NBR IEC 60034-14 (Tabela 11: Limites de Vibração RMS em mm/s)
+        const TABELA_LIMITES_VIBRACAO = {
+            'A': {
+                '56_132': 1.6,
+                '132_280': 2.2,
+                'gt_280': 2.8
+            },
+            'B': {
+                '56_132': 0.7,
+                '132_280': 1.1,
+                'gt_280': 1.8
+            }
+        };
+
+        function obterLimiteVibracaoAtual() {
+            const carcaca = document.getElementById('carcaca_vibracao').value || '132_280';
+            const grau = document.getElementById('grau_vibracao').value || 'A';
+            return TABELA_LIMITES_VIBRACAO[grau][carcaca] || 2.2;
+        }
+
+        // Formatação amigável de sinais (+ / -)
+        function formatarDesvio(val) {
+            if (val > 0) return '+' + val.toFixed(3);
+            if (val === 0) return '0.000';
+            return val.toFixed(3);
+        }
+
+        // Recalcula e exibe todos os limites de tolerância das tabelas
+        function calcularTolerancias() {
+            // Eixo 3
+            const n3 = parseFloat(document.getElementById('nom_eixo3').value);
+            const tol3 = obterTolAssentoEixo(n3);
+            if (tol3) {
+                document.getElementById('tol_desc_eixo3').innerHTML = 
+                    `<span class="norma-badge">ISO 286 ${tol3.classe}</span> <span class="tol-range">[${tol3.minimo.toFixed(3)} ~ ${tol3.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tol3.desvioInf)} / ${formatarDesvio(tol3.desvioSup)})`;
+            }
+
+            // Eixo 4
+            const n4 = parseFloat(document.getElementById('nom_eixo4').value);
+            const tol4 = obterTolAssentoEixo(n4);
+            if (tol4) {
+                document.getElementById('tol_desc_eixo4').innerHTML = 
+                    `<span class="norma-badge">ISO 286 ${tol4.classe}</span> <span class="tol-range">[${tol4.minimo.toFixed(3)} ~ ${tol4.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tol4.desvioInf)} / ${formatarDesvio(tol4.desvioSup)})`;
+            }
+
+            // Ponta de Eixo
+            const nPonta = parseFloat(document.getElementById('nom_ponta').value);
+            const tolPonta = obterTolPontaEixo(nPonta);
+            if (tolPonta) {
+                document.getElementById('tol_desc_ponta').innerHTML = 
+                    `<span class="norma-badge">IEC 60072-1 ${tolPonta.classe}</span> <span class="tol-range">[${tolPonta.minimo.toFixed(3)} ~ ${tolPonta.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tolPonta.desvioInf)} / ${formatarDesvio(tolPonta.desvioSup)})`;
+            }
+
+            // Chaveta DIN 6885-1 (depende do diâmetro da ponta do eixo)
+            const tolChaveta = obterChavetaDIN6885(nPonta);
+            if (tolChaveta) {
+                document.getElementById('nom_chaveta').value = tolChaveta.larguraNominal;
+                document.getElementById('tol_desc_chaveta').innerHTML = 
+                    `<span class="norma-badge">DIN 6885-1 ${tolChaveta.classe}</span> <span class="tol-range">[${tolChaveta.minimo.toFixed(3)} ~ ${tolChaveta.maximo.toFixed(3)} mm]</span> (largura ${tolChaveta.larguraNominal}mm | ${formatarDesvio(tolChaveta.desvioInf)} / ${formatarDesvio(tolChaveta.desvioSup)})`;
+            }
+
+            // Tampa LA
+            const nTampaLA = parseFloat(document.getElementById('nom_tampa_la').value);
+            const tolTampaLA = obterTolTampaAlojamento(nTampaLA);
+            if (tolTampaLA) {
+                document.getElementById('tol_desc_tampa_la').innerHTML = 
+                    `<span class="norma-badge">EASA AR100 H6</span> <span class="tol-range">[${tolTampaLA.minimo.toFixed(3)} ~ ${tolTampaLA.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tolTampaLA.desvioInf)} / ${formatarDesvio(tolTampaLA.desvioSup)})`;
+            }
+
+            // Tampa LOA
+            const nTampaLOA = parseFloat(document.getElementById('nom_tampa_loa').value);
+            const tolTampaLOA = obterTolTampaAlojamento(nTampaLOA);
+            if (tolTampaLOA) {
+                document.getElementById('tol_desc_tampa_loa').innerHTML = 
+                    `<span class="norma-badge">EASA AR100 H6</span> <span class="tol-range">[${tolTampaLOA.minimo.toFixed(3)} ~ ${tolTampaLOA.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tolTampaLOA.desvioInf)} / ${formatarDesvio(tolTampaLOA.desvioSup)})`;
+            }
+
+            // Atualiza Seção 06 - Vibração
+            atualizarParametrosVibracao();
+
+            // Revalida todos os itens que já possuem valor digitado
+            ['eixo3', 'eixo4', 'ponta', 'chaveta', 'tampa_la', 'tampa_loa'].forEach(validarItem);
+            ['com_flange', 'sem_flange'].forEach(validarBatimento);
+        }
+
+
+
+        // Atualiza os parâmetros, textos e células ativas de vibração da Seção 06
+        function atualizarParametrosVibracao() {
+            const carcaca = document.getElementById('carcaca_vibracao').value || '132_280';
+            const grau = document.getElementById('grau_vibracao').value || 'A';
+            const limite = obterLimiteVibracaoAtual();
+
+            const textoLimiteFormatado = `≤ ${limite.toFixed(1).replace('.', ',')} mm/s`;
+
+            // Atualiza as colunas de limite na tabela de medição
+            document.querySelectorAll('.col-limite-vib').forEach(el => {
+                el.textContent = textoLimiteFormatado;
+            });
+
+            // Atualiza legendas abaixo de cada ponto
+            for (let i = 1; i <= 6; i++) {
+                const desc = document.getElementById(`tol_desc_vib_${i}`);
+                if (desc) {
+                    desc.innerHTML = `<span class="norma-badge">NBR IEC 60034-14</span> <span class="tol-range">[≤ ${limite.toFixed(1).replace('.', ',')} mm/s RMS]</span>`;
+                }
+            }
+
+            // Atualiza texto explicativo
+            const carcacaTxt = carcaca === '56_132' ? '56 ≤ H ≤ 132' : (carcaca === '132_280' ? '132 < H ≤ 280' : 'H > 280');
+            const grauTxt = grau === 'A' ? 'Grau A (padrão)' : 'Grau B (especial)';
+            const resumo = document.getElementById('info_resumo_vibracao');
+            if (resumo) {
+                resumo.innerHTML = `<strong>Critério ativo:</strong> ABNT NBR IEC 60034-14 · ${grauTxt} · Carcaça ${carcacaTxt} · Limite máximo permitido: <strong>${limite.toFixed(1).replace('.', ',')} mm/s RMS</strong>.`;
+            }
+
+            // Destaca a célula ativa na Tabela 11 de referência
+            document.querySelectorAll('#tabela_referencia_vibracao td').forEach(td => {
+                td.classList.remove('active-limit-cell');
+            });
+            const cellId = `cell_${grau}_${carcaca}`;
+            const activeCell = document.getElementById(cellId);
+            if (activeCell) {
+                activeCell.classList.add('active-limit-cell');
+            }
+
+            // Revalida todos os 6 pontos de medição
+            for (let i = 1; i <= 6; i++) {
+                validarVibracao(i);
+            }
+        }
+
+        // Validação dimensional automática item por item (Seção 01 e 02)
+        function validarItem(tipo) {
+            let medElem, resElem, tolObj;
+
+            if (tipo === 'eixo3') {
+                medElem = document.getElementById('med_eixo3');
+                resElem = document.getElementById('res_eixo3');
+                tolObj = obterTolAssentoEixo(parseFloat(document.getElementById('nom_eixo3').value));
+            } else if (tipo === 'eixo4') {
+                medElem = document.getElementById('med_eixo4');
+                resElem = document.getElementById('res_eixo4');
+                tolObj = obterTolAssentoEixo(parseFloat(document.getElementById('nom_eixo4').value));
+            } else if (tipo === 'ponta') {
+                medElem = document.getElementById('med_ponta');
+                resElem = document.getElementById('res_ponta');
+                tolObj = obterTolPontaEixo(parseFloat(document.getElementById('nom_ponta').value));
+            } else if (tipo === 'chaveta') {
+                medElem = document.getElementById('med_chaveta');
+                resElem = document.getElementById('res_chaveta');
+                tolObj = obterChavetaDIN6885(parseFloat(document.getElementById('nom_ponta').value));
+            } else if (tipo === 'tampa_la') {
+                medElem = document.getElementById('med_tampa_la');
+                resElem = document.getElementById('res_tampa_la');
+                tolObj = obterTolTampaAlojamento(parseFloat(document.getElementById('nom_tampa_la').value));
+            } else if (tipo === 'tampa_loa') {
+                medElem = document.getElementById('med_tampa_loa');
+                resElem = document.getElementById('res_tampa_loa');
+                tolObj = obterTolTampaAlojamento(parseFloat(document.getElementById('nom_tampa_loa').value));
+            }
+
+            if (!medElem || !resElem) return;
+
+            const valorMedido = parseFloat(medElem.value);
+
+            if (isNaN(valorMedido) || medElem.value.trim() === '') {
+                resElem.value = "";
+                resElem.className = "status-pendente";
+                return;
+            }
+
+            if (tolObj) {
+                const aprovado = (valorMedido >= (tolObj.minimo - 0.0001)) && (valorMedido <= (tolObj.maximo + 0.0001));
+                
+                if (aprovado) {
+                    resElem.value = "Aprovado";
+                    resElem.className = "status-aprovado";
+                } else {
+                    resElem.value = "Reprovado";
+                    resElem.className = "status-reprovado";
+                }
+            }
+        }
+
+        // Validação automática da Seção 05 - Batimento (Limites fixos normativos)
+        function validarBatimento(tipo) {
+            const med = document.getElementById(`med_bat_${tipo}`);
+            const res = document.getElementById(`res_bat_${tipo}`);
+            if (!med || !res) return;
+
+            const val = parseFloat(med.value);
+            const maximoPermitido = (tipo === 'com_flange') ? 0.050 : 0.030;
+
+            if (isNaN(val) || med.value.trim() === '') {
+                res.value = "";
+                res.className = "status-pendente";
+                return;
+            }
+
+            if (val >= 0 && val <= (maximoPermitido + 0.0001)) {
+                res.value = "Aprovado";
+                res.className = "status-aprovado";
+            } else {
+                res.value = "Reprovado";
+                res.className = "status-reprovado";
+            }
+        }
+
+        // Validação automática da Seção 06 - Vibração (ABNT NBR IEC 60034-14 Tabela 11)
+        function validarVibracao(ponto) {
+            const med = document.getElementById(`med_vib_${ponto}`);
+            const res = document.getElementById(`res_vib_${ponto}`);
+            if (!med || !res) return;
+
+            const val = parseFloat(med.value);
+            const limiteMaximo = obterLimiteVibracaoAtual();
+
+            if (isNaN(val) || med.value.trim() === '') {
+                res.value = "";
+                res.className = "status-pendente";
+                return;
+            }
+
+            // Critério ABNT NBR IEC 60034-14 (Velocidade RMS ≤ Limite da Carcaça e Grau)
+            if (val >= 0 && val <= (limiteMaximo + 0.001)) {
+                res.value = "Aprovado";
+                res.className = "status-aprovado";
+            } else {
+                res.value = "Reprovado";
+                res.className = "status-reprovado";
+            }
+        }
+
+        function atualizarDatasRelatorio() {
+            const agora = new Date();
+            const dataAtual = [
+                String(agora.getDate()).padStart(2, '0'),
+                String(agora.getMonth() + 1).padStart(2, '0'),
+                agora.getFullYear()
+            ].join('/');
+
+            document.querySelectorAll('#rq028-form input.report-date').forEach(campo => {
+                campo.value = dataAtual;
+                campo.readOnly = true;
+            });
+        }
+
+        const camposExecutantesRelatorio = document.querySelectorAll('#rq028-form .executante-relatorio');
+        let camposExecutanteEditados = new WeakSet();
+
+        function sincronizarExecutantes() {
+            const nome = document.getElementById('executante').value;
+            camposExecutantesRelatorio.forEach(campo => {
+                if (!camposExecutanteEditados.has(campo)) {
+                    campo.value = nome;
+                }
+            });
+        }
+
+        document.getElementById('executante').addEventListener('input', sincronizarExecutantes);
+        camposExecutantesRelatorio.forEach(campo => {
+            campo.addEventListener('input', function() {
+                camposExecutanteEditados.add(campo);
+            });
+        });
+
+        window.addEventListener('beforeprint', atualizarDatasRelatorio);
+        document.getElementById('rq028-form').addEventListener('reset', function() {
+            setTimeout(function() {
+                camposExecutanteEditados = new WeakSet();
+                atualizarDatasRelatorio();
+                sincronizarExecutantes();
+            }, 0);
+        });
+
+        // Inicialização automática ao carregar a página
+        window.addEventListener('DOMContentLoaded', function() {
+            atualizarDatasRelatorio();
+            sincronizarExecutantes();
+            calcularTolerancias();
+        });
+
+        // Função de download do HTML preenchido com preservação total de valores
+        function baixarFormulario() {
+            atualizarDatasRelatorio();
+            const copia = document.documentElement.cloneNode(true);
+            const camposAtuais = document.querySelectorAll('input, select, textarea');
+            const camposCopia = copia.querySelectorAll('input, select, textarea');
+
+            camposAtuais.forEach((campo, indice) => {
+                const campoCopia = camposCopia[indice];
+                if (campo.tagName === 'TEXTAREA') {
+                    campoCopia.textContent = campo.value;
+                } else if (campo.tagName === 'SELECT') {
+                    Array.from(campoCopia.options).forEach((opcao, opcaoIndice) => {
+                        if (opcaoIndice === campo.selectedIndex) opcao.setAttribute('selected', 'selected');
+                        else opcao.removeAttribute('selected');
+                    });
+                    campoCopia.className = campo.className;
+                } else if (campo.type === 'radio' || campo.type === 'checkbox') {
+                    if (campo.checked) campoCopia.setAttribute('checked', 'checked');
+                    else campoCopia.removeAttribute('checked');
+                } else {
+                    campoCopia.setAttribute('value', campo.value);
+                }
+            });
+
+            const conteudo = '<!DOCTYPE html>\n' + copia.outerHTML;
+            const arquivo = new Blob([conteudo], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(arquivo);
+            link.download = `RQ028_${document.getElementById('os').value || 'controle_dimensional'}.html`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+    </script>
+</body>
+</html>
