@@ -131,7 +131,7 @@
             <label style="font-weight: bold; color: #003366;">Nº ORDEM DE SERVIÇO: </label>
             <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px; color: #ed1c24;" placeholder="Ex: 5449" oninput="buscarDadosOS()">
         </div>
-        <a class="rq028-link no-print" href="index-rq028.html" target="_blank" rel="noopener">ABRIR RQ 028</a>
+        <a id="rq028-link" class="rq028-link no-print" href="index-rq028.html" target="_blank" rel="noopener">ABRIR RQ 028</a>
     </div>
 
     <div class="no-print" style="text-align: center; margin-bottom: 10px;">
@@ -335,6 +335,14 @@
                 : String(valor || '');
         }
 
+        function atualizarLinkRQ028() {
+            const link = document.getElementById('rq028-link');
+            const url = new URL('index-rq028.html', window.location.href);
+            url.searchParams.set('os', document.getElementById('input-os').value.trim());
+            url.searchParams.set('equipamento', document.getElementById('campo-redutor').value.trim());
+            link.href = url.toString();
+        }
+
         function buscarDadosOS() {
             const osVal = document.getElementById('input-os').value.trim();
             const item = osVal.length >= 3 ? dadosOS[osVal] : null;
@@ -356,6 +364,7 @@
             campoSerie.value = codigoGold;
             campoSerie.setAttribute('value', codigoGold);
             document.getElementById('campo-data-criacao').innerText = formatarDataCriacao(item?.dataCriacao);
+            atualizarLinkRQ028();
         }
 
         function criarLinhaPeca() {
