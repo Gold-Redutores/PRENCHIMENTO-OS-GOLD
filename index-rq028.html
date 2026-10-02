@@ -1375,6 +1375,12 @@
 
         // Inicialização automática ao carregar a página
         window.addEventListener('DOMContentLoaded', function() {
+            const parametros = new URLSearchParams(window.location.search);
+            const numeroOS = parametros.get('os');
+            const equipamento = parametros.get('equipamento');
+            if (numeroOS) document.getElementById('os').value = numeroOS;
+            if (equipamento) document.getElementById('tag-equipamento').value = equipamento;
+
             atualizarDatasRelatorio();
             sincronizarExecutantes();
             calcularTolerancias();
