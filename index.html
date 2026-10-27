@@ -2,533 +2,867 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Relatório de Manutenção - Gold Redutores</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RQ 028 - Controle Dimensional Motores</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; color: #003366; background-color: #fff; }
-        
-        /* ============================================================
-           MODIFICAÇÃO: NOVO SISTEMA DE CABEÇALHO PARA ALINHAMENTO 
-           ============================================================ */
-        .header-container {
-            display: flex;
-            align-items: center; 
-            justify-content: space-between;
-            border-bottom: 3px solid #ed1c24;
-            padding-bottom: 15px;
-            margin-bottom: 10px;
+        :root {
+            color-scheme: light;
+            --ink: #17334b;
+            --blue: #245675;
+            --blue-dark: #193d54;
+            --red: #b94d20;
+            --green: #2e695d;
+            --line: #bdc9d1;
+            --soft: #edf2f5;
+            --field: #f8fafb;
+            --muted: #5d6d78;
+            --bg-aprovado: #d4edda;
+            --text-aprovado: #155724;
+            --bg-reprovado: #f8d7da;
+            --text-reprovado: #721c24;
+            --badge-bg: #e2eaf0;
+            --badge-text: #245675;
+            --ex-blue: #0d47a1;
+            --ex-bg: #e3f2fd;
+            --ex-border: #90caf9;
         }
 
-        .brand-logo {
-            max-height: 80px; /* Ajuste o tamanho do logo aqui */
-            width: auto;
-        }
-
-        .title-area {
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        .title-area h2 {
+        * { box-sizing: border-box; }
+        body {
             margin: 0;
-            font-size: 22px;
-            text-transform: uppercase;
-            color: #003366;
+            background: linear-gradient(180deg, #e7edf1 0%, #f6f8f9 100%);
+            color: var(--ink);
+            font: 14px/1.4 "Aptos", "Segoe UI", sans-serif;
+        }
+        .page {
+            width: min(1120px, calc(100% - 32px));
+            margin: 24px auto;
+            padding: 28px 32px 24px;
+            background: #fff;
+            border-top: 5px solid var(--red);
+            box-shadow: 0 8px 28px rgba(23, 51, 75, .12);
+            border-radius: 2px;
         }
 
-        .subtitle {
-            margin: 5px 0 0 0;
-            font-size: 13px;
-            color: #666;
-            font-weight: normal;
+        /* SELETOR DE TIPO E MODELO */
+        .motor-type-container {
+            display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;
+            padding: 12px; background: #f0f4f8; border-radius: 6px; border: 1px solid var(--line);
         }
-
-        /* Espaçador para garantir que o título fique no centro real */
-        .header-spacer {
-            width: 120px; 
+        .main-type-buttons { display: flex; gap: 10px; }
+        .type-btn {
+            flex: 1; padding: 12px; border: 2px solid transparent; border-radius: 4px;
+            background: #fff; color: var(--muted); font-weight: 700; cursor: pointer;
+            transition: all 0.2s; text-align: center; font-size: 14px;
         }
-
-        .os-entry {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-            align-items: center;
-            gap: 12px;
-        }
-        .os-number { grid-column: 2; text-align: center; }
-        .rq028-link {
-            justify-self: end;
-            padding: 10px 14px;
-            border-radius: 3px;
-            background: #003366;
-            color: #fff;
-            font-size: 12px;
-            font-weight: bold;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-        .rq028-link:hover { background: #ed1c24; }
-        /* ============================================================ */
-
-        .section { background: #d9d9d9; padding: 6px; margin-top: 15px; font-weight: bold; text-align: center; border: 1px solid #333; text-transform: uppercase; font-size: 13px; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 0; }
-        table, th, td { border: 1px solid #333; }
-        td { padding: 6px; font-size: 11px; vertical-align: middle; }
-        th { background: #eee; padding: 8px; font-size: 11px; text-align: center; color: #003366; }
-        input[type="text"], input[type="number"], textarea { width: 98%; border: none; outline: none; background: transparent; font-size: 11px; color: #000; }
-
-        .checkbox-container { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        .checkbox-container input { width: auto; margin: 0; }
-
-        .autocomplete-wrapper { position: relative; overflow: visible !important; }
-        .suggestions { 
-            position: absolute; background: white; border: 2px solid #333; 
-            width: 100%; z-index: 99999; max-height: 250px; overflow-y: auto; 
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.3); display: none; left: 0; top: 100%;
-        }
-        .suggestion-item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; color: #000; text-align: left; }
-        .suggestion-item:hover { background-color: #ed1c24; color: white; }
-
-        .foto-upload-container { text-align: center; padding: 15px; background: #f4f4f4; border: 2px dashed #ccc; margin: 10px 0; border-radius: 5px; transition: border-color 0.2s; cursor: pointer; }
-        .foto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 05px; }
-        .foto-item { border: 1px solid #333; padding: 8px; text-align: center; background: #fff; position: relative; page-break-inside: avoid; display: flex; flex-direction: column; }
-        .foto-preview { max-width: 100%; height: auto; max-height: 300px; object-fit: contain; margin-bottom: 8px; }
-
-        .btn-remove { position: absolute; top: 5px; right: 5px; background: #ed1c24; color: white; border: none; cursor: pointer; padding: 3px 10px; font-weight: bold; border-radius: 3px; z-index: 10; }
-
-        .signature-pad { border: 1px solid #eee; background: #fff; width: 95%; height: 80px; cursor: crosshair; touch-action: none; }
-        .name-input { border-bottom: 1px dashed #ccc !important; width: 90%; margin-bottom: 5px; text-align: center; font-weight: bold; text-transform: uppercase; }
+        .type-btn:hover { background: #e2e8f0; }
+        .type-btn.active { border-color: var(--blue); color: var(--blue); box-shadow: 0 2px 8px rgba(36, 86, 117, 0.15); }
+        .type-btn.active.ex-mode { border-color: var(--ex-blue); color: var(--ex-blue); box-shadow: 0 2px 8px rgba(13, 71, 161, 0.15); }
         
-        .btn-group { display: flex; gap: 15px; justify-content: center; margin-top: 40px; padding-bottom: 50px; }
-        .btn-action { padding: 12px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; }
-
-        @media print { 
-            .no-print { display: none !important; } 
-            body { padding: 0; margin: 0; } 
-            .signature-pad { border: none; }
-            .header-container { border-bottom: 3px solid #ed1c24 !important; }
+        .ex-dropdown-container {
+            display: none; align-items: center; justify-content: flex-start; gap: 15px;
+            padding: 12px 15px; background: var(--ex-bg); border: 1px solid var(--ex-border);
+            border-radius: 4px; width: 100%; margin-top: 5px;
         }
-        @media (max-width: 760px) {
-            .os-entry { grid-template-columns: 1fr; justify-items: center; }
-            .os-number { grid-column: 1; }
-            .rq028-link { justify-self: center; }
+        .ex-dropdown-container.visible { display: flex; }
+        .ex-dropdown-container label { font-weight: 700; color: var(--ex-blue); font-size: 13px; white-space: nowrap; }
+        .ex-dropdown-container select { flex: 1; max-width: 400px; font-weight: 700; color: var(--ex-blue); border-color: var(--ex-border); min-height: 36px; }
+
+        /* CONTROLE DE EXIBIÇÃO VIA JS */
+        .secao-oculta { display: none !important; }
+
+        .document-header {
+            display: grid; grid-template-columns: 1fr minmax(230px, 1.6fr) 1fr;
+            align-items: center; gap: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--line);
+        }
+        .brand-logo { display: block; width: 100%; max-width: 175px; max-height: 56px; object-fit: contain; }
+        .title { text-align: center; }
+        .title h1 { margin: 0; color: var(--ink); font-size: 21px; font-weight: 800; }
+        .title p { margin: 5px 0 0; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+        .doc-meta { justify-self: end; display: grid; grid-template-columns: auto auto; gap: 3px 10px; font-size: 11px; }
+        .doc-meta dt { color: var(--muted); }
+        .doc-meta dd { margin: 0; text-align: right; font-weight: 700; }
+
+        /* CABEÇALHO GLOBAL */
+        .header-global {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin: 18px 0; padding: 15px; background: var(--soft); border: 1px solid #d6e0e6; border-radius: 4px;
+        }
+        .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+        .field label { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+
+        input, select, textarea {
+            min-height: 34px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 3px;
+            background: var(--field); color: #172d3e; font: inherit; transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus { outline: 2px solid rgba(36, 86, 117, .25); border-color: var(--blue); background: #fff; }
+
+        .section { margin-top: 20px; }
+        .section-heading {
+            display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
+            padding: 8px 12px; border-left: 4px solid var(--red); background: var(--soft); border-radius: 0 4px 4px 0;
+        }
+        .ex-section .section-heading { border-left-color: var(--ex-blue); background: var(--ex-bg); }
+        .section-heading .number { color: var(--red); font-size: 12px; font-weight: 800; }
+        .ex-section .section-heading .number { color: var(--ex-blue); }
+        .section-heading h2 { margin: 0; color: var(--ink); font-size: 13px; text-transform: uppercase; font-weight: 700; }
+        
+        /* FORMATAÇÃO DAS TABELAS */
+        .table-scroll { width: 100%; overflow-x: auto; }
+        table { width: 100%; min-width: 850px; border-collapse: collapse; margin-bottom: 15px; table-layout: auto; }
+        th, td { padding: 8px 6px; border: 1px solid var(--line); vertical-align: middle; }
+        th { background: #f4f7f9; color: var(--blue); font-size: 11px; text-align: center; text-transform: uppercase; font-weight: 700; }
+        td { height: 44px; font-size: 12px; }
+        td:first-child { font-weight: 600; width: 25%; text-align: left; }
+        
+        td input, td select { 
+            min-height: 34px; padding: 6px 8px; font-size: 12px; width: 100%; 
+            border-radius: 4px; border: 1px solid #c2cfd8;
+        }
+        td select.status-select { min-width: 110px; font-size: 11px; }
+        td input::placeholder { color: #6b8ba4; font-style: italic; font-weight: 600; opacity: 0.8; }
+
+        .lbl-tolerancia { 
+            display: block; font-size: 10px; color: var(--muted); font-weight: normal; 
+            margin-top: 6px; line-height: 1.3; background: #f8fafb; padding: 3px 5px;
+            border-radius: 3px; border-left: 2px solid var(--blue);
+        }
+        .norma-badge { 
+            display: inline-block; background: var(--badge-bg); color: var(--badge-text); 
+            padding: 1px 5px; border-radius: 3px; font-weight: 700; font-size: 9px; 
+            margin-right: 4px; text-transform: uppercase;
+        }
+        .ex-section .norma-badge { background: #bbdefb; color: #0d47a1; }
+        .tol-range { font-weight: 700; color: #17334b; }
+
+        .status-aprovado { background-color: var(--bg-aprovado) !important; color: var(--text-aprovado) !important; font-weight: 800 !important; }
+        .status-reprovado { background-color: var(--bg-reprovado) !important; color: var(--text-reprovado) !important; font-weight: 800 !important; }
+        .status-pendente { background-color: var(--field) !important; color: var(--muted) !important; font-weight: normal !important; }
+
+        .checklist-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 10px; }
+        .checklist-item { background: #fff; padding: 12px 15px; border: 1px solid var(--ex-border); border-radius: 4px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+        .checklist-item span { font-weight: 600; font-size: 12px; flex: 1; }
+        .checklist-options { display: flex; align-items: center; gap: 15px; white-space: nowrap; }
+        .checklist-options label { font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+
+        /* VIBRAÇÃO */
+        .vibration-reference {
+            display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 1.5fr);
+            gap: 14px; align-items: center; margin: 18px 0; padding: 12px;
+            border: 1px solid var(--line); background: #f8fafb; break-inside: avoid;
+        }
+        .vibration-image { display: block; width: 100%; max-height: 180px; object-fit: contain; }
+        .vibration-reference figcaption { margin-top: 5px; color: var(--muted); font-size: 10px; text-align: center; }
+        .vibration-limits { min-width: 0; }
+        .vibration-limits caption { padding: 0 0 7px; color: var(--ink); font-size: 11px; font-weight: 700; text-align: left; }
+        .vibration-limits th, .vibration-limits td { height: auto; padding: 6px 4px; text-align: center; transition: all 0.2s ease; }
+        .vibration-limits td:first-child { text-align: left; font-weight: 600; }
+        .vibration-note { margin: 5px 0 0; color: var(--muted); font-size: 9px; }
+        .active-limit-cell { background-color: var(--bg-aprovado) !important; color: var(--text-aprovado) !important; font-weight: 800 !important; border: 2px solid var(--green) !important; }
+
+        .actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 22px 0 6px; }
+        .actions button { min-height: 40px; padding: 9px 15px; border: 0; border-radius: 3px; color: white; font: inherit; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .primary { background: var(--blue); }
+        .secondary { background: var(--green); }
+        .quiet { background: #687883; }
+
+        @media print {
+            body { background: white; font-size: 10px; }
+            .page { width: 100%; margin: 0; padding: 0; border-top-width: 3px; box-shadow: none; }
+            .no-print { display: none !important; }
+            .table-scroll { overflow: visible; }
+            table { min-width: 0; }
+            th, td { padding: 4px; font-size: 8px; height: 32px; }
+            td input, td select { min-height: 24px; padding: 2px 4px; font-size: 10px; }
         }
     </style>
 </head>
 <body>
+    <main class="page">
+        <header class="document-header">
+            <img class="brand-logo" src="https://i.ibb.co/zWgjxdtj/logo.png" alt="Gold Soluções e Serviços">
+            <div class="title">
+                <h1>Controle Dimensional</h1>
+                <p id="subtitle-motor-type">MOTORES CA</p>
+            </div>
+            <dl class="doc-meta">
+                <dt>Documento</dt><dd id="meta-doc">RQ 028</dd>
+                <dt>Revisão</dt><dd id="meta-rev">03 / 02</dd>
+                <dt>Data do documento</dt><dd id="meta-data">05/12/2018</dd>
+            </dl>
+        </header>
 
-    <header class="header-container">
-        <div class="logo-box">
-            <img class="brand-logo" src="GOLD REDUTORES.JPG" alt="Gold Redutores">
+        <!-- SELETOR DE TIPO E MODELO -->
+        <div class="motor-type-container no-print">
+            <div class="main-type-buttons">
+                <button type="button" class="type-btn active" id="btn-ca" onclick="alternarModoBase('ca')">Motor Padrão (CA)</button>
+                <button type="button" class="type-btn" id="btn-ex" onclick="alternarModoBase('ex')">Motor à Prova de Explosão (Ex)</button>
+            </div>
+            
+            <div id="ex-model-dropdown" class="ex-dropdown-container">
+                <label for="select-ex-model">Selecione o Modelo Ex:</label>
+                <select id="select-ex-model" onchange="alternarModeloEx(this.value)">
+                    <option value="ex_w21">Ex d W21 (RQ 028.1)</option>
+                    <option value="ex_w22_200">Ex d W22 71-200 (RQ 028.2)</option>
+                    <option value="ex_w22_355">Ex d W22 225-355 (RQ 028.2.1)</option>
+                    <option value="ex_ent">Ex e / Ex n / Ex t (RQ 028.3)</option>
+                    <option value="ex_outras">Ex d Outras Marcas (RQ 028.4)</option>
+                    <option value="ex_motofreio">Motofreio Ex d (RQ 028.5)</option>
+                </select>
+            </div>
         </div>
 
-        <div class="title-area">
-            <h2>RELATÓRIO DE MANUTENÇÃO PREVENTIVA</h2>
-        </div>
-        <div class="header-spacer"></div>
-    </header>
+        <form id="rq028-form">
+            <!-- DADOS GLOBAIS (OS, Executantes, Datas) -->
+            <section class="header-global">
+                <div class="field"><label for="os">OS</label><input id="os" name="os" type="text" placeholder="Ex: 5449"></div>
+                <div class="field"><label for="tag-equipamento">TAG / Equipamento</label><input id="tag-equipamento" name="tag-equipamento" type="text" placeholder="Motor CA 75CV"></div>
+                
+                <div style="grid-column: 1 / -1; height: 1px; background: var(--line); margin: 5px 0;"></div>
 
-    <div class="os-entry" style="margin-bottom: 20px;">
-        <div class="os-number">
-            <label style="font-weight: bold; color: #003366;">Nº ORDEM DE SERVIÇO: </label>
-            <input type="text" id="input-os" style="width: 150px; border-bottom: 2px solid #ed1c24; text-align: center; font-weight: bold; font-size: 18px; color: #ed1c24;" placeholder="Ex: 5449" oninput="buscarDadosOS()">
-        </div>
-        <a id="rq028-link" class="rq028-link no-print" href="index-rq028.html" target="_blank" rel="noopener">ABRIR RQ 028</a>
-    </div>
+                <div class="field"><label for="data_inicial">Data Verificação Inicial</label><input id="data_inicial" name="data_inicial" type="text" class="data-global report-date" readonly></div>
+                <div class="field"><label for="executante_inicial">Executante Inicial</label><input id="executante_inicial" name="executante_inicial" type="text" class="exec-global" placeholder="Nome do técnico"></div>
+                
+                <div class="field"><label for="data_reparo">Data Verificação Após Reparo</label><input id="data_reparo" name="data_reparo" type="text" class="data-global report-date" readonly></div>
+                <div class="field"><label for="executante_reparo">Executante Após Reparo</label><input id="executante_reparo" name="executante_reparo" type="text" class="exec-global" placeholder="Nome do técnico"></div>
+            </section>
 
-    <div class="no-print" style="text-align: center; margin-bottom: 10px;">
-        <span id="db-status" style="font-size: 12px; font-weight: bold; color: orange;">⏳ Sincronizando com GitHub...</span>
-    </div>
-
-    <div class="section">DADOS DO CLIENTE E EQUIPAMENTO</div>
-    <table>
-        <tr>
-            <td colspan="2"><label><strong>Cliente:</strong></label> <input type="text" id="campo-cliente"></td>
-            <td colspan="2"><label><strong>Data de Criação:</strong></label> <span id="campo-data-criacao" style="font-weight: bold;"></span></td>
-        </tr>
-        <tr>
-            <td><label><strong>Equipamento:</strong></label> <input type="text" id="campo-redutor"></td>
-            <td><label><strong>Redução:</strong></label> <input type="text" id="campo-reducao" placeholder="Ex: 1:40"></td>
-            <td colspan="2"><label><strong>Série / Cód Gold:</strong></label> <input type="text" id="campo-serie"></td>
-        </tr>
-    </table>
-
-    <div class="section">ANÁLISES FOTOGRÁFICAS</div>
-    
-    <!-- ZONA DE ARRASTE E CLIQUE ATUALIZADA -->
-    <div class="foto-upload-container no-print" 
-         id="drop-zone"
-         ondragover="event.preventDefault(); this.style.borderColor='#ed1c24';"
-         ondragleave="this.style.borderColor='#ccc';"
-         ondrop="handleDrop(event)"
-         onclick="document.getElementById('file-input').click()">
-        <label style="font-weight: bold; display: block; margin-bottom: 5px; cursor: pointer;">
-            📸 ARRASTE FOTOS AQUI OU CLIQUE PARA SELECIONAR
-        </label>
-        <input type="file" id="file-input" accept="image/*" multiple onchange="previewFotos(event)" style="display:none;">
-    </div>
-    
-    <div id="container-fotos" class="foto-container"></div>
-
-    <div class="section">PEÇAS NECESSÁRIAS PARA EXECUÇÃO</div>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 65%;">Descrição da Peça (Busca Global: Utilize o % termo)</th>
-                <th style="width: 15%;">Qtd</th>
-                <th style="width: 20%;">Cód Gold</th>
-            </tr>
-        </thead>
-        <tbody id="tabela-pecas"></tbody>
-    </table>
-        
-    <div class="section">RESUMO DE MÃO DE OBRA</div>
-    <table>
-        <thead>
-            <tr>
-                <th>Descrição</th>
-                <th style="width: 80px;">Qtd (hs)</th>
-                <th style="width: 150px;">Cód Gold</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>DESMONTAGEM DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1192</td></tr>
-            <tr><td>DESCONTAMINACAO DE PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1193</td></tr>
-            <tr><td>ANALISE E PERITAGEM EM PECAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1194</td></tr>
-            <tr><td>MONTAGEM E AJUSTE DE FOLGAS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1210</td></tr>
-            <tr><td>TESTES FINAIS DO EQUIPAMENTO</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1200</td></tr>
-            <tr><td>PINTURA FINAL</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1174</td></tr>
-            <tr><td>SACAR ACOPLAMENTOS</td><td><input type="number" class="hr-input" oninput="calcularTotal()"></td><td>SVG1262</td></tr>
-        </tbody>
-        <tfoot>
-            <tr class="total-row">
-                <td style="text-align: right; padding-right: 15px;">TOTAL DE HORAS TÉCNICAS:</td>
-                <td id="total-horas" style="text-align: center;">40</td>
-                <td></td>
-            </tr>
-        </tfoot>
-    </table>
-
-    <div class="section">CONCLUSÕES</div>
-    <textarea id="conclusoes" rows="5" style="width: 100%; border: 1px solid #333; margin-top: 5px; padding: 8px;" placeholder="Parecer técnico final..."></textarea>
-
-    <div style="margin-top: 30px;">
-        <table style="border: none;">
-            <tr>
-                <td style="border: 1px solid #333; padding: 0; background: #fafafa;">
-                    <div style="text-align: center; padding: 10px;">
-                        <input type="text" class="name-input" placeholder="NOME DO TÉCNICO (LEGÍVEL)">
-                        <div style="height: 90px; display: flex; align-items: center; justify-content: center;">
-                            <canvas id="pad-tecnico" class="signature-pad"></canvas>
-                        </div>
-                        <button class="no-print" onclick="limparAssinatura('pad-tecnico')" style="font-size: 9px; margin-top: 5px;">Limpar</button>
-                        <div style="border-top: 1px solid #333; margin-top: 5px; font-size: 10px; font-weight: bold; padding: 5px;">ASSINATURA DO TÉCNICO RESPONSÁVEL</div>
+            <!-- ========================================== -->
+            <!-- SEÇÕES EX - W21 -->
+            <!-- ========================================== -->
+            <div id="sec-ex-w21-dados" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.01</span><h2>Dados de Identificação (W21)</h2></div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div class="field"><label>Tipo de Proteção</label><select><option>Ex d</option></select></div>
+                        <div class="field"><label>Grupo</label><select><option>I</option><option>IIA</option><option>IIB</option><option>IIC</option></select></div>
+                        <div class="field"><label>Classe de Temperatura</label><input type="text" placeholder="Ex: T4, T5"></div>
+                        <div class="field"><label>Nº Certificado</label><input type="text" placeholder="Certificado do Motor"></div>
                     </div>
-                </td>
-            </tr>
-        </table>
-    </div>
+                </section>
+            </div>
 
-    <div class="btn-group no-print">
-        <button class="btn-action" style="background: #003366;" onclick="salvarHTML()">SALVAR ARQUIVO (.HTML)</button>
-        <button class="btn-action" style="background: #ed1c24;" onclick="window.print()">GERAR PDF / IMPRIMIR</button>
-    </div>
+            <div id="sec-ex-w21-dimensoes" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.02</span><h2>Medições Específicas W21</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Interstício Tampa LA</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Comprimento Passagem LA</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Folga Caixa de Ligação</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SEÇÕES EX - W22 71-200 -->
+            <!-- ========================================== -->
+            <div id="sec-ex-w22-200-dados" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.01</span><h2>Dados de Identificação (W22 71-200)</h2></div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div class="field"><label>Tipo de Proteção</label><select><option>Ex d</option></select></div>
+                        <div class="field"><label>Grupo</label><select><option>I</option><option>IIA</option><option>IIB</option><option>IIC</option></select></div>
+                        <div class="field"><label>Classe de Temperatura</label><input type="text" placeholder="Ex: T4, T5"></div>
+                        <div class="field"><label>Nº Certificado</label><input type="text" placeholder="Certificado do Motor"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="sec-ex-w22-200-tampas" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.02</span><h2>Tampas (W22 71-200)</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Tampa Dianteira (Ø1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Tampa Dianteira (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Tampa Traseira (Ø1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SEÇÕES EX - W22 225-355 -->
+            <!-- ========================================== -->
+            <div id="sec-ex-w22-355-dados" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.01</span><h2>Dados de Identificação (W22 225-355)</h2></div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div class="field"><label>Tipo de Proteção</label><select><option>Ex d</option></select></div>
+                        <div class="field"><label>Grupo</label><select><option>I</option><option>IIA</option><option>IIB</option><option>IIC</option></select></div>
+                        <div class="field"><label>Classe de Temperatura</label><input type="text" placeholder="Ex: T4, T5"></div>
+                        <div class="field"><label>Nº Certificado</label><input type="text" placeholder="Certificado do Motor"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="sec-ex-w22-355-tampas" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.02</span><h2>Tampas e Anéis de Fixação (W22 225-355)</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Tampa Dianteira (Ø1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Anel de Fixação LA (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Anel de Fixação LA (Ø D2)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Anel de Fixação LOA (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div id="sec-ex-w22-355-carcaca" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.03</span><h2>Carcaça e Bushings (W22 225-355)</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Carcaça (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Bushing A (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Bushing B (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Bushing C (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Bushing D (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Bushing E (Ø D1)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SEÇÕES EX - OUTROS MODELOS -->
+            <!-- ========================================== -->
+            <div id="sec-ex-outros-dados" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.01</span><h2>Dados de Identificação (Ex e / n / t / Outras / Motofreio)</h2></div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div class="field"><label>Tipo de Proteção</label><select><option>Ex e</option><option>Ex n</option><option>Ex t</option><option>Ex d</option></select></div>
+                        <div class="field"><label>Grupo</label><select><option>I</option><option>IIA</option><option>IIB</option><option>IIC</option></select></div>
+                        <div class="field"><label>Classe de Temperatura</label><input type="text" placeholder="Ex: T4, T5"></div>
+                        <div class="field"><label>Nº Certificado</label><input type="text" placeholder="Certificado do Motor"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="sec-ex-outros-medidas" class="ex-section secao-oculta">
+                <section class="section">
+                    <div class="section-heading"><span class="number">EX.02</span><h2>Medições Específicas (Ex e / n / t / Outras / Motofreio)</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Distância entre Encosto do Rolamento (L)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Entreferro Radial (Rotor ↔ Estator)</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Rugosidade da Carcaça</td><td><input type="number"></td><td><input type="number"></td><td><select class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- BLOCO 4: MEDIÇÕES DIMENSIONAIS PADRÃO (Sempre visível) -->
+            <div id="sec-dim-padrao">
+                <section class="section">
+                    <div class="section-heading"><span class="number">01</span><h2>Verificação dimensional do eixo e componentes</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Componente</th><th>Ø Nominal (mm)</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Eixo Ø3 (Rol. LA)<span id="tol_desc_eixo3" class="lbl-tolerancia"></span></td><td><input type="number" id="nom_eixo3" placeholder="Ex: 70" oninput="calcularTolerancias()"></td><td><input type="number" id="med_eixo3" oninput="validarItem('eixo3')"></td><td><input type="number" id="med_eixo3_rep" oninput="validarItem('eixo3_rep')"></td><td><select id="res_eixo3_rep" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Eixo Ø4 (Rol. LOA)<span id="tol_desc_eixo4" class="lbl-tolerancia"></span></td><td><input type="number" id="nom_eixo4" placeholder="Ex: 70" oninput="calcularTolerancias()"></td><td><input type="number" id="med_eixo4" oninput="validarItem('eixo4')"></td><td><input type="number" id="med_eixo4_rep" oninput="validarItem('eixo4_rep')"></td><td><select id="res_eixo4_rep" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Ponta de eixo<span id="tol_desc_ponta" class="lbl-tolerancia"></span></td><td><input type="number" id="nom_ponta" placeholder="Ex: 65" oninput="calcularTolerancias()"></td><td><input type="number" id="med_ponta" oninput="validarItem('ponta')"></td><td><input type="number" id="med_ponta_rep" oninput="validarItem('ponta_rep')"></td><td><select id="res_ponta_rep" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Rasgo de Chaveta<span id="tol_desc_chaveta" class="lbl-tolerancia"></span></td><td><input type="number" id="nom_chaveta" readonly style="background:#edf2f5; color:var(--muted); cursor:not-allowed;" placeholder="Automático"></td><td><input type="number" id="med_chaveta" oninput="validarItem('chaveta')"></td><td><input type="number" id="med_chaveta_rep" oninput="validarItem('chaveta_rep')"></td><td><select id="res_chaveta_rep" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section class="section">
+                    <div class="section-heading"><span class="number">02</span><h2>Tampas (Alojamento)</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Ø Nominal (mm)</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Tampa LA (Ø1)<span id="tol_desc_tampa_la" class="lbl-tolerancia"></span></td><td><input type="number" id="nom_tampa_la" placeholder="Ex: 150" oninput="calcularTolerancias()"></td><td><input type="number" id="med_tampa_la" oninput="validarItem('tampa_la')"></td><td><input type="number" id="med_tampa_la_rep" oninput="validarItem('tampa_la_rep')"></td><td><select id="res_tampa_la_rep" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Tampa LOA (Ø1)<span id="tol_desc_tampa_loa" class="lbl-tolerancia"></span></td><td><input type="number" id="nom_tampa_loa" placeholder="Ex: 150" oninput="calcularTolerancias()"></td><td><input type="number" id="med_tampa_loa" oninput="validarItem('tampa_loa')"></td><td><input type="number" id="med_tampa_loa_rep" oninput="validarItem('tampa_loa_rep')"></td><td><select id="res_tampa_loa_rep" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section class="section">
+                    <div class="section-heading"><span class="number">03</span><h2>Concentricidade</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Limite</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Flange<span class="lbl-tolerancia"><span class="norma-badge">NBR 15623</span> [0.000 ~ 0.050 mm]</span></td><td>≤ 0,050 mm</td><td><input type="number" id="med_conc_inicial" oninput="validarConcentPerp('conc_inicial')"></td><td><input type="number" id="med_conc_reparo" oninput="validarConcentPerp('conc_reparo')"></td><td><select id="res_conc_reparo" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section class="section">
+                    <div class="section-heading"><span class="number">04</span><h2>Perpendicularidade</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Limite</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Flange<span class="lbl-tolerancia"><span class="norma-badge">NBR 15623</span> [0.000 ~ 0.050 mm]</span></td><td>≤ 0,050 mm</td><td><input type="number" id="med_perp_inicial" oninput="validarConcentPerp('perp_inicial')"></td><td><input type="number" id="med_perp_reparo" oninput="validarConcentPerp('perp_reparo')"></td><td><select id="res_perp_reparo" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section class="section">
+                    <div class="section-heading"><span class="number">05</span><h2>Batimento em ponta de eixo / flange</h2></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Local</th><th>Limite</th><th>Medição Inicial</th><th>Medição Reparo</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Com flange<span class="lbl-tolerancia">[≤ 0.050 mm]</span></td><td>≤ 0,050 mm</td><td><input type="number" id="med_bat_com_flange" oninput="validarBatimento('com_flange')"></td><td><input type="number" id="med_bat_com_flange_rep" oninput="validarBatimento('com_flange_rep')"></td><td><select id="res_bat_com_flange_rep" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Sem flange<span class="lbl-tolerancia">[≤ 0.030 mm]</span></td><td>≤ 0,030 mm</td><td><input type="number" id="med_bat_sem_flange" oninput="validarBatimento('sem_flange')"></td><td><input type="number" id="med_bat_sem_flange_rep" oninput="validarBatimento('sem_flange_rep')"></td><td><select id="res_bat_sem_flange_rep" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- BLOCO 10: VIBRAÇÃO (Sempre visível) -->
+            <div id="sec-vibracao">
+                <section class="section">
+                    <div class="section-heading"><span class="number">06</span><h2>Medição do nível de vibração (ABNT NBR IEC 60034-14)</h2></div>
+                    <div class="section-config no-print" style="margin-bottom: 10px;">
+                        <label>Carcaça (H):</label>
+                        <select id="carcaca_vibracao" onchange="atualizarParametrosVibracao()"><option value="56_132">56 ≤ H ≤ 132</option><option value="132_280" selected>132 &lt; H ≤ 280</option><option value="gt_280">H &gt; 280</option></select>
+                        <label>Grau:</label>
+                        <select id="grau_vibracao" onchange="atualizarParametrosVibracao()"><option value="A" selected>Grau A</option><option value="B">Grau B</option></select>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead><tr><th>Ponto</th><th>Limite Máx.</th><th>Medição (mm/s RMS)</th><th>Aprovado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Ponto 1 (LA Horiz.)</td><td class="col-limite-vib">≤ 2,2 mm/s</td><td><input type="number" id="med_vib_1" oninput="validarVibracao(1)"></td><td><select id="res_vib_1" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Ponto 2 (LA Vert.)</td><td class="col-limite-vib">≤ 2,2 mm/s</td><td><input type="number" id="med_vib_2" oninput="validarVibracao(2)"></td><td><select id="res_vib_2" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Ponto 3 (LA Axial)</td><td class="col-limite-vib">≤ 2,2 mm/s</td><td><input type="number" id="med_vib_3" oninput="validarVibracao(3)"></td><td><select id="res_vib_3" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Ponto 4 (LOA Horiz.)</td><td class="col-limite-vib">≤ 2,2 mm/s</td><td><input type="number" id="med_vib_4" oninput="validarVibracao(4)"></td><td><select id="res_vib_4" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Ponto 5 (LOA Vert.)</td><td class="col-limite-vib">≤ 2,2 mm/s</td><td><input type="number" id="med_vib_5" oninput="validarVibracao(5)"></td><td><select id="res_vib_5" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                                <tr><td>Ponto 6 (LOA Axial)</td><td class="col-limite-vib">≤ 2,2 mm/s</td><td><input type="number" id="med_vib_6" oninput="validarVibracao(6)"></td><td><select id="res_vib_6" class="status-select"><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- FIGURA E TABELA 11 - SVG -->
+            <figure class="vibration-reference" aria-labelledby="vibration-caption">
+                <div>
+                    <img class="vibration-image" src="https://i.ibb.co/HL9dr6Pc/VIBRACAO-MOTOR.jpg" alt="Diagrama dos pontos de medição de vibração do motor">
+                    <figcaption id="vibration-caption">Figura 20: Pontos de medição</figcaption>
+                </div>
+                <div>
+                    <table class="vibration-limits" id="tabela_referencia_vibracao">
+                        <caption>Valores máximos de velocidade de vibração por tamanho da carcaça</caption>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Grau de vibração</th>
+                                <th colspan="3">Tamanho da carcaça (H)</th>
+                            </tr>
+                            <tr>
+                                <th>56 ≤ H ≤ 132</th>
+                                <th>132 &lt; H ≤ 280</th>
+                                <th>H &gt; 280</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>A (padrão)</td>
+                                <td id="cell_A_56_132">1,6 mm/s</td>
+                                <td id="cell_A_132_280" class="active-limit-cell">2,2 mm/s</td>
+                                <td id="cell_A_gt_280">2,8 mm/s</td>
+                            </tr>
+                            <tr>
+                                <td>B (especial)</td>
+                                <td id="cell_B_56_132">0,7 mm/s</td>
+                                <td id="cell_B_132_280">1,1 mm/s</td>
+                                <td id="cell_B_gt_280">1,8 mm/s</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="vibration-note">Tabela 11: Limites da ABNT NBR IEC 60034-14 para suspensão livre, em mm/s RMS.</p>
+                </div>
+            </figure>
+
+            <!-- DIAGNÓSTICO FINAL -->
+            <section class="section">
+                <div class="section-heading"><span class="number">FIM</span><h2>Resumo do Diagnóstico Dimensional</h2></div>
+                <div class="field">
+                    <label for="diagnostico">Observações e conclusão</label>
+                    <textarea id="diagnostico" placeholder="Insira o parecer técnico..."></textarea>
+                </div>
+            </section>
+
+            <div class="footer-note">
+                <span>RQ 028 · Controle dimensional de motores CA / Ex</span>
+                <span>Formulário de coleta calibrado por normas ISO / DIN / EASA / ABNT NBR IEC</span>
+            </div>
+
+            <div class="actions no-print">
+                <button class="primary" type="button" onclick="window.print()">Imprimir / Salvar PDF</button>
+                <button class="secondary" type="button" onclick="baixarFormulario()">Baixar HTML Preenchido</button>
+                <button class="quiet" type="reset" onclick="setTimeout(()=>{calcularTolerancias(); alternarModoBase('ca');}, 100); return confirm('Limpar todos os campos preenchidos?')">Limpar Formulário</button>
+            </div>
+        </form>
+    </main>
 
     <script>
-        const URL_JSON_OS = 'https://raw.githubusercontent.com/Gold-Redutores/OS-MANUTEN-A-INPASA/main/dados_os.json';
-        const URL_CSV_OS_BACKUP = 'https://raw.githubusercontent.com/Gold-Redutores/PRENCHIMENTO-OS-GOLD/main/dmsoser00000045.csv';
-        const URL_CSV_PRODUTOS = 'https://raw.githubusercontent.com/Gold-Redutores/OS-MANUTEN-A-INPASA/main/relalisatagemprodutosdetada.csv';
-        let dadosOS = {};
-        let listaProdutos = [];
-
-        function parseCSV(text) {
-            let linhas = [];
-            let linhaAtual = [];
-            let campoAtual = '';
-            let dentroDeAspas = false;
-
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                let proximoChar = text[i + 1];
-
-                if (char === '"') {
-                    if (dentroDeAspas && proximoChar === '"') {
-                        campoAtual += '"'; i++;
-                    } else {
-                        dentroDeAspas = !dentroDeAspas;
-                    }
-                } 
-                else if (char === ',' && !dentroDeAspas) {
-                    linhaAtual.push(campoAtual.trim());
-                    campoAtual = '';
-                } 
-                else if ((char === '\n' || char === '\r') && !dentroDeAspas) {
-                    if (char === '\r' && proximoChar === '\n') i++;
-                    linhaAtual.push(campoAtual.trim());
-                    if (linhaAtual.length > 5) linhas.push(linhaAtual);
-                    linhaAtual = []; campoAtual = '';
-                } 
-                else {
-                    campoAtual += char;
-                }
-            }
-            if (campoAtual || linhaAtual.length > 0) {
-                linhaAtual.push(campoAtual.trim());
-                if (linhaAtual.length > 5) linhas.push(linhaAtual);
-            }
-            return linhas;
-        }
-
-        async function carregarDados() {
-            const status = document.getElementById('db-status');
-            const timestamp = Date.now();
-            try {
-                try {
-                    const resJSON = await fetch(`${URL_JSON_OS}?t=${timestamp}`);
-                    if (resJSON.ok) dadosOS = await resJSON.json();
-                } catch (eJSON) {
-                    console.warn('JSON não disponível, tentando CSV de backup...', eJSON);
-                }
-
-                if (!dadosOS || Object.keys(dadosOS).length === 0) {
-                    const resCSV = await fetch(`${URL_CSV_OS_BACKUP}?t=${timestamp}`);
-                    if (!resCSV.ok) throw new Error(`Falha ao carregar CSV: HTTP ${resCSV.status}`);
-                    const linhas = parseCSV(await resCSV.text());
-                    dadosOS = {};
-                    linhas.forEach(linha => {
-                        const os = (linha[21] || '').trim();
-                        if (os) {
-                            dadosOS[os] = {
-                                os,
-                                serie: linha[23] || '',
-                                redutor: linha[24] || '',
-                                cliente: linha[26] || ''
-                            };
-                        }
-                    });
-                }
-
-                if (Object.keys(dadosOS).length === 0) {
-                    throw new Error('Nenhuma ordem de serviço foi carregada.');
-                }
-
-                try {
-                    const resProd = await fetch(`${URL_CSV_PRODUTOS}?t=${timestamp}`);
-                    if (!resProd.ok) throw new Error(`Falha ao carregar produtos: HTTP ${resProd.status}`);
-                    listaProdutos = parseCSV(await resProd.text());
-                } catch (eProd) {
-                    console.warn('Produtos não carregados:', eProd);
-                }
-
-                buscarDadosOS();
-                status.innerText = '✅ GitHub Sincronizado!';
-                status.style.color = 'green';
-            } catch (e) {
-                status.innerText = '❌ Erro na sincronização.';
-                status.style.color = 'red';
-                console.error(e);
-            }
-        }
-
-        function formatarDataCriacao(valor) {
-            const correspondencia = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(valor || '').trim());
-            return correspondencia
-                ? `${correspondencia[3]}/${correspondencia[2]}/${correspondencia[1]}`
-                : String(valor || '');
-        }
-
-        function atualizarLinkRQ028() {
-            const link = document.getElementById('rq028-link');
-            const url = new URL('index-rq028.html', window.location.href);
-            url.searchParams.set('os', document.getElementById('input-os').value.trim());
-            url.searchParams.set('equipamento', document.getElementById('campo-redutor').value.trim());
-            link.href = url.toString();
-        }
-
-        function buscarDadosOS() {
-            const osVal = document.getElementById('input-os').value.trim();
-            const item = osVal.length >= 3 ? dadosOS[osVal] : null;
-            const campos = {
-                cliente: document.getElementById('campo-cliente'),
-                redutor: document.getElementById('campo-redutor'),
-                reducao: document.getElementById('campo-reducao')
-            };
-
-            Object.entries(campos).forEach(([campo, input]) => {
-                input.value = item?.[campo] ?? '';
-                input.setAttribute('value', input.value);
-            });
-
-            const codigoGold = item && Object.prototype.hasOwnProperty.call(item, 'codigoGold')
-                ? item.codigoGold ?? ''
-                : item?.serie ?? '';
-            const campoSerie = document.getElementById('campo-serie');
-            campoSerie.value = codigoGold;
-            campoSerie.setAttribute('value', codigoGold);
-            document.getElementById('campo-data-criacao').innerText = formatarDataCriacao(item?.dataCriacao);
-            atualizarLinkRQ028();
-        }
-
-        function criarLinhaPeca() {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="autocomplete-wrapper">
-                    <input type="text" class="input-nome-peca" placeholder="Busca global de peças...">
-                    <div class="suggestions"></div>
-                </td>
-                <td><input type="number" value="1" style="text-align:center;" oninput="this.setAttribute('value', this.value)"></td>
-                <td><input type="text" class="input-cod-gold" readonly style="text-align:center; background: #eee;"></td>
-            `;
-            const input = tr.querySelector('.input-nome-peca');
-            const sugestoes = tr.querySelector('.suggestions');
-            const codInput = tr.querySelector('.input-cod-gold');
-
-            input.addEventListener('input', function() {
-                const busca = this.value.toLowerCase();
-                sugestoes.innerHTML = '';
-                if (busca.length < 2) { sugestoes.style.display = 'none'; return; }
-                const termos = busca.split('%').map(t => t.trim()).filter(t => t !== '');
-                
-                const filtrados = listaProdutos.filter(p => {
-                    const linhaToda = p.join(' ').toLowerCase();
-                    return termos.every(t => linhaToda.includes(t));
-                }).slice(0, 15);
-
-                if (filtrados.length > 0) {
-                    sugestoes.style.display = 'block';
-                    filtrados.forEach(p => {
-                        const div = document.createElement('div');
-                        div.className = 'suggestion-item';
-                        const codigo = p[21] || '';
-                        const nome = p[22] || '';
-                        div.innerText = codigo + ' | ' + nome;
-                        div.onclick = () => {
-                            input.value = nome;
-                            input.setAttribute('value', nome);
-                            codInput.value = codigo;
-                            codInput.setAttribute('value', codigo);
-                            sugestoes.style.display = 'none';
-                            const todasLinhas = document.querySelectorAll('#tabela-pecas tr');
-                            if (tr === todasLinhas[todasLinhas.length - 1]) criarLinhaPeca();
-                        };
-                        sugestoes.appendChild(div);
-                    });
-                } else { sugestoes.style.display = 'none'; }
-            });
-            document.getElementById('tabela-pecas').appendChild(tr);
-        }
-
-        // FUNÇÃO DE PROCESSAMENTO DO ARRASTE DE IMAGENS
-        function handleDrop(e) {
-            e.preventDefault();
-            document.getElementById('drop-zone').style.borderColor = '#ccc';
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                previewFotos({ target: { files: files } });
-            }
-        }
-
-        function previewFotos(e) {
-            for (let f of e.target.files) {
-                const r = new FileReader();
-                r.onload = ev => {
-                    const d = document.createElement('div');
-                    d.className = 'foto-item';
-                    d.innerHTML = `
-                        <button class="btn-remove no-print" onclick="this.parentElement.remove()">X</button>
-                        <img src="${ev.target.result}" class="foto-preview">
-                        <textarea rows="3" placeholder="Parecer..." oninput="this.innerHTML = this.value"></textarea>
-                    `;
-                    document.getElementById('container-fotos').appendChild(d);
-                };
-                r.readAsDataURL(f);
-            }
-        }
-
-        function configurarAssinatura(id) {
-            const canvas = document.getElementById(id);
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let desenhando = false;
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-
-            function obterPos(e) {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return { x: clientX - rect.left, y: clientY - rect.top };
-            }
-
-            function iniciar(e) { desenhando = true; mover(e); }
-            function parar() { desenhando = false; ctx.beginPath(); }
-            function mover(e) {
-                if (!desenhando) return;
-                const pos = obterPos(e);
-                ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
-                ctx.lineTo(pos.x, pos.y); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-                if(e.cancelable) e.preventDefault();
-            }
-
-            canvas.addEventListener('mousedown', iniciar);
-            canvas.addEventListener('mousemove', mover);
-            window.addEventListener('mouseup', parar);
-            canvas.addEventListener('touchstart', iniciar);
-            canvas.addEventListener('touchmove', mover);
-            canvas.addEventListener('touchend', parar);
-        }
-
-        function limparAssinatura(id) {
-            const canvas = document.getElementById(id);
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function prepararHTML() {
-            document.querySelectorAll('input, textarea').forEach(i => {
-                if(i.type === 'checkbox') {
-                    if(i.checked) i.setAttribute('checked', 'checked');
-                    else i.removeAttribute('checked');
-                } else {
-                    i.setAttribute('value', i.value);
-                    if(i.tagName === 'TEXTAREA') i.innerHTML = i.value;
-                }
-            });
-            return '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-        }
-
-        function salvarHTML() {
-            const os = document.getElementById('input-os').value || 'SN';
-            const cliente = document.getElementById('campo-cliente').value || 'RELATORIO';
-            const blob = new Blob([prepararHTML()], { type: 'text/html' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `OS_${os}_${cliente}.html`;
-            link.click();
-        }
-
-        function calcularTotal() {
-            let inputs = document.getElementsByClassName('hr-input');
-            let total = 0;
-            for (let i = 0; i < inputs.length; i++) {
-                let valor = parseFloat(inputs[i].value);
-                if (!isNaN(valor)) total += valor;
-            }
-            document.getElementById('total-horas').innerText = total;
-        }
-
-        // UNIFICAÇÃO DA INICIALIZAÇÃO DA PÁGINA
-        window.onload = () => {
-            carregarDados();
-            calcularTotal();
-            for(let i=0; i<2; i++) { criarLinhaPeca(); }
-            configurarAssinatura('pad-tecnico');
+        /* PAINEL DE CONFIGURAÇÃO DO DOCUMENTO */
+        const CONFIG_DOCUMENTO = {
+            padrao: { numero: "RQ 028", revisao: "03 / 02", data: "05/12/2018" },
+            ex_w21: { numero: "RQ 028.1", revisao: "10", data: "21/10/2020" },
+            ex_w22_200: { numero: "RQ 028.2", revisao: "01", data: "29/05/2018" },
+            ex_w22_355: { numero: "RQ 028.2.1", revisao: "00", data: "04/09/2018" },
+            ex_ent: { numero: "RQ 028.3", revisao: "01", data: "05/12/2018" },
+            ex_outras: { numero: "RQ 028.4", revisao: "02", data: "05/12/2018" },
+            ex_motofreio: { numero: "RQ 028.5", revisao: "00", data: "26/06/2019" }
         };
 
-        window.onclick = e => { 
-            if (!e.target.matches('.input-nome-peca')) {
-                document.querySelectorAll('.suggestions').forEach(s => s.style.display = 'none'); 
+        function aplicarConfigDocumento(modelo) {
+            const config = CONFIG_DOCUMENTO[modelo] || CONFIG_DOCUMENTO.padrao;
+            document.getElementById('meta-doc').textContent = config.numero;
+            document.getElementById('meta-rev').textContent = config.revisao;
+            document.getElementById('meta-data').textContent = config.data;
+        }
+
+        /* LÓGICA DE ALTERNÂNCIA CORRIGIDA */
+        function alternarModoBase(modo) {
+            const btnCA = document.getElementById('btn-ca');
+            const btnEX = document.getElementById('btn-ex');
+            const dropdown = document.getElementById('ex-model-dropdown');
+            const subtitle = document.getElementById('subtitle-motor-type');
+
+            // Esconde todas as seções EX
+            document.querySelectorAll('.ex-section').forEach(sec => sec.classList.add('secao-oculta'));
+
+            if (modo === 'ex') {
+                btnCA.classList.remove('active');
+                btnEX.classList.add('active', 'ex-mode');
+                dropdown.classList.add('visible');
+                subtitle.textContent = 'MOTORES À PROVA DE EXPLOSÃO (EX)';
+                document.querySelector('.page').style.borderTopColor = 'var(--ex-blue)';
+                alternarModeloEx(document.getElementById('select-ex-model').value);
+            } else {
+                btnEX.classList.remove('active', 'ex-mode');
+                btnCA.classList.add('active');
+                dropdown.classList.remove('visible');
+                subtitle.textContent = 'MOTORES CA';
+                document.querySelector('.page').style.borderTopColor = 'var(--red)';
             }
+        }
+
+        function alternarModeloEx(modelo) {
+            // Esconde todas as seções EX novamente
+            document.querySelectorAll('.ex-section').forEach(sec => sec.classList.add('secao-oculta'));
+            
+            // Mostra as específicas
+            if (modelo === 'ex_w21') {
+                ['sec-ex-w21-dados', 'sec-ex-w21-dimensoes'].forEach(id => document.getElementById(id).classList.remove('secao-oculta'));
+            } else if (modelo === 'ex_w22_200') {
+                ['sec-ex-w22-200-dados', 'sec-ex-w22-200-tampas'].forEach(id => document.getElementById(id).classList.remove('secao-oculta'));
+            } else if (modelo === 'ex_w22_355') {
+                ['sec-ex-w22-355-dados', 'sec-ex-w22-355-tampas', 'sec-ex-w22-355-carcaca'].forEach(id => document.getElementById(id).classList.remove('secao-oculta'));
+            } else {
+                ['sec-ex-outros-dados', 'sec-ex-outros-medidas'].forEach(id => document.getElementById(id).classList.remove('secao-oculta'));
+            }
+
+            aplicarConfigDocumento(modelo);
+        }
+
+        /* CÁLCULOS E VALIDAÇÕES */
+        function obterTolAssentoEixo(d) {
+            if (!d) return null;
+            let min = 0, max = 0, classe = 'k5';
+            if (d <= 18) { min = d + 0.001; max = d + 0.009; }
+            else if (d <= 30) { min = d + 0.002; max = d + 0.011; }
+            else if (d <= 50) { min = d + 0.002; max = d + 0.013; }
+            else if (d <= 80) { min = d + 0.011; max = d + 0.024; classe = 'm5'; }
+            else if (d <= 120) { min = d + 0.013; max = d + 0.028; classe = 'm5'; }
+            else { min = d + 0.015; max = d + 0.033; classe = 'm5'; }
+            return { minimo: min, maximo: max, classe: classe };
+        }
+
+        function obterTolPontaEixo(d) {
+            if (!d) return null;
+            let min = 0, max = 0, classe = 'j6';
+            if (d <= 10) { min = d - 0.002; max = d + 0.007; }
+            else if (d <= 18) { min = d - 0.003; max = d + 0.008; }
+            else if (d <= 28) { min = d - 0.004; max = d + 0.009; }
+            else if (d <= 30) { min = d + 0.002; max = d + 0.015; classe = 'k6'; }
+            else if (d <= 50) { min = d + 0.002; max = d + 0.018; classe = 'k6'; }
+            else if (d <= 80) { min = d + 0.011; max = d + 0.030; classe = 'm6'; }
+            else if (d <= 120) { min = d + 0.013; max = d + 0.035; classe = 'm6'; }
+            else { min = d + 0.015; max = d + 0.040; classe = 'm6'; }
+            return { minimo: min, maximo: max, classe: classe };
+        }
+
+        function obterChavetaDIN6885(d) {
+            if (!d) return null;
+            let b = 0, h = 0, tolMin = 0;
+            if (d > 6 && d <= 8) { b = 2; h = 2; tolMin = -0.025; }
+            else if (d > 8 && d <= 10) { b = 3; h = 3; tolMin = -0.025; }
+            else if (d > 10 && d <= 12) { b = 4; h = 4; tolMin = -0.030; }
+            else if (d > 12 && d <= 17) { b = 5; h = 5; tolMin = -0.030; }
+            else if (d > 17 && d <= 22) { b = 6; h = 6; tolMin = -0.030; }
+            else if (d > 22 && d <= 30) { b = 8; h = 7; tolMin = -0.036; }
+            else if (d > 30 && d <= 38) { b = 10; h = 8; tolMin = -0.036; }
+            else if (d > 38 && d <= 44) { b = 12; h = 8; tolMin = -0.043; }
+            else if (d > 44 && d <= 50) { b = 14; h = 9; tolMin = -0.043; }
+            else if (d > 50 && d <= 58) { b = 16; h = 10; tolMin = -0.043; }
+            else if (d > 58 && d <= 65) { b = 18; h = 11; tolMin = -0.043; }
+            else if (d > 65 && d <= 75) { b = 20; h = 12; tolMin = -0.052; }
+            else if (d > 75 && d <= 85) { b = 22; h = 14; tolMin = -0.052; }
+            else { b = 25; h = 14; tolMin = -0.052; }
+            return { larguraNominal: b, alturaNominal: h, classe: 'N9', minimo: b + tolMin, maximo: b };
+        }
+
+        function obterTolTampaAlojamento(D) {
+            if (!D) return null;
+            let max = 0;
+            if (D <= 30) max = 0.013;
+            else if (D <= 50) max = 0.016;
+            else if (D <= 80) max = 0.019;
+            else if (D <= 120) max = 0.022;
+            else if (D <= 150) max = 0.025;
+            else if (D <= 180) max = 0.025;
+            else max = 0.029;
+            return { minimo: D, maximo: D + max, classe: 'H6' };
+        }
+
+        function calcularTolerancias() {
+            const n3 = parseFloat(document.getElementById('nom_eixo3').value);
+            const t3 = obterTolAssentoEixo(n3);
+            if (t3) document.getElementById('tol_desc_eixo3').innerHTML = `<span class="norma-badge">ISO 286 ${t3.classe}</span> [${t3.minimo.toFixed(3)} ~ ${t3.maximo.toFixed(3)} mm]`;
+
+            const n4 = parseFloat(document.getElementById('nom_eixo4').value);
+            const t4 = obterTolAssentoEixo(n4);
+            if (t4) document.getElementById('tol_desc_eixo4').innerHTML = `<span class="norma-badge">ISO 286 ${t4.classe}</span> [${t4.minimo.toFixed(3)} ~ ${t4.maximo.toFixed(3)} mm]`;
+
+            const nP = parseFloat(document.getElementById('nom_ponta').value);
+            const tP = obterTolPontaEixo(nP);
+            if (tP) document.getElementById('tol_desc_ponta').innerHTML = `<span class="norma-badge">IEC 60072 ${tP.classe}</span> [${tP.minimo.toFixed(3)} ~ ${tP.maximo.toFixed(3)} mm]`;
+
+            const tC = obterChavetaDIN6885(nP);
+            if (tC) {
+                document.getElementById('nom_chaveta').value = tC.larguraNominal;
+                document.getElementById('tol_desc_chaveta').innerHTML = `<span class="norma-badge">DIN 6885 N9</span> [${tC.minimo.toFixed(3)} ~ ${tC.maximo.toFixed(3)} mm]`;
+            }
+
+            const nLA = parseFloat(document.getElementById('nom_tampa_la').value);
+            const tLA = obterTolTampaAlojamento(nLA);
+            if (tLA) document.getElementById('tol_desc_tampa_la').innerHTML = `<span class="norma-badge">EASA H6</span> [${tLA.minimo.toFixed(3)} ~ ${tLA.maximo.toFixed(3)} mm]`;
+
+            const nLOA = parseFloat(document.getElementById('nom_tampa_loa').value);
+            const tLOA = obterTolTampaAlojamento(nLOA);
+            if (tLOA) document.getElementById('tol_desc_tampa_loa').innerHTML = `<span class="norma-badge">EASA H6</span> [${tLOA.minimo.toFixed(3)} ~ ${tLOA.maximo.toFixed(3)} mm]`;
+
+            atualizarParametrosVibracao();
+            
+            if (nP) {
+                let limite = 0.140;
+                if (nP > 100 && nP <= 112) limite = 0.118;
+                else if (nP > 112 && nP <= 132) limite = 0.118;
+                else if (nP > 132 && nP <= 160) limite = 0.133;
+                else if (nP > 160 && nP <= 180) limite = 0.133;
+                else if (nP > 180 && nP <= 200) limite = 0.146;
+                const el = document.getElementById('limite_ex_intersticio_la');
+                if (el) el.textContent = limite.toFixed(3) + ' mm';
+                const desc = document.getElementById('tol_desc_ex_intersticio_la');
+                if (desc) desc.innerHTML = `<span class="norma-badge">NBR 60079-1</span> Máx: ${limite.toFixed(3)} mm`;
+            }
+        }
+
+        const TABELA_VIBRACAO = { 'A': { '56_132': 1.6, '132_280': 2.2, 'gt_280': 2.8 }, 'B': { '56_132': 0.7, '132_280': 1.1, 'gt_280': 1.8 } };
+        function obterLimiteVibracaoAtual() {
+            const c = document.getElementById('carcaca_vibracao').value || '132_280';
+            const g = document.getElementById('grau_vibracao').value || 'A';
+            return TABELA_VIBRACAO[g][c] || 2.2;
+        }
+
+        function atualizarParametrosVibracao() {
+            const lim = obterLimiteVibracaoAtual();
+            const txt = `≤ ${lim.toFixed(1).replace('.', ',')} mm/s`;
+            document.querySelectorAll('.col-limite-vib').forEach(el => el.textContent = txt);
+            for (let i = 1; i <= 6; i++) validarVibracao(i);
+        }
+
+        function validarItem(tipo) {
+            let med, res, min = 0, max = 0;
+            
+            if (tipo === 'eixo3' || tipo === 'eixo3_rep') { 
+                med = tipo === 'eixo3' ? 'med_eixo3' : 'med_eixo3_rep'; 
+                res = 'res_eixo3_rep'; 
+                const t = obterTolAssentoEixo(parseFloat(document.getElementById('nom_eixo3').value)); 
+                if(t){min=t.minimo; max=t.maximo;} 
+            }
+            else if (tipo === 'eixo4' || tipo === 'eixo4_rep') { 
+                med = tipo === 'eixo4' ? 'med_eixo4' : 'med_eixo4_rep'; 
+                res = 'res_eixo4_rep'; 
+                const t = obterTolAssentoEixo(parseFloat(document.getElementById('nom_eixo4').value)); 
+                if(t){min=t.minimo; max=t.maximo;} 
+            }
+            else if (tipo === 'ponta' || tipo === 'ponta_rep') { 
+                med = tipo === 'ponta' ? 'med_ponta' : 'med_ponta_rep'; 
+                res = 'res_ponta_rep'; 
+                const t = obterTolPontaEixo(parseFloat(document.getElementById('nom_ponta').value)); 
+                if(t){min=t.minimo; max=t.maximo;} 
+            }
+            else if (tipo === 'chaveta' || tipo === 'chaveta_rep') { 
+                med = tipo === 'chaveta' ? 'med_chaveta' : 'med_chaveta_rep'; 
+                res = 'res_chaveta_rep'; 
+                const t = obterChavetaDIN6885(parseFloat(document.getElementById('nom_ponta').value)); 
+                if(t){min=t.minimo; max=t.maximo;} 
+            }
+            else if (tipo === 'tampa_la' || tipo === 'tampa_la_rep') { 
+                med = tipo === 'tampa_la' ? 'med_tampa_la' : 'med_tampa_la_rep'; 
+                res = 'res_tampa_la_rep'; 
+                const t = obterTolTampaAlojamento(parseFloat(document.getElementById('nom_tampa_la').value)); 
+                if(t){min=t.minimo; max=t.maximo;} 
+            }
+            else if (tipo === 'tampa_loa' || tipo === 'tampa_loa_rep') { 
+                med = tipo === 'tampa_loa' ? 'med_tampa_loa' : 'med_tampa_loa_rep'; 
+                res = 'res_tampa_loa_rep'; 
+                const t = obterTolTampaAlojamento(parseFloat(document.getElementById('nom_tampa_loa').value)); 
+                if(t){min=t.minimo; max=t.maximo;} 
+            }
+
+            const m = document.getElementById(med), r = document.getElementById(res);
+            if (!m || !r) return;
+            const v = parseFloat(m.value);
+            
+            if (isNaN(v) || m.value.trim() === '') { r.value = ""; r.className = "status-pendente"; return; }
+            const aprov = (v >= min - 0.0001) && (v <= max + 0.0001);
+            r.value = aprov ? "Aprovado" : "Reprovado";
+            r.className = aprov ? "status-aprovado" : "status-reprovado";
+        }
+
+        function validarBatimento(tipo) {
+            const isReparo = tipo.includes('_rep');
+            const idBase = tipo.replace('_rep', '');
+            
+            const med = document.getElementById(`med_bat_${tipo}`);
+            const res = document.getElementById(`res_bat_${tipo}_rep`);
+            
+            if (!med || !res) return;
+
+            const v = parseFloat(med.value);
+            const max = (idBase === 'com_flange') ? 0.050 : 0.030;
+            
+            if (isNaN(v) || med.value.trim() === '') { res.value = ""; res.className = "status-pendente"; return; }
+            const aprov = (v >= 0 && v <= max + 0.0001);
+            res.value = aprov ? "Aprovado" : "Reprovado";
+            res.className = aprov ? "status-aprovado" : "status-reprovado";
+        }
+
+        function validarConcentPerp(tipo) {
+            let med = '', res = '', max = 0.050;
+            if (tipo === 'conc_inicial' || tipo === 'conc_reparo') { 
+                med = tipo === 'conc_inicial' ? 'med_conc_inicial' : 'med_conc_reparo'; 
+                res = 'res_conc_reparo'; 
+            }
+            else if (tipo === 'perp_inicial' || tipo === 'perp_reparo') { 
+                med = tipo === 'perp_inicial' ? 'med_perp_inicial' : 'med_perp_reparo'; 
+                res = 'res_perp_reparo'; 
+            }
+            
+            const m = document.getElementById(med), r = document.getElementById(res);
+            if (!m || !r) return;
+
+            const v = parseFloat(m.value);
+            if (isNaN(v) || m.value.trim() === '') { r.value = ""; r.className = "status-pendente"; return; }
+            const aprov = (v >= 0 && v <= max + 0.0001);
+            r.value = aprov ? "Aprovado" : "Reprovado";
+            r.className = aprov ? "status-aprovado" : "status-reprovado";
+        }
+
+        function validarEX(tipo) {
+            const idBase = tipo.replace('_rep', '');
+            
+            let med = `med_${tipo}`;
+            let res = `res_${tipo}_rep`;
+            
+            if (tipo === 'ex_entreferro' || tipo === 'ex_entreferro_rep') {
+                med = tipo; 
+                res = 'res_ex_entreferro_rep';
+            }
+            
+            const m = document.getElementById(med), r = document.getElementById(res);
+            if (!m || !r) return;
+
+            const v = parseFloat(m.value);
+            let limit = 0, isMin = false;
+            
+            if (idBase === 'ex_intersticio_la') limit = 0.140;
+            else if (idBase === 'ex_comp_la') { limit = 15.3; isMin = true; }
+            else if (idBase === 'ex_caixa') limit = 0.040;
+            else if (idBase === 'ex_rugosidade') limit = 6.3;
+            else if (idBase === 'ex_entreferro') { limit = 0.2; isMin = true; }
+            
+            if (isNaN(v) || m.value.trim() === '') { r.value = ""; r.className = "status-pendente"; return; }
+            const aprov = isMin ? (v >= limit) : (v <= limit);
+            r.value = aprov ? "Aprovado" : "Reprovado";
+            r.className = aprov ? "status-aprovado" : "status-reprovado";
+        }
+
+        function validarVibracao(i) {
+            const med = document.getElementById(`med_vib_${i}`);
+            const res = document.getElementById(`res_vib_${i}`);
+            if (!med || !res) return;
+
+            const v = parseFloat(med.value);
+            const max = obterLimiteVibracaoAtual();
+            if (isNaN(v) || med.value.trim() === '') { res.value = ""; res.className = "status-pendente"; return; }
+            const aprov = (v >= 0 && v <= max + 0.001);
+            res.value = aprov ? "Aprovado" : "Reprovado";
+            res.className = aprov ? "status-aprovado" : "status-reprovado";
+        }
+
+        /* UTILITÁRIOS GERAIS */
+        function atualizarDatasRelatorio() {
+            const hoje = new Date();
+            const str = [String(hoje.getDate()).padStart(2, '0'), String(hoje.getMonth() + 1).padStart(2, '0'), hoje.getFullYear()].join('/');
+            document.querySelectorAll('.data-global').forEach(el => el.value = str);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            atualizarDatasRelatorio();
+            calcularTolerancias();
+            alternarModoBase('ca');
+        });
+
+        function baixarFormulario() {
+            atualizarDatasRelatorio();
+            const copia = document.documentElement.cloneNode(true);
+            const atuais = document.querySelectorAll('input, select, textarea');
+            const copias = copia.querySelectorAll('input, select, textarea');
+            atuais.forEach((c, i) => {
+                if (c.tagName === 'TEXTAREA') copias[i].textContent = c.value;
+                else if (c.tagName === 'SELECT') { Array.from(copias[i].options).forEach((o, j) => { if (j === c.selectedIndex) o.setAttribute('selected', 'selected'); else o.removeAttribute('selected'); }); copias[i].className = c.className; }
+                else if (c.type === 'radio' || c.type === 'checkbox') { if (c.checked) copias[i].setAttribute('checked', 'checked'); else copias[i].removeAttribute('checked'); }
+                else copias[i].setAttribute('value', c.value);
+            });
+            const blob = new Blob(['<!DOCTYPE html>\n' + copia.outerHTML], { type: 'text/html;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `RQ028_${document.getElementById('os').value || 'controle'}.html`;
+            a.click();
+            URL.revokeObjectURL(a.href);
         }
     </script>
 </body>
