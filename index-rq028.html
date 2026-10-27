@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>RQ 028 - Controle Dimensional Motores CA</title>
+    <title>RQ 028 - Controle Dimensional Motores CA / Ex</title>
     <style>
         :root {
             color-scheme: light;
@@ -26,6 +26,10 @@
             --badge-text: #245675;
             --highlight-limit: #fffae6;
             --highlight-border: #d4a017;
+            /* Cores Ex */
+            --ex-blue: #0d47a1;
+            --ex-bg: #e3f2fd;
+            --ex-border: #90caf9;
         }
 
         * { box-sizing: border-box; }
@@ -45,6 +49,52 @@
             border-top: 5px solid var(--red);
             box-shadow: 0 8px 28px rgba(23, 51, 75, .12);
             border-radius: 2px;
+        }
+
+        /* BARRA DE SELEÇÃO DE TIPO DE MOTOR */
+        .motor-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f0f4f8;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+        }
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            background: #fff;
+            color: var(--muted);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 14px;
+        }
+        .type-btn:hover { background: #e2e8f0; }
+        .type-btn.active {
+            border-color: var(--blue);
+            color: var(--blue);
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(36, 86, 117, 0.15);
+        }
+        .type-btn.active.ex-mode {
+            border-color: var(--ex-blue);
+            color: var(--ex-blue);
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(13, 71, 161, 0.15);
+        }
+
+        /* ESCONDER/EXIBIR SEÇÕES EX */
+        .ex-section { display: none; }
+        .ex-section.visible { display: block; animation: fadeIn 0.3s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .document-header {
@@ -124,8 +174,14 @@
             background: var(--soft);
             border-radius: 0 4px 4px 0;
         }
+        
+        .ex-section .section-heading {
+            border-left-color: var(--ex-blue);
+            background: var(--ex-bg);
+        }
 
         .section-heading .number { color: var(--red); font-size: 12px; font-weight: 800; }
+        .ex-section .section-heading .number { color: var(--ex-blue); }
         .section-heading h2 { margin: 0; color: var(--ink); font-size: 13px; text-transform: uppercase; font-weight: 700; }
         .section-heading small { color: var(--muted); font-size: 10px; }
         
@@ -184,7 +240,6 @@
             margin: 0 0 8px;
         }
 
-        /* Classes de Destaque Automático de Tolerâncias e Status */
         .lbl-tolerancia {
             display: block;
             font-size: 10px;
@@ -203,6 +258,10 @@
             font-size: 9px;
             margin-right: 4px;
             text-transform: uppercase;
+        }
+        .ex-section .norma-badge {
+            background: #bbdefb;
+            color: #0d47a1;
         }
         .tol-range {
             font-weight: 700;
@@ -241,6 +300,12 @@
             flex-wrap: wrap;
         }
         .info-normas-box strong { color: var(--blue); }
+        
+        .ex-section .info-normas-box {
+            background: #e3f2fd;
+            border-color: #90caf9;
+        }
+        .ex-section .info-normas-box strong { color: #0d47a1; }
 
         .diagnosis { margin-top: 18px; }
         .diagnosis textarea { min-height: 86px; resize: vertical; }
@@ -264,7 +329,6 @@
         .vibration-limits td:first-child { text-align: left; font-weight: 600; }
         .vibration-note { margin: 5px 0 0; color: var(--muted); font-size: 9px; }
 
-        /* Célula ativa na Tabela 11 */
         .active-limit-cell {
             background-color: var(--bg-aprovado) !important;
             color: var(--text-aprovado) !important;
@@ -300,6 +364,44 @@
         .quiet { background: #687883; }
         .actions button:hover { filter: brightness(.92); transform: translateY(-1px); }
 
+        /* CHECKLIST EX */
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .checklist-item {
+            background: #fff;
+            padding: 12px 15px;
+            border: 1px solid var(--ex-border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px; /* Espaço entre o texto e os botões */
+        }
+        .checklist-item span { 
+            font-weight: 600; 
+            font-size: 12px; 
+            flex: 1; /* Permite que o texto ocupe o espaço e quebre linha se necessário */
+            line-height: 1.4;
+        }
+        .checklist-options { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; /* Espaço entre o botão Sim e Não */
+            white-space: nowrap; /* Impede que os botões quebrem de linha */
+        }
+        .checklist-options label { 
+            font-size: 12px; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 5px; 
+            margin: 0;
+        }
+
         @media (max-width: 760px) {
             .page { width: 100%; margin: 0; padding: 18px 14px; box-shadow: none; }
             .document-header { grid-template-columns: 1fr auto; gap: 12px; }
@@ -311,6 +413,7 @@
             .section-heading small { display: none; }
             .vibration-reference { grid-template-columns: 1fr; }
             .vibration-image { max-height: 240px; }
+            .motor-type-selector { flex-direction: column; }
         }
 
         @page { size: A4 portrait; margin: 10mm; }
@@ -341,6 +444,7 @@
             td input, td select { min-height: 24px; padding: 2px 4px; font-size: 10px; }
             .diagnosis textarea { min-height: 60px; }
             .footer-note { margin-top: 10px; }
+            .ex-section.visible { display: block !important; }
         }
     </style>
 </head>
@@ -348,16 +452,22 @@
     <main class="page">
         <header class="document-header">
             <img class="brand-logo" src="https://i.ibb.co/zWgjxdtj/logo.png" alt="Gold Soluções e Serviços">
-            <div class="title">
+                        <div class="title">
                 <h1>Controle Dimensional</h1>
-                <p>MOTORES CA</p>
+                <p id="subtitle-motor-type">MOTORES CA</p>
             </div>
             <dl class="doc-meta">
-                <dt>Documento</dt><dd>RQ 028</dd>
-                <dt>Revisão</dt><dd>03 / 02</dd>
-                <dt>Data do documento</dt><dd>05/12/2018</dd>
+                <dt>Documento</dt><dd id="meta-doc">RQ 028</dd>
+                <dt>Revisão</dt><dd id="meta-rev">03 / 02</dd>
+                <dt>Data do documento</dt><dd id="meta-data">05/12/2018</dd>
             </dl>
         </header>
+
+        <!-- SELETOR DE TIPO DE MOTOR -->
+        <div class="motor-type-selector no-print" role="tablist">
+            <button type="button" class="type-btn active" id="btn-padrao" onclick="alternarModo('padrao')">Motor Padrão (CA)</button>
+            <button type="button" class="type-btn" id="btn-ex" onclick="alternarModo('ex')">Motor à Prova de Explosão (Ex)</button>
+        </div>
 
         <form id="rq028-form">
             <section class="intro-fields" aria-label="Identificação do ensaio">
@@ -379,8 +489,209 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO 01 - EIXO E COMPONENTES -->
-            <section class="section" aria-labelledby="secao-eixo">
+            <!-- ========================================== -->
+            <!-- SEÇÃO EXCLUSIVA PARA MOTORES EX -->
+            <!-- ========================================== -->
+            <div id="secao-exclusiva-ex" class="ex-section">
+                
+                <section class="section" aria-labelledby="secao-ex-dados">
+                    <div class="section-heading">
+                        <span class="number">EX.01</span>
+                        <h2 id="secao-ex-dados">Dados de Identificação do Motor Ex</h2>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px;">
+                        <div class="field">
+                            <label for="ex-tipo-protecao">Tipo de Proteção</label>
+                            <select id="ex-tipo-protecao" name="ex-tipo-protecao">
+                                <option value="">Selecione...</option>
+                                <option value="Ex d">Ex d (Invólucro à Prova de Explosão)</option>
+                                <option value="Ex e">Ex e (Segurança Aumentada)</option>
+                                <option value="Ex n">Ex n (Não Acendível)</option>
+                                <option value="Ex t">Ex t (Prova de Poeira)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="ex-grupo">Grupo</label>
+                            <select id="ex-grupo" name="ex-grupo">
+                                <option value="">Selecione...</option>
+                                <option value="I">Grupo I (Mineração)</option>
+                                <option value="IIA">Grupo IIA</option>
+                                <option value="IIB">Grupo IIB</option>
+                                <option value="IIC">Grupo IIC</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="ex-classe-temp">Classe de Temperatura</label>
+                            <input id="ex-classe-temp" name="ex-classe-temp" type="text" placeholder="Ex: T4, T5">
+                        </div>
+                        <div class="field">
+                            <label for="ex-certificado">Nº Certificado</label>
+                            <input id="ex-certificado" name="ex-certificado" type="text" placeholder="Certificado do Motor">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" aria-labelledby="secao-ex-dimensoes">
+                    <div class="section-heading">
+                        <span class="number">EX.02</span>
+                        <h2 id="secao-ex-dimensoes">Verificação Dimensional Ex d (Passagem de Chama)</h2>
+                        <small>Baseado na PO-GOLD-06-RON</small>
+                    </div>
+                    
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="col-item">Componente / Local</th>
+                                    <th class="col-nominal">Limite Máx. (mm)</th>
+                                    <th class="col-measure">Medição Inicial (mm)</th>
+                                    <th class="col-result">Resultado</th>
+                                    <th class="col-instrument">Instrumento</th>
+                                    <th class="col-tag">TAG Instrumento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        Interstício Tampa LA (Carcaça ↔ Tampa)
+                                        <span id="tol_desc_ex_intersticio_la" class="lbl-tolerancia"></span>
+                                    </td>
+                                    <td style="font-weight: bold; color: var(--blue); font-size: 11px;" id="limite_ex_intersticio_la">0.140 mm</td>
+                                    <td><input type="number" step="0.001" id="med_ex_intersticio_la" name="ex-intersticio-la" placeholder="0.000" oninput="validarEX('ex_intersticio_la')"></td>
+                                    <td><select id="res_ex_intersticio_la" name="ex-intersticio-la-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option></select></td>
+                                    <td><input type="text" value="Calibrador de folga" readonly style="background:#edf2f5;"></td>
+                                    <td><input type="text" placeholder="TAG Gold"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Comprimento da Passagem de Chama LA
+                                        <span id="tol_desc_ex_comp_la" class="lbl-tolerancia"></span>
+                                    </td>
+                                    <td style="font-weight: bold; color: var(--blue); font-size: 11px;" id="limite_ex_comp_la">≥ 15.3 mm</td>
+                                    <td><input type="number" step="0.01" id="med_ex_comp_la" name="ex-comp-la" placeholder="0.00" oninput="validarEX('ex_comp_la')"></td>
+                                    <td><select id="res_ex_comp_la" name="ex-comp-la-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option></select></td>
+                                    <td><input type="text" value="Paquímetro / Súbito" readonly style="background:#edf2f5;"></td>
+                                    <td><input type="text" placeholder="TAG Gold"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Folga da Caixa de Ligação (Calibrador Não Passa)
+                                        <span id="tol_desc_ex_caixa" class="lbl-tolerancia"></span>
+                                    </td>
+                                    <td style="font-weight: bold; color: var(--blue); font-size: 11px;">≤ 0.040 mm</td>
+                                    <td><input type="number" step="0.001" id="med_ex_caixa" name="ex-caixa" placeholder="0.000" oninput="validarEX('ex_caixa')"></td>
+                                    <td><select id="res_ex_caixa" name="ex-caixa-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option></select></td>
+                                    <td><input type="text" value="Calibrador de folga 0,04" readonly style="background:#edf2f5;"></td>
+                                    <td><input type="text" placeholder="TAG Gold"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="info-normas-box">
+                        <span><strong>Norma aplicada:</strong> ABNT NBR IEC 60079-0 / 60079-1 (Tabelas de interstício e comprimento de passagem de chama). *Ajuste o diâmetro da carcaça no campo "Ø Nominal" do eixo na seção 01 para recalcular os limites.*</span>
+                    </div>
+                </section>
+
+                <section class="section" aria-labelledby="secao-ex-rugosidade">
+                    <div class="section-heading">
+                        <span class="number">EX.03</span>
+                        <h2 id="secao-ex-rugosidade">Medição de Rugosidade (Face de Junta)</h2>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="col-item">Superfície Avaliada</th>
+                                    <th class="col-nominal">Limite Máx. (Ra)</th>
+                                    <th class="col-measure">Medição (µm)</th>
+                                    <th class="col-result">Resultado</th>
+                                    <th class="col-instrument">Instrumento</th>
+                                    <th class="col-tag">TAG Instrumento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Face de encaixe (Tampa / Carcaça)</td>
+                                    <td style="font-weight: bold; color: var(--blue); font-size: 11px;">6,3 µm (Ra)</td>
+                                    <td><input type="number" step="0.1" id="med_ex_rugosidade" name="ex-rugosidade" placeholder="0.0" oninput="validarEX('ex_rugosidade')"></td>
+                                    <td><select id="res_ex_rugosidade" name="ex-rugosidade-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option></select></td>
+                                    <td><input type="text" value="Rugosímetro Digital" readonly style="background:#edf2f5;"></td>
+                                    <td><input type="text" placeholder="TAG Gold"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="info-normas-box">
+                        <span><strong>Norma aplicada:</strong> PF-GOLD-07-RON (Superfícies de junta devem ter rugosidade máxima de 6,3 μm Ra).</span>
+                    </div>
+                </section>
+
+                <section class="section" aria-labelledby="secao-ex-entreferro">
+                    <div class="section-heading">
+                        <span class="number">EX.04</span>
+                        <h2 id="secao-ex-entreferro">Medição de Entreferro (Apenas Motores Ex e / Ex n)</h2>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="col-item">Local</th>
+                                    <th class="col-nominal">Mínimo Requerido</th>
+                                    <th class="col-measure">Medição (mm)</th>
+                                    <th class="col-result">Resultado</th>
+                                    <th class="col-instrument">Instrumento</th>
+                                    <th class="col-tag">TAG</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Entreferro Radial (Rotor ↔ Estator)</td>
+                                    <td style="font-weight: bold; color: var(--blue); font-size: 11px;">Calculado conforme Norma</td>
+                                    <td><input type="number" step="0.01" id="med_ex_entreferro" name="ex-entreferro" placeholder="0.00" oninput="validarEX('ex_entreferro')"></td>
+                                    <td><select id="res_ex_entreferro" name="ex-entreferro-resultado"><option value="">Pendente</option><option value="Aprovado">Aprovado</option><option value="Reprovado">Reprovado</option></select></td>
+                                    <td><input type="text" value="Calibrador / Folga" readonly style="background:#edf2f5;"></td>
+                                    <td><input type="text" placeholder="TAG Gold"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                                <section class="section" aria-labelledby="secao-ex-checklist">
+                    <div class="section-heading">
+                        <span class="number">EX.05</span>
+                        <h2 id="secao-ex-checklist">Checklist de Conformidade Ex</h2>
+                    </div>
+                    <div class="checklist-grid">
+                        <div class="checklist-item">
+                            <span>Prensa-cabos certificados?</span>
+                            <div class="checklist-options">
+                                <label><input type="radio" name="chk_prensa" value="Sim"> Sim</label>
+                                <label><input type="radio" name="chk_prensa" value="Não"> Não</label>
+                            </div>
+                        </div>
+                        <div class="checklist-item">
+                            <span>Bujões certificados?</span>
+                            <div class="checklist-options">
+                                <label><input type="radio" name="chk_bujao" value="Sim"> Sim</label>
+                                <label><input type="radio" name="chk_bujao" value="Não"> Não</label>
+                            </div>
+                        </div>
+                        <div class="checklist-item">
+                            <span>Juntas de encaixe (Loctite 5923) aplicadas?</span>
+                            <div class="checklist-options">
+                                <label><input type="radio" name="chk_loctite" value="Sim"> Sim</label>
+                                <label><input type="radio" name="chk_loctite" value="Não"> Não</label>
+                            </div>
+                        </div>
+                        <!-- Você pode adicionar mais itens aqui seguindo este mesmo padrão -->
+                    </div>
+                </section>
+            </div>
+            <!-- FIM DA SEÇÃO EX -->
+
+            <!-- SEÇÃO 01 - EIXO E COMPONENTES (PADRÃO) -->
+            <section class="section standard-section" aria-labelledby="secao-eixo">
                 <div class="section-heading">
                     <span class="number">01</span>
                     <h2 id="secao-eixo">Verificação dimensional do eixo e componentes</h2>
@@ -400,7 +711,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Eixo Ø3 (Rolamento LA) -->
                             <tr>
                                 <td>
                                     Eixo Ø3 (Rolamento LA)
@@ -424,7 +734,6 @@
                                 <td><input name="eixo-3-tag" type="text" placeholder="TAG Gold"></td>
                             </tr>
 
-                            <!-- Eixo Ø4 (Rolamento LOA) -->
                             <tr>
                                 <td>
                                     Eixo Ø4 (Rolamento LOA)
@@ -448,7 +757,6 @@
                                 <td><input name="eixo-4-tag" type="text" placeholder="TAG Gold"></td>
                             </tr>
 
-                            <!-- Medição ponta de eixo -->
                             <tr>
                                 <td>
                                     Medição ponta de eixo
@@ -472,7 +780,6 @@
                                 <td><input name="ponta-eixo-tag" type="text" placeholder="TAG Gold"></td>
                             </tr>
 
-                            <!-- Rasgo de chaveta (Largura N9 DIN 6885-1) -->
                             <tr>
                                 <td>
                                     Rasgo de chaveta (Largura)
@@ -529,7 +836,7 @@
             </section>
 
             <!-- SEÇÃO 02 - TAMPAS (ANSI/EASA AR100 / ISO 286 H6/H7) -->
-            <section class="section" aria-labelledby="secao-tampas">
+            <section class="section standard-section" aria-labelledby="secao-tampas">
                 <div class="section-heading">
                     <span class="number">02</span>
                     <h2 id="secao-tampas">Verificação dimensional das tampas (Alojamento dos Rolamentos)</h2>
@@ -548,7 +855,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Tampa LA (Ø1) -->
                             <tr>
                                 <td>
                                     Tampa LA (Ø1)
@@ -572,7 +878,6 @@
                                 <td><input name="tampa-la-tag" type="text" placeholder="TAG Gold"></td>
                             </tr>
 
-                            <!-- Tampa LOA (Ø1) -->
                             <tr>
                                 <td>
                                     Tampa LOA (Ø1)
@@ -604,112 +909,138 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO 03 - CONCENTRICIDADE -->
-            <section class="section" aria-labelledby="secao-concentricidade">
+             <!-- SEÇÃO 03 - CONCENTRICIDADE -->
+            <section class="section standard-section" aria-labelledby="secao-concentricidade">
                 <div class="section-heading">
                     <span class="number">03</span>
                     <h2 id="secao-concentricidade">Medição de concentricidade</h2>
                 </div>
                 <div class="table-scroll">
-                    <table class="repair-check-table">
+                    <table>
                         <thead>
                             <tr>
-                                <th rowspan="2">Flange</th>
-                                <th colspan="4">Verificação inicial</th>
-                                <th colspan="3">Verificação após reparo</th>
-                            </tr>
-                            <tr>
-                                <th>Medição (mm)</th>
-                                <th>Aprovado</th>
-                                <th>Executante</th>
-                                <th>Data</th>
-                                <th>Medição (mm)</th>
-                                <th>Executante</th>
-                                <th>Data</th>
+                                <th class="col-item">Local / Condição</th>
+                                <th class="col-nominal">Limite Máx. (mm)</th>
+                                <th class="col-measure">Medição Inicial (mm)</th>
+                                <th class="col-result">Resultado Inicial</th>
+                                <th class="col-measure">Medição Após Reparo (mm)</th>
+                                <th class="col-result">Resultado Final</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Flange</td>
-                                <td><input aria-label="Concentricidade: medição inicial" name="concentricidade-medicao-inicial" type="number" step="0.001" placeholder="0.000"></td>
-                                <td><div class="approval-options">
-                                    <label><input name="concentricidade-aprovado" type="radio" value="sim"> Sim</label>
-                                    <label><input name="concentricidade-aprovado" type="radio" value="nao"> Não</label>
-                                </div>
+                                <td>
+                                    Flange (Face / Encaixe)
+                                    <span class="lbl-tolerancia"><span class="norma-badge">NBR 15623 / DIN 42955</span> <span class="tol-range">[0.000 ~ 0.050 mm]</span></span>
                                 </td>
-                                <td><input aria-label="Concentricidade: executante inicial" name="concentricidade-executante-inicial" type="text" class="executante-relatorio"></td>
-                                <td><input aria-label="Concentricidade: data inicial" name="concentricidade-data-inicial" type="text" class="report-date" readonly></td>
-                                <td><input aria-label="Concentricidade: medição após reparo" name="concentricidade-medicao-reparo" type="number" step="0.001" placeholder="0.000"></td>
-                                <td><input aria-label="Concentricidade: executante após reparo" name="concentricidade-executante-reparo" type="text" class="executante-relatorio"></td>
-                                <td><input aria-label="Concentricidade: data após reparo" name="concentricidade-data-reparo" type="text" class="report-date" readonly></td>
+                                <td style="font-weight: bold; color: var(--blue); font-size: 11px;">≤ 0,050 mm</td>
+                                <td>
+                                    <input aria-label="Concentricidade: medição inicial" id="med_conc_inicial" name="concentricidade-medicao-inicial" type="number" step="0.001" placeholder="0.000" oninput="validarConcentPerp('conc_inicial')">
+                                </td>
+                                <td>
+                                    <select id="res_conc_inicial" name="concentricidade-resultado-inicial">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input aria-label="Concentricidade: medição após reparo" id="med_conc_reparo" name="concentricidade-medicao-reparo" type="number" step="0.001" placeholder="0.000" oninput="validarConcentPerp('conc_reparo')">
+                                </td>
+                                <td>
+                                    <select id="res_conc_reparo" name="concentricidade-resultado-reparo">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
                             </tr>
                             <tr class="instrument-row">
-                                <td colspan="8">
+                                <td colspan="6">
                                     <div class="instrument-fields">
                                         <div class="field"><label for="instrumento-concentricidade">Instrumento de medição</label><input id="instrumento-concentricidade" name="instrumento-concentricidade" type="text" value="Relógio comparador"></div>
                                         <div class="field"><label for="tag-concentricidade">TAG Gold</label><input id="tag-concentricidade" name="tag-concentricidade" type="text" placeholder="TAG Gold"></div>
+                                       
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+                <div class="info-normas-box">
+                    <span><strong>Parâmetros aplicados:</strong> Como a tabela completa da NBR 15623 não está detalhada nos POs (apenas cita a norma), utilizamos a tolerância padrão de <strong>0,050 mm</strong> para esta medição (baseada na DIN 42955 e NBR 15623 para motores de indução de médio porte).</span>
+                </div>
             </section>
 
             <!-- SEÇÃO 04 - PERPENDICULARIDADE -->
-            <section class="section" aria-labelledby="secao-perpendicularidade">
+            <section class="section standard-section" aria-labelledby="secao-perpendicularidade">
                 <div class="section-heading">
                     <span class="number">04</span>
                     <h2 id="secao-perpendicularidade">Medição de perpendicularidade</h2>
                 </div>
                 <div class="table-scroll">
-                    <table class="repair-check-table">
+                    <table>
                         <thead>
                             <tr>
-                                <th rowspan="2">Flange</th>
-                                <th colspan="4">Verificação inicial</th>
-                                <th colspan="3">Verificação após reparo</th>
-                            </tr>
-                            <tr>
-                                <th>Medição (mm)</th>
-                                <th>Aprovado</th>
-                                <th>Executante</th>
-                                <th>Data</th>
-                                <th>Medição (mm)</th>
-                                <th>Executante</th>
-                                <th>Data</th>
+                                <th class="col-item">Local / Condição</th>
+                                <th class="col-nominal">Limite Máx. (mm)</th>
+                                <th class="col-measure">Medição Inicial (mm)</th>
+                                <th class="col-result">Resultado Inicial</th>
+                                <th class="col-measure">Medição Após Reparo (mm)</th>
+                                <th class="col-result">Resultado Final</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Flange</td>
-                                <td><input aria-label="Perpendicularidade: medição inicial" name="perpendicularidade-medicao-inicial" type="number" step="0.001" placeholder="0.000"></td>
-                                <td><div class="approval-options">
-                                    <label><input name="perpendicularidade-aprovado" type="radio" value="sim"> Sim</label>
-                                    <label><input name="perpendicularidade-aprovado" type="radio" value="nao"> Não</label>
-                                </div>
+                                <td>
+                                    Flange (Superfície)
+                                    <span class="lbl-tolerancia"><span class="norma-badge">NBR 15623 / DIN 42955</span> <span class="tol-range">[0.000 ~ 0.050 mm]</span></span>
                                 </td>
-                                <td><input aria-label="Perpendicularidade: executante inicial" name="perpendicularidade-executante-inicial" type="text" class="executante-relatorio"></td>
-                                <td><input aria-label="Perpendicularidade: data inicial" name="perpendicularidade-data-inicial" type="text" class="report-date" readonly></td>
-                                <td><input aria-label="Perpendicularidade: medição após reparo" name="perpendicularidade-medicao-reparo" type="number" step="0.001" placeholder="0.000"></td>
-                                <td><input aria-label="Perpendicularidade: executante após reparo" name="perpendicularidade-executante-reparo" type="text" class="executante-relatorio"></td>
-                                <td><input aria-label="Perpendicularidade: data após reparo" name="perpendicularidade-data-reparo" type="text" class="report-date" readonly></td>
+                                <td style="font-weight: bold; color: var(--blue); font-size: 11px;">≤ 0,050 mm</td>
+                                <td>
+                                    <input aria-label="Perpendicularidade: medição inicial" id="med_perp_inicial" name="perpendicularidade-medicao-inicial" type="number" step="0.001" placeholder="0.000" oninput="validarConcentPerp('perp_inicial')">
+                                </td>
+                                <td>
+                                    <select id="res_perp_inicial" name="perpendicularidade-resultado-inicial">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input aria-label="Perpendicularidade: medição após reparo" id="med_perp_reparo" name="perpendicularidade-medicao-reparo" type="number" step="0.001" placeholder="0.000" oninput="validarConcentPerp('perp_reparo')">
+                                </td>
+                                <td>
+                                    <select id="res_perp_reparo" name="perpendicularidade-resultado-reparo">
+                                        <option value="">Pendente</option>
+                                        <option value="Aprovado">Aprovado</option>
+                                        <option value="Reprovado">Reprovado</option>
+                                        <option value="N/A">N/A</option>
+                                    </select>
+                                </td>
                             </tr>
                             <tr class="instrument-row">
-                                <td colspan="8">
+                                <td colspan="6">
                                     <div class="instrument-fields">
                                         <div class="field"><label for="instrumento-perpendicularidade">Instrumento de medição</label><input id="instrumento-perpendicularidade" name="instrumento-perpendicularidade" type="text" value="Relógio comparador"></div>
                                         <div class="field"><label for="tag-perpendicularidade">TAG Gold</label><input id="tag-perpendicularidade" name="tag-perpendicularidade" type="text" placeholder="TAG Gold"></div>
+                                        
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+                <div class="info-normas-box">
+                    <span><strong>Parâmetros aplicados:</strong> Como a tabela completa da NBR 15623 não está detalhada nos POs (apenas cita a norma), utilizamos a tolerância padrão de <strong>0,050 mm</strong> para esta medição (baseada na DIN 42955 e NBR 15623 para motores de indução de médio porte).</span>
+                </div>
             </section>
 
             <!-- SEÇÃO 05 - BATIMENTO EM PONTA DE EIXO / FLANGE -->
-            <section class="section" aria-labelledby="secao-batimento">
+            <section class="section standard-section" aria-labelledby="secao-batimento">
                 <div class="section-heading">
                     <span class="number">05</span>
                     <h2 id="secao-batimento">Batimento em ponta de eixo / flange</h2>
@@ -728,7 +1059,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Com Flange -->
                             <tr>
                                 <td>
                                     Com flange (Face / Encaixe)
@@ -750,7 +1080,6 @@
                                 <td><input aria-label="TAG do instrumento: Com flange" name="com-flange-tag" type="text" placeholder="TAG Gold"></td>
                             </tr>
 
-                            <!-- Sem Flange (Ponta de Eixo) -->
                             <tr>
                                 <td>
                                     Sem flange (Ponta de eixo)
@@ -781,7 +1110,7 @@
             </section>
 
             <!-- SEÇÃO 06 - VIBRAÇÃO (ABNT NBR IEC 60034-14) -->
-            <section class="section" aria-labelledby="secao-vibracao">
+            <section class="section standard-section" aria-labelledby="secao-vibracao">
                 <div class="section-heading">
                     <span class="number">06</span>
                     <h2 id="secao-vibracao">Medição do nível de vibração (ABNT NBR IEC 60034-14)</h2>
@@ -829,7 +1158,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Ponto 1 -->
                             <tr>
                                 <td>
                                     Ponto 1 (Mancal LA - Horiz.)
@@ -842,7 +1170,6 @@
                                 <td><input aria-label="Data: Ponto 1" name="vibracao-ponto-1-data" type="text" class="report-date" readonly></td>
                             </tr>
 
-                            <!-- Ponto 2 -->
                             <tr>
                                 <td>
                                     Ponto 2 (Mancal LA - Vert.)
@@ -855,7 +1182,6 @@
                                 <td><input aria-label="Data: Ponto 2" name="vibracao-ponto-2-data" type="text" class="report-date" readonly></td>
                             </tr>
 
-                            <!-- Ponto 3 -->
                             <tr>
                                 <td>
                                     Ponto 3 (Mancal LA - Axial)
@@ -868,7 +1194,6 @@
                                 <td><input aria-label="Data: Ponto 3" name="vibracao-ponto-3-data" type="text" class="report-date" readonly></td>
                             </tr>
 
-                            <!-- Ponto 4 -->
                             <tr>
                                 <td>
                                     Ponto 4 (Mancal LOA - Horiz.)
@@ -881,7 +1206,6 @@
                                 <td><input aria-label="Data: Ponto 4" name="vibracao-ponto-4-data" type="text" class="report-date" readonly></td>
                             </tr>
 
-                            <!-- Ponto 5 -->
                             <tr>
                                 <td>
                                     Ponto 5 (Mancal LOA - Vert.)
@@ -894,7 +1218,6 @@
                                 <td><input aria-label="Data: Ponto 5" name="vibracao-ponto-5-data" type="text" class="report-date" readonly></td>
                             </tr>
 
-                            <!-- Ponto 6 -->
                             <tr>
                                 <td>
                                     Ponto 6 (Mancal LOA - Axial)
@@ -916,7 +1239,7 @@
             </section>
 
             <!-- FIGURA E TABELA 11 DA NORMA NBR IEC 60034-14 -->
-            <figure class="vibration-reference" aria-labelledby="vibration-caption">
+            <figure class="vibration-reference standard-section" aria-labelledby="vibration-caption">
                 <div>
                     <img class="vibration-image" src="https://i.ibb.co/HL9dr6Pc/VIBRACAO-MOTOR.jpg" alt="Diagrama dos pontos de medição de vibração do motor">
                     <figcaption id="vibration-caption">Figura 20: Pontos de medição</figcaption>
@@ -966,30 +1289,111 @@
             </section>
 
             <div class="footer-note">
-                <span>RQ 028 · Controle dimensional de motores CA</span>
+                <span>RQ 028 · Controle dimensional de motores CA / Ex</span>
                 <span>Formulário de coleta calibrado por normas ISO / DIN / EASA / ABNT NBR IEC</span>
             </div>
 
             <div class="actions no-print">
                 <button class="primary" type="button" onclick="window.print()">Imprimir / Salvar PDF</button>
                 <button class="secondary" type="button" onclick="baixarFormulario()">Baixar HTML Preenchido</button>
-                <button class="quiet" type="reset" onclick="setTimeout(calcularTolerancias, 100); return confirm('Limpar todos os campos preenchidos?')">Limpar Formulário</button>
+                <button class="quiet" type="reset" onclick="setTimeout(calcularTolerancias, 100); setTimeout(alternarModo, 100, 'padrao'); return confirm('Limpar todos os campos preenchidos?')">Limpar Formulário</button>
             </div>
         </form>
     </main>
 
     <script>
-        /**
-         * MATRIZ COMPLETA DE TOLERÂNCIAS CONFORME NORMAS INTERNACIONAIS:
-         * 1. DIN 6885-1: Chaveta Paralela e Rasgos de Chaveta (Ajuste N9) para eixos de 6mm a 200mm
-         * 2. IEC 60072-1 & ISO 286-2: Ponta de Eixo Cilíndrica (j6 / k6 / m6)
-         * 3. ISO 286-2 & SKF/WEG/EASA AR100: Assentos de Rolamentos no Eixo (k5 / m5 / k6 / m6)
-         * 4. ANSI/EASA AR100 & ISO 286-2 H6: Alojamento dos Rolamentos nas Tampas
-         * 5. DIN 42955 / IEC 60072-1: Batimento Radial e Axial de Ponta de Eixo e Flange
-         * 6. ABNT NBR IEC 60034-14: Tabela 11 de Limites Máximos de Velocidade de Vibração RMS
-         */
+          /* ====================================================================
+           PAINEL DE CONFIGURAÇÃO DO DOCUMENTO (ALTERE AQUI NO FUTURO)
+           ==================================================================== */
+        const CONFIG_DOCUMENTO = {
+            numero: "RQ 028",
+            revisao: "03 / 02",
+            data: "05/12/2018"
+        };
 
-        // 1. DIN 6885-1: Seleciona largura nominal e limites N9 com base no diâmetro do eixo
+        // Função para aplicar as configurações no cabeçalho
+        function aplicarConfigDocumento() {
+            document.getElementById('meta-doc').textContent = CONFIG_DOCUMENTO.numero;
+            document.getElementById('meta-rev').textContent = CONFIG_DOCUMENTO.revisao;
+            document.getElementById('meta-data').textContent = CONFIG_DOCUMENTO.data;
+        }          /**
+         * LÓGICA DE ALTERNÂNCIA ENTRE MOTOR PADRÃO E MOTOR EX
+         */
+        function alternarModo(modo) {
+            const btnPadrao = document.getElementById('btn-padrao');
+            const btnEx = document.getElementById('btn-ex');
+            const secaoEx = document.getElementById('secao-exclusiva-ex');
+            const subtitle = document.getElementById('subtitle-motor-type');
+
+            if (modo === 'ex') {
+                btnPadrao.classList.remove('active');
+                btnEx.classList.add('active', 'ex-mode');
+                secaoEx.classList.add('visible');
+                subtitle.textContent = 'MOTORES À PROVA DE EXPLOSÃO (EX)';
+                // Rola a tela para a seção Ex
+                secaoEx.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                btnEx.classList.remove('active', 'ex-mode');
+                btnPadrao.classList.add('active');
+                secaoEx.classList.remove('visible');
+                subtitle.textContent = 'MOTORES CA'; // <-- AQUI ESTAVA O ERRO (estava 'MOTORES CA / EX')
+            }
+        }
+
+        // Função auxiliar para validar os campos EX
+        function validarEX(tipo) {
+            let medId = '', resId = '', limite = 0, isMaiorQue = false;
+
+            if (tipo === 'ex_intersticio_la') {
+                medId = 'med_ex_intersticio_la'; resId = 'res_ex_intersticio_la';
+                limite = 0.140; // Valor máximo padrão
+            } else if (tipo === 'ex_comp_la') {
+                medId = 'med_ex_comp_la'; resId = 'res_ex_comp_la';
+                limite = 15.3; isMaiorQue = true;
+            } else if (tipo === 'ex_caixa') {
+                medId = 'med_ex_caixa'; resId = 'res_ex_caixa';
+                limite = 0.040;
+            } else if (tipo === 'ex_rugosidade') {
+                medId = 'med_ex_rugosidade'; resId = 'res_ex_rugosidade';
+                limite = 6.3;
+            } else if (tipo === 'ex_entreferro') {
+                // O entreferro é validado visualmente, mas colocamos um limite mínimo padrão de 0.2mm para exemplo
+                medId = 'med_ex_entreferro'; resId = 'res_ex_entreferro';
+                limite = 0.2; isMaiorQue = true; 
+            }
+
+            const medInput = document.getElementById(medId);
+            const resSelect = document.getElementById(resId);
+
+            if (!medInput || !resSelect) return;
+
+            const val = parseFloat(medInput.value);
+
+            if (isNaN(val) || medInput.value.trim() === '') {
+                resSelect.value = "";
+                resSelect.className = "status-pendente";
+                return;
+            }
+
+            let aprovado = false;
+            if (isMaiorQue) {
+                aprovado = (val >= limite);
+            } else {
+                aprovado = (val <= limite);
+            }
+
+            if (aprovado) {
+                resSelect.value = "Aprovado";
+                resSelect.className = "status-aprovado";
+            } else {
+                resSelect.value = "Reprovado";
+                resSelect.className = "status-reprovado";
+            }
+        }
+
+        /**
+         * MATRIZ COMPLETA DE TOLERÂNCIAS CONFORME NORMAS INTERNACIONAIS (PADRÃO)
+         */
         function obterChavetaDIN6885(d) {
             if (!d || d <= 0) return null;
             let b = 0, h = 0, tolMin = 0, tolMax = 0;
@@ -1088,7 +1492,6 @@
             resultado.className = aprovado ? 'status-aprovado' : 'status-reprovado';
         }
 
-        // 2. IEC 60072-1 / ISO 286-2: Ponta de Eixo de Motores CA
         function obterTolPontaEixo(d) {
             if (!d || d <= 0) return null;
             let classe = 'j6', desvioInf = 0, desvioSup = 0;
@@ -1119,7 +1522,6 @@
             };
         }
 
-        // 3. ISO 286-2 / Assento de Rolamentos no Eixo (k5 / m5 / k6 / m6)
         function obterTolAssentoEixo(d) {
             if (!d || d <= 0) return null;
             let classe = 'k5', desvioInf = 0, desvioSup = 0;
@@ -1156,7 +1558,6 @@
             };
         }
 
-        // 4. ANSI/EASA AR100 / ISO 286-2 H6 (Alojamento dos Rolamentos nas Tampas)
         function obterTolTampaAlojamento(D) {
             if (!D || D <= 0) return null;
             let classe = 'H6 (EASA AR100)', desvioInf = 0.000, desvioSup = 0;
@@ -1180,18 +1581,9 @@
             };
         }
 
-        // 5. ABNT NBR IEC 60034-14 (Tabela 11: Limites de Vibração RMS em mm/s)
         const TABELA_LIMITES_VIBRACAO = {
-            'A': {
-                '56_132': 1.6,
-                '132_280': 2.2,
-                'gt_280': 2.8
-            },
-            'B': {
-                '56_132': 0.7,
-                '132_280': 1.1,
-                'gt_280': 1.8
-            }
+            'A': { '56_132': 1.6, '132_280': 2.2, 'gt_280': 2.8 },
+            'B': { '56_132': 0.7, '132_280': 1.1, 'gt_280': 1.8 }
         };
 
         function obterLimiteVibracaoAtual() {
@@ -1200,16 +1592,13 @@
             return TABELA_LIMITES_VIBRACAO[grau][carcaca] || 2.2;
         }
 
-        // Formatação amigável de sinais (+ / -)
         function formatarDesvio(val) {
             if (val > 0) return '+' + val.toFixed(3);
             if (val === 0) return '0.000';
             return val.toFixed(3);
         }
 
-        // Recalcula e exibe todos os limites de tolerância das tabelas
         function calcularTolerancias() {
-            // Eixo 3
             const n3 = parseFloat(document.getElementById('nom_eixo3').value);
             const tol3 = obterTolAssentoEixo(n3);
             if (tol3) {
@@ -1217,7 +1606,6 @@
                     `<span class="norma-badge">ISO 286 ${tol3.classe}</span> <span class="tol-range">[${tol3.minimo.toFixed(3)} ~ ${tol3.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tol3.desvioInf)} / ${formatarDesvio(tol3.desvioSup)})`;
             }
 
-            // Eixo 4
             const n4 = parseFloat(document.getElementById('nom_eixo4').value);
             const tol4 = obterTolAssentoEixo(n4);
             if (tol4) {
@@ -1225,7 +1613,6 @@
                     `<span class="norma-badge">ISO 286 ${tol4.classe}</span> <span class="tol-range">[${tol4.minimo.toFixed(3)} ~ ${tol4.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tol4.desvioInf)} / ${formatarDesvio(tol4.desvioSup)})`;
             }
 
-            // Ponta de Eixo
             const nPonta = parseFloat(document.getElementById('nom_ponta').value);
             const tolPonta = obterTolPontaEixo(nPonta);
             if (tolPonta) {
@@ -1233,7 +1620,6 @@
                     `<span class="norma-badge">IEC 60072-1 ${tolPonta.classe}</span> <span class="tol-range">[${tolPonta.minimo.toFixed(3)} ~ ${tolPonta.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tolPonta.desvioInf)} / ${formatarDesvio(tolPonta.desvioSup)})`;
             }
 
-            // Chaveta DIN 6885-1 (depende do diâmetro da ponta do eixo)
             const tolChaveta = obterChavetaDIN6885(nPonta);
             if (tolChaveta) {
                 document.getElementById('nom_chaveta').value = tolChaveta.larguraNominal;
@@ -1248,7 +1634,6 @@
             }
             ['largura', 'altura', 'comprimento'].forEach(atualizarValidacaoChaveta);
 
-            // Tampa LA
             const nTampaLA = parseFloat(document.getElementById('nom_tampa_la').value);
             const tolTampaLA = obterTolTampaAlojamento(nTampaLA);
             if (tolTampaLA) {
@@ -1256,7 +1641,6 @@
                     `<span class="norma-badge">EASA AR100 H6</span> <span class="tol-range">[${tolTampaLA.minimo.toFixed(3)} ~ ${tolTampaLA.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tolTampaLA.desvioInf)} / ${formatarDesvio(tolTampaLA.desvioSup)})`;
             }
 
-            // Tampa LOA
             const nTampaLOA = parseFloat(document.getElementById('nom_tampa_loa').value);
             const tolTampaLOA = obterTolTampaAlojamento(nTampaLOA);
             if (tolTampaLOA) {
@@ -1264,17 +1648,30 @@
                     `<span class="norma-badge">EASA AR100 H6</span> <span class="tol-range">[${tolTampaLOA.minimo.toFixed(3)} ~ ${tolTampaLOA.maximo.toFixed(3)} mm]</span> (${formatarDesvio(tolTampaLOA.desvioInf)} / ${formatarDesvio(tolTampaLOA.desvioSup)})`;
             }
 
-            // Atualiza Seção 06 - Vibração
             atualizarParametrosVibracao();
 
-            // Revalida todos os itens que já possuem valor digitado
+            // Atualiza dinamicamente as tolerâncias Ex baseadas no Ø do eixo (Se tiver um campo para isso)
+            // Exemplo: Interstício máximo conforme Tabela 4 do PO-GOLD-06-RON
+            if (nPonta) {
+                let limiteIntersticio = 0.140;
+                if (nPonta > 90 && nPonta <= 100) limiteIntersticio = 0.140;
+                else if (nPonta > 100 && nPonta <= 112) limiteIntersticio = 0.118;
+                else if (nPonta > 112 && nPonta <= 132) limiteIntersticio = 0.118;
+                else if (nPonta > 132 && nPonta <= 160) limiteIntersticio = 0.133;
+                else if (nPonta > 160 && nPonta <= 180) limiteIntersticio = 0.133;
+                else if (nPonta > 180 && nPonta <= 200) limiteIntersticio = 0.146;
+                
+                const elLimite = document.getElementById('limite_ex_intersticio_la');
+                if (elLimite) elLimite.textContent = limiteIntersticio.toFixed(3) + ' mm';
+                
+                const elDesc = document.getElementById('tol_desc_ex_intersticio_la');
+                if (elDesc) elDesc.innerHTML = `<span class="norma-badge">NBR IEC 60079-1</span> <span class="tol-range">Máx: ${limiteIntersticio.toFixed(3)} mm</span>`;
+            }
+
             ['eixo3', 'eixo4', 'ponta', 'chaveta', 'tampa_la', 'tampa_loa'].forEach(validarItem);
             ['com_flange', 'sem_flange'].forEach(validarBatimento);
         }
 
-
-
-        // Atualiza os parâmetros, textos e células ativas de vibração da Seção 06
         function atualizarParametrosVibracao() {
             const carcaca = document.getElementById('carcaca_vibracao').value || '132_280';
             const grau = document.getElementById('grau_vibracao').value || 'A';
@@ -1282,12 +1679,10 @@
 
             const textoLimiteFormatado = `≤ ${limite.toFixed(1).replace('.', ',')} mm/s`;
 
-            // Atualiza as colunas de limite na tabela de medição
             document.querySelectorAll('.col-limite-vib').forEach(el => {
                 el.textContent = textoLimiteFormatado;
             });
 
-            // Atualiza legendas abaixo de cada ponto
             for (let i = 1; i <= 6; i++) {
                 const desc = document.getElementById(`tol_desc_vib_${i}`);
                 if (desc) {
@@ -1295,7 +1690,6 @@
                 }
             }
 
-            // Atualiza texto explicativo
             const carcacaTxt = carcaca === '56_132' ? '56 ≤ H ≤ 132' : (carcaca === '132_280' ? '132 < H ≤ 280' : 'H > 280');
             const grauTxt = grau === 'A' ? 'Grau A (padrão)' : 'Grau B (especial)';
             const resumo = document.getElementById('info_resumo_vibracao');
@@ -1303,7 +1697,6 @@
                 resumo.innerHTML = `<strong>Critério ativo:</strong> ABNT NBR IEC 60034-14 · ${grauTxt} · Carcaça ${carcacaTxt} · Limite máximo permitido: <strong>${limite.toFixed(1).replace('.', ',')} mm/s RMS</strong>.`;
             }
 
-            // Destaca a célula ativa na Tabela 11 de referência
             document.querySelectorAll('#tabela_referencia_vibracao td').forEach(td => {
                 td.classList.remove('active-limit-cell');
             });
@@ -1313,13 +1706,11 @@
                 activeCell.classList.add('active-limit-cell');
             }
 
-            // Revalida todos os 6 pontos de medição
             for (let i = 1; i <= 6; i++) {
                 validarVibracao(i);
             }
         }
 
-        // Validação dimensional automática item por item (Seção 01 e 02)
         function validarItem(tipo) {
             let medElem, resElem, tolObj;
 
@@ -1372,7 +1763,6 @@
             }
         }
 
-        // Validação automática da Seção 05 - Batimento (Limites fixos normativos)
         function validarBatimento(tipo) {
             const med = document.getElementById(`med_bat_${tipo}`);
             const res = document.getElementById(`res_bat_${tipo}`);
@@ -1396,7 +1786,6 @@
             }
         }
 
-        // Validação automática da Seção 06 - Vibração (ABNT NBR IEC 60034-14 Tabela 11)
         function validarVibracao(ponto) {
             const med = document.getElementById(`med_vib_${ponto}`);
             const res = document.getElementById(`res_vib_${ponto}`);
@@ -1411,7 +1800,6 @@
                 return;
             }
 
-            // Critério ABNT NBR IEC 60034-14 (Velocidade RMS ≤ Limite da Carcaça e Grau)
             if (val >= 0 && val <= (limiteMaximo + 0.001)) {
                 res.value = "Aprovado";
                 res.className = "status-aprovado";
@@ -1455,28 +1843,37 @@
         });
 
         window.addEventListener('beforeprint', atualizarDatasRelatorio);
+        
         document.getElementById('rq028-form').addEventListener('reset', function() {
             setTimeout(function() {
                 camposExecutanteEditados = new WeakSet();
                 atualizarDatasRelatorio();
                 sincronizarExecutantes();
+                alternarModo('padrao'); // Reseta para o modo padrão
             }, 0);
         });
 
-        // Inicialização automática ao carregar a página
         window.addEventListener('DOMContentLoaded', function() {
             const parametros = new URLSearchParams(window.location.search);
             const numeroOS = parametros.get('os');
             const equipamento = parametros.get('equipamento');
+            
             if (numeroOS) document.getElementById('os').value = numeroOS;
             if (equipamento) document.getElementById('tag-equipamento').value = equipamento;
 
+            // 1. Aplica as configurações do documento (Número, Revisão, Data)
+            aplicarConfigDocumento();
+
+            // 2. Preenche datas, executantes e calcula as tolerâncias padrão
             atualizarDatasRelatorio();
             sincronizarExecutantes();
             calcularTolerancias();
+            
+            // 3. Inicia a tela no modo Padrão (CA)
+            alternarModo('padrao');
         });
+    
 
-        // Função de download do HTML preenchido com preservação total de valores
         function baixarFormulario() {
             atualizarDatasRelatorio();
             const copia = document.documentElement.cloneNode(true);
